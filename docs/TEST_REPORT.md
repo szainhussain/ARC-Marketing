@@ -218,3 +218,31 @@ debugging fallback.
   `quality_reviewer`) is unchanged from what passed the fake-provider test
   in `test_workflow_success_path.py`, but hasn't been seen succeed against
   a real model in the same run as the other three.
+
+## Platform export formatting (Meta/Instagram, Google Ads, TikTok Ads)
+
+Added after the user asked whether the app could run ads/post to social
+media (it can't, and won't — see `docs/DECISIONS.md` D9) and requested
+smoother manual export instead. Verified three ways:
+
+1. **Automated tests** (`tests/integration/test_deliverable_approval_handoff.py`):
+   `target_platform=google_ads` on a real two-variant content_pack
+   produces a correctly-shaped `platform_export` with a header field under
+   the 30-character limit (`fits: True`); an unrecognized platform name
+   is rejected with 400. 24/24 tests passing.
+2. **Direct API calls** (curl) against the running backend for all three
+   platforms: `meta_instagram` correctly flagged a 155-character body as
+   not fitting Instagram's 125-char and Facebook's 150-char limits
+   (`fits: false` on both) while correctly marking the organic-caption
+   field `limit_confirmed: false`; `google_ads` correctly truncated and
+   validated headline/description against the 30/90 character limits;
+   `tiktok_ads` correctly returned the ad text with `limit_confirmed:
+   false` (no official limit was found) plus the sourced video-spec
+   checklist.
+3. **Browser-driven, visually inspected**: created a real content_pack
+   deliverable (two variants) via the service layer, then drove the full
+   UI path — request approval, approve, select "Google Ads" from the new
+   platform dropdown, export, and visually confirmed the rendered result:
+   per-field character counters (`30/30`, `90/90`), truncation notes, the
+   "Google requires 3+ headlines" reminder, asset checklist, source
+   citation, and working Copy buttons. Zero unexpected console errors.

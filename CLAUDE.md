@@ -137,6 +137,18 @@ allows the cross-port request. This caused a real bug during this build
   chosen via the `.claude/skills/ui-ux-pro-max` skill's color catalog —
   query it again for new palette/style decisions rather than guessing).
 
+## Platform export formatting (not a connector)
+
+`app/integrations/export_formats.py` formats an already-approved
+`content_pack` to Meta/Instagram, Google Ads, or TikTok Ads composer
+limits for manual copy-paste — no API calls, no OAuth, no posting/
+spending. See `docs/DECISIONS.md` D9. If you add a field or platform:
+cite an official source in the `FieldCheck`/docstring, or set
+`limit_confirmed=False` — never fill in a commonly-repeated-but-unofficial
+number (this already happened once for real: Instagram's caption limit
+and TikTok's ad-text limit aren't published anywhere official, and are
+deliberately left unconfirmed rather than guessed at "2200" or similar).
+
 ## What NOT to do without asking first
 
 - Don't add a live publishing connector (Meta, LinkedIn, etc.) without the

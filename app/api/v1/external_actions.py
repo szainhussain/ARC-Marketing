@@ -23,7 +23,13 @@ def execute_external_action_route(organization_id, approval_id):
             "Please correct the highlighted fields.",
             details=[{"field": "idempotency_key", "issue": "Required"}],
         )
-    action = execute_manual_handoff(organization_id, approval_id, current_user.id, idempotency_key)
+    action = execute_manual_handoff(
+        organization_id,
+        approval_id,
+        current_user.id,
+        idempotency_key,
+        target_platform=payload.get("target_platform"),
+    )
     return jsonify({"external_action": action.to_dict()}), 200
 
 

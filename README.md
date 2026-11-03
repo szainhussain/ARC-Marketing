@@ -131,7 +131,13 @@ docs/             Architecture, API, security, test report, decisions, deploymen
   been seen completing in one run without hitting it.
 - **Only manual handoff/export** is implemented for external actions — no
   live publishing connector (that's M11 in the backlog, deliberately
-  deferred until a pilot channel is chosen).
+  deferred until a pilot channel is chosen). The manual export *is* now
+  platform-aware: selecting Meta/Instagram, Google Ads, or TikTok Ads when
+  exporting a `content_pack` formats the content to that platform's real
+  composer limits (sourced from each platform's own docs — see
+  `docs/DECISIONS.md` D9) to speed up copy-pasting into Meta Business
+  Suite / Google Ads Editor / TikTok Ads Manager. **This still never posts
+  or spends anything automatically** — it's formatting, not a connector.
 - **Milestones M0–M6 are the solid core** (foundation, auth/tenant
   isolation, business profile, campaign CRUD, workflow persistence, AI
   adapter, full 5-stage pipeline) plus the essentials of M7–M9 (versioning,

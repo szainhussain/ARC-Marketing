@@ -159,3 +159,49 @@ that design surviving contact with a real second provider, unmodified).
 **Consequence:** `.env`'s `AI_MODEL` default is now provider-dependent
 (`app/config.py:_AI_MODEL_DEFAULTS`) rather than a single hardcoded
 string, since Anthropic and Groq model IDs don't share a namespace.
+
+## D9 — Platform-formatted manual export (Meta/Instagram, Google Ads, TikTok Ads), not live connectors
+
+**Decision:** The user asked for Meta/Instagram, Google Ads, and TikTok
+Ads "execution" (running ads, posting, scheduling). After explicitly
+surfacing what that actually requires (a registered developer app, app
+review, and for the ad platforms a linked ad account with API access —
+all of which only the account owner can obtain, none of which existed
+this session), the user chose the manual-export-formatting option rather
+than scaffolding untestable OAuth connectors.
+
+Built: `app/integrations/export_formats.py` — pure formatting functions
+(no network calls, no API client, no OAuth) that take an already-approved
+`content_pack` variant and reformat it to each platform's actual composer
+constraints (character limits, field counts, asset specs), so pasting
+into Meta Business Suite / Google Ads Editor / TikTok Ads Manager needs
+less manual rework. Wired into the existing manual-handoff execute
+endpoint via an optional `target_platform` parameter — this is the same
+`ManualHandoffConnector` as before, with a formatting layer on top, not a
+new connector and not a new permission level. No agent or code path in
+this app can post, publish, or spend on any of these platforms; a human
+still does that themselves, in the platform's own tool, after copying the
+formatted output.
+
+**Why this is consistent with the rest of the governance design:** Per
+`docs/SECURITY_AND_GOVERNANCE.md` and the 12-agent operating model (roles
+3 and 5 in `docs/AGENT_OPERATING_MODEL.md`), publishing/spend actions
+require either a verified live connector + approval + re-validated
+execution (Level 2) or remain permanently human-only (Level 3, ad spend).
+Neither exists here — this feature only makes the existing, already-
+governed manual handoff path more useful, it doesn't add a new execution
+capability or widen any permission.
+
+**Limits, stated plainly rather than glossed over:** Google Ads' RSA
+character/count limits are sourced from Google's own help page and are
+solid. Meta's ad-creative limits are sourced from Meta's own ad-spec
+pages. Instagram's *organic* caption limit and TikTok's ad-text character
+limit and CTA button list could not be found on any official page reached
+in this session (tried multiple pages/angles for each, including the
+Graph API field reference and TikTok's ad-creation help index) — these
+are explicitly marked `limit_confirmed: false` in the API/UI rather than
+filled in with the commonly-repeated-but-unofficial numbers (e.g. "2200
+characters" for Instagram) that circulate in marketing blogs. If a real
+official source for either surfaces later, update
+`app/integrations/export_formats.py`'s docstrings and `FieldCheck` calls
+with the citation — don't just add a number.

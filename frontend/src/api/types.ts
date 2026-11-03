@@ -105,11 +105,40 @@ export type Integration = {
   scopes: string | null
 }
 
+export type PlatformFieldCheck = {
+  label: string
+  text: string
+  length: number
+  limit: number | null
+  limit_confirmed: boolean
+  fits: boolean | null
+  note: string
+}
+
+export type PlatformVariantExport = {
+  platform: string
+  platform_label: string
+  fields: PlatformFieldCheck[]
+  cta: string
+  cta_note?: string
+  requirements?: string[]
+  asset_checklist: string[]
+  source_note: string
+}
+
+export type PlatformExport = {
+  platform: string
+  creative_brief: string
+  variant_exports: PlatformVariantExport[]
+}
+
 export type ExternalAction = {
   id: string
   approval_id: string
   connector: string
   status: string
+  target_platform: string | null
+  platform_export: PlatformExport | null
   publication_status: string
   publication_confirmed_at: string | null
   created_at: string

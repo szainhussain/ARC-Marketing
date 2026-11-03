@@ -77,7 +77,7 @@ conventions (403/404/409/429) follow the technical spec as drafted.
 |---|---|---|
 | POST | `/organizations/<org_id>/approvals` | `{deliverable_id, action_type?, action_payload?}` → ties to the deliverable's *current* version at request time |
 | POST | `/organizations/<org_id>/approvals/<id>/decision` | `{decision: approved\|rejected\|changes_requested, comment?}` — 403 unless the actor's role can approve; 409 if not `pending` |
-| POST | `/organizations/<org_id>/approvals/<approval_id>/execute` | **requires** `Idempotency-Key`; re-validates kill switch, approval decision, and version match immediately before "executing" (packaging) the manual handoff; 409 on any mismatch |
+| POST | `/organizations/<org_id>/approvals/<approval_id>/execute` | **requires** `Idempotency-Key`; re-validates kill switch, approval decision, and version match immediately before "executing" (packaging) the manual handoff; 409 on any mismatch. Optional body field `target_platform` (`meta_instagram`\|`google_ads`\|`tiktok_ads`) — only meaningful when the deliverable is a `content_pack`; adds a `platform_export` to the response formatted to that platform's composer limits (see `app/integrations/export_formats.py`). 400 for an unrecognized platform. This never calls any external platform API — still manual copy/paste handoff. |
 | POST | `/organizations/<org_id>/external-actions/<id>/confirm-publication` | the *only* way `publication_status` becomes `manually_confirmed_published` |
 
 ## Integrations, reports, audit

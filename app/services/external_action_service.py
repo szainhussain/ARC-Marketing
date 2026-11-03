@@ -1,6 +1,9 @@
+import json
+
 from flask import current_app
 
 from app.extensions import db
+from app.integrations.export_formats import PLATFORM_FORMATTERS, format_content_pack_for_platform
 from app.integrations.manual_handoff import ManualHandoffConnector
 from app.models.approval import DECISION_APPROVED
 from app.models.base import utcnow
@@ -20,7 +23,11 @@ _connector = ManualHandoffConnector()
 
 
 def execute_manual_handoff(
-    organization_id: str, approval_id: str, user_id: str, idempotency_key: str
+    organization_id: str,
+    approval_id: str,
+    user_id: str,
+    idempotency_key: str,
+    target_platform: str | None = None,
 ) -> ExternalAction:
     """Revalidates everything immediately before "executing" (packaging)
     the approved content, per the non-negotiable governance rules: kill
@@ -54,10 +61,24 @@ def execute_manual_handoff(
             "The deliverable has changed since approval; this action can no longer execute."
         )
 
+    if target_platform is not None and target_platform not in PLATFORM_FORMATTERS:
+        raise ValidationError(
+            "Please correct the highlighted fields.",
+            details=[{"field": "target_platform", "issue": "Unknown platform"}],
+        )
+
     content = deliverable.current_version.to_dict()["content"]
     action_payload = {"content": content}
     _connector.validate_action(action_payload)
     result = _connector.execute_action(action_payload, idempotency_key)
+
+    # Platform formatting is a presentation/export concern layered on top
+    # of the already-approved content — it does not change what was
+    # approved (the approval's payload hash covers deliverable content
+    # only, not the target platform), and it never calls any external
+    # platform API. See app/integrations/export_formats.py.
+    if target_platform is not None and deliverable.deliverable_type == "content_pack":
+        result["platform_export"] = format_content_pack_for_platform(content, target_platform)
 
     action = ExternalAction(
         organization_id=organization_id,
@@ -66,6 +87,8 @@ def execute_manual_handoff(
         idempotency_key=idempotency_key,
         status=STATUS_SUCCEEDED,  # the export package was produced
         publication_status=PUBLICATION_UNVERIFIED,
+        target_platform=target_platform,
+        response_metadata_json=json.dumps(result, default=str),
     )
     db.session.add(action)
     db.session.flush()

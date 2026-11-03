@@ -2,12 +2,20 @@ import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { apiRequest, ApiError } from '../api/client'
 import DeliverableContent from '../components/DeliverableContent'
+import PlatformExportView from '../components/PlatformExportView'
 import { useWorkspace } from '../context/WorkspaceContext'
 import type { Approval, Campaign, Deliverable, ExternalAction, WorkflowRun } from '../api/types'
 
 function uuid() {
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`
 }
+
+const PLATFORM_OPTIONS = [
+  { value: '', label: 'Generic export (no platform formatting)' },
+  { value: 'meta_instagram', label: 'Meta / Instagram' },
+  { value: 'google_ads', label: 'Google Ads (Responsive Search Ads)' },
+  { value: 'tiktok_ads', label: 'TikTok Ads' },
+]
 
 export default function CampaignWorkspacePage() {
   const { campaignId } = useParams<{ campaignId: string }>()
@@ -17,6 +25,7 @@ export default function CampaignWorkspacePage() {
   const [deliverables, setDeliverables] = useState<Deliverable[]>([])
   const [approvalsByDeliverable, setApprovalsByDeliverable] = useState<Record<string, Approval>>({})
   const [actionsByApproval, setActionsByApproval] = useState<Record<string, ExternalAction>>({})
+  const [platformByDeliverable, setPlatformByDeliverable] = useState<Record<string, string>>({})
   const [error, setError] = useState<string | null>(null)
   const [starting, setStarting] = useState(false)
 
@@ -82,12 +91,16 @@ export default function CampaignWorkspacePage() {
     }
   }
 
-  async function execute(approvalId: string) {
+  async function execute(approvalId: string, targetPlatform: string) {
     if (!orgId) return
     try {
       const data = await apiRequest<{ external_action: ExternalAction }>(
         `/organizations/${orgId}/approvals/${approvalId}/execute`,
-        { method: 'POST', idempotencyKey: uuid() },
+        {
+          method: 'POST',
+          idempotencyKey: uuid(),
+          body: targetPlatform ? { target_platform: targetPlatform } : undefined,
+        },
       )
       setActionsByApproval((prev) => ({ ...prev, [approvalId]: data.external_action }))
     } catch (err) {
@@ -190,21 +203,46 @@ export default function CampaignWorkspacePage() {
                     </>
                   )}
                   {approval.decision === 'approved' && !action && (
-                    <button onClick={() => execute(approval.id)}>Export for manual handoff</button>
+                    <div style={{ marginTop: 10 }}>
+                      {d.deliverable_type === 'content_pack' && (
+                        <div className="field" style={{ maxWidth: 360 }}>
+                          <label htmlFor={`platform-${d.id}`}>Format for platform (optional)</label>
+                          <select
+                            id={`platform-${d.id}`}
+                            value={platformByDeliverable[d.id] || ''}
+                            onChange={(e) =>
+                              setPlatformByDeliverable((prev) => ({ ...prev, [d.id]: e.target.value }))
+                            }
+                          >
+                            {PLATFORM_OPTIONS.map((opt) => (
+                              <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                      <button onClick={() => execute(approval.id, platformByDeliverable[d.id] || '')}>
+                        Export for manual handoff
+                      </button>
+                    </div>
                   )}
                   {action && (
-                    <div className="banner success">
-                      Handed off (export package generated). Publication status:{' '}
-                      <strong>{action.publication_status}</strong>.
-                      {action.publication_status === 'unverified' && (
-                        <>
-                          {' '}
-                          This has <u>not</u> been marked published.{' '}
-                          <button onClick={() => confirmPublication(approval.id, action.id)}>
-                            I posted this myself — confirm
-                          </button>
-                        </>
-                      )}
+                    <div style={{ marginTop: 10 }}>
+                      <div className="banner success">
+                        Handed off (export package generated). Publication status:{' '}
+                        <strong>{action.publication_status}</strong>.
+                        {action.publication_status === 'unverified' && (
+                          <>
+                            {' '}
+                            This has <u>not</u> been marked published.{' '}
+                            <button onClick={() => confirmPublication(approval.id, action.id)}>
+                              I posted this myself — confirm
+                            </button>
+                          </>
+                        )}
+                      </div>
+                      {action.platform_export && <PlatformExportView export={action.platform_export} />}
                     </div>
                   )}
                 </div>

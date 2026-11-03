@@ -83,3 +83,18 @@ Server-side REST API for image/video generation (e.g. SOUL V2 prompt-based gener
   kept v2 to match the spec's own stack recommendation and existing
   Flask-SQLAlchemy ecosystem conventions. Revisit before a long-lived
   production deployment.
+
+## Platform export formatting (Meta/Instagram, Google Ads, TikTok Ads)
+
+Not a library/SDK adoption — `app/integrations/export_formats.py` is
+hand-written formatting logic with no third-party dependency and no
+network calls. Added after the user asked for Meta, Google Ads, and
+TikTok Ads "execution"; see `docs/DECISIONS.md` D9 for why that became
+smarter manual-export formatting instead of live OAuth connectors (none
+of the three have a registered developer app, app review, or linked ad
+account in this session — only the account owner can obtain those).
+Character/count limits are sourced from each platform's own official
+help pages where found (Google Ads RSA, Meta ad specs); left explicitly
+`limit_confirmed: false` where no official source was found (Instagram's
+organic caption limit, TikTok's ad-text limit and CTA list) rather than
+using unofficial numbers from marketing blogs.

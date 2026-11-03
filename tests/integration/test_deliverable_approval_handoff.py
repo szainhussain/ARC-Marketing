@@ -133,3 +133,89 @@ def test_duplicate_idempotency_key_does_not_execute_twice(app, client):
         headers={"Idempotency-Key": "same-handoff-key"},
     )
     assert first.get_json()["external_action"]["id"] == second.get_json()["external_action"]["id"]
+
+
+def test_execute_with_target_platform_returns_formatted_export(app, client):
+    register_and_login(client)
+    org = create_org(client)
+    campaign = create_campaign(client, org["id"])
+
+    with app.app_context():
+        deliverable = create_deliverable_with_first_version(
+            organization_id=org["id"],
+            campaign_id=campaign["id"],
+            workflow_run_id=None,
+            deliverable_type="content_pack",
+            content={
+                "creative_brief": "Launch brief",
+                "variants": [
+                    {
+                        "channel": "instagram",
+                        "headline": "A headline that is definitely longer than thirty characters",
+                        "body": "Short body copy.",
+                        "cta": "Shop now",
+                    }
+                ],
+                "calendar_notes": "",
+            },
+        )
+        db.session.commit()
+        deliverable_id = deliverable.id
+
+    approval = client.post(
+        f"/api/v1/organizations/{org['id']}/approvals",
+        json={"deliverable_id": deliverable_id},
+    ).get_json()["approval"]
+    client.post(
+        f"/api/v1/organizations/{org['id']}/approvals/{approval['id']}/decision",
+        json={"decision": "approved"},
+    )
+
+    resp = client.post(
+        f"/api/v1/organizations/{org['id']}/approvals/{approval['id']}/execute",
+        headers={"Idempotency-Key": "platform-export-1"},
+        json={"target_platform": "google_ads"},
+    )
+    assert resp.status_code == 200
+    action = resp.get_json()["external_action"]
+    assert action["target_platform"] == "google_ads"
+
+    export = action["platform_export"]
+    assert export["platform"] == "google_ads"
+    headline_field = export["variant_exports"][0]["fields"][0]
+    assert headline_field["label"] == "Headline 1"
+    assert headline_field["length"] <= 30
+    assert headline_field["fits"] is True
+
+
+def test_execute_with_unknown_platform_rejected(app, client):
+    register_and_login(client)
+    org = create_org(client)
+    campaign = create_campaign(client, org["id"])
+
+    with app.app_context():
+        deliverable = create_deliverable_with_first_version(
+            organization_id=org["id"],
+            campaign_id=campaign["id"],
+            workflow_run_id=None,
+            deliverable_type="content_pack",
+            content={"creative_brief": "b", "variants": [], "calendar_notes": ""},
+        )
+        db.session.commit()
+        deliverable_id = deliverable.id
+
+    approval = client.post(
+        f"/api/v1/organizations/{org['id']}/approvals",
+        json={"deliverable_id": deliverable_id},
+    ).get_json()["approval"]
+    client.post(
+        f"/api/v1/organizations/{org['id']}/approvals/{approval['id']}/decision",
+        json={"decision": "approved"},
+    )
+
+    resp = client.post(
+        f"/api/v1/organizations/{org['id']}/approvals/{approval['id']}/execute",
+        headers={"Idempotency-Key": "platform-export-bad"},
+        json={"target_platform": "snapchat_ads"},
+    )
+    assert resp.status_code == 400
