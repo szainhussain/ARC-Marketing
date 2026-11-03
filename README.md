@@ -102,8 +102,12 @@ app/              Flask application (api/, models/, services/, agents/, ai/, wor
 migrations/       Alembic migrations
 tests/            unit/, integration/, security/
 frontend/         React + TypeScript app (Vite)
-docs/             Architecture, API, security, test report, decisions, deployment, 12-agent roadmap
-.claude/          Project-specific Claude Code agents and skills for continuing this build
+docs/             Architecture, API, security, test report, decisions, deployment,
+                  12-agent roadmap + full operating model (docs/AGENT_OPERATING_MODEL.md),
+                  tools/dependency evaluation (docs/TOOLS_AND_DEPENDENCIES.md)
+.claude/          Project-specific Claude Code agents and skills for continuing this build,
+                  plus the ui-ux-pro-max design-guidance skill (pruned install — see
+                  docs/TOOLS_AND_DEPENDENCIES.md for what was kept vs. removed)
 ```
 
 ## Known limitations (read before pitching this as "done")
