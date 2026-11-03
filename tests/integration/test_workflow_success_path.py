@@ -26,7 +26,7 @@ FAKE_OUTPUTS = {
     "campaign_plan": {
         "summary": "A four-week trail launch campaign.",
         "channels": ["email", "social"],
-        "timeline": [{"week": 1, "focus": "teaser"}],
+        "timeline": [{"phase": "Teaser week", "activities": ["Post countdown content"]}],
         "success_metrics": ["signups"],
         "assumptions": [],
     },

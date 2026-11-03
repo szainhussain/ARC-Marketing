@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { apiRequest } from '../api/client'
+import AnimatedNumber from '../components/motion/AnimatedNumber'
 import { useWorkspace } from '../context/WorkspaceContext'
 import type { Campaign } from '../api/types'
 
@@ -55,12 +56,14 @@ export default function DashboardPage() {
           <div className="kpi-grid">
             <div className="kpi-tile">
               <div className="kpi-label">Campaigns</div>
-              <div className="kpi-value">{summary.total_campaigns}</div>
+              <div className="kpi-value">
+                <AnimatedNumber value={summary.total_campaigns} />
+              </div>
             </div>
             <div className="kpi-tile">
               <div className="kpi-label">Workflow runs</div>
               <div className="kpi-value">
-                {summary.completed_workflow_runs}
+                <AnimatedNumber value={summary.completed_workflow_runs} />
                 <span style={{ fontSize: '1rem', color: 'var(--color-muted-fg)', fontWeight: 600 }}>
                   {' '}
                   / {summary.total_workflow_runs}
@@ -70,7 +73,13 @@ export default function DashboardPage() {
             </div>
             <div className="kpi-tile">
               <div className="kpi-label">Estimated AI cost</div>
-              <div className="kpi-value">${summary.estimated_ai_cost_usd.toFixed(4)}</div>
+              <div className="kpi-value">
+                $
+                <AnimatedNumber
+                  value={summary.estimated_ai_cost_usd}
+                  format={(n) => n.toFixed(4)}
+                />
+              </div>
               <div className="kpi-sub">{summary.cost_basis}</div>
             </div>
           </div>

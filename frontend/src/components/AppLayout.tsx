@@ -15,7 +15,10 @@ export default function AppLayout() {
   return (
     <div>
       <nav className="app-nav">
-        <span className="brand">Marketing Department Harness</span>
+        <Link to="/app" className="brand">
+          <span className="mark" />
+          ARC
+        </Link>
         <Link to="/app">Overview</Link>
         <Link to="/app/campaigns">Campaigns</Link>
         <Link to="/app/brand">Brand profile</Link>

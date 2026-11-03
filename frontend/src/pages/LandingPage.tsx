@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom'
+import Reveal from '../components/motion/Reveal'
+import TiltCard from '../components/motion/TiltCard'
 
 const STEPS = ['Brief', 'Plan', 'Create', 'Review', 'Approve', 'Hand off']
 
@@ -24,21 +26,32 @@ export default function LandingPage() {
   return (
     <div>
       <nav className="app-nav">
-        <span className="brand">Marketing Department Harness</span>
+        <span className="brand">
+          <span className="mark" />
+          ARC
+        </span>
         <span className="spacer" />
         <Link to="/sign-in">Sign in</Link>
-        <Link to="/sign-up" className="btn">
+        <Link to="/sign-up" className="btn accent">
           Create workspace
         </Link>
       </nav>
 
       <div className="hero">
-        <span className="tag">AI marketing, with a human in the loop</span>
-        <h1>Your coordinated AI marketing team.</h1>
+        <div className="hero-grid" aria-hidden="true" />
+        <div className="hero-glow" aria-hidden="true" />
+
+        <span className="tag">
+          <span className="dot" />
+          Strategy &middot; Plan &middot; Execution
+        </span>
+        <h1>
+          Your marketing department, <span className="accent-text">running on its own.</span>
+        </h1>
         <p>
-          Plan, create, and review campaigns with a workflow that keeps every deliverable
-          versioned and every consequential action behind a human approval. Nothing is marked
-          published until you confirm it actually happened.
+          ARC plans, drafts, and reviews campaigns continuously — and keeps every consequential
+          action behind your approval. Nothing is marked published until you confirm it actually
+          happened.
         </p>
         <Link to="/sign-up" className="btn accent">
           Start a pilot →
@@ -59,25 +72,29 @@ export default function LandingPage() {
 
       <div className="page">
         <div className="feature-grid">
-          {FEATURES.map((f) => (
-            <div className="card hoverable" key={f.title}>
-              <div className="feature-icon">{f.icon}</div>
-              <h2>{f.title}</h2>
-              <p className="muted" style={{ margin: 0 }}>
-                {f.body}
-              </p>
-            </div>
+          {FEATURES.map((f, i) => (
+            <Reveal key={f.title} delay={i * 0.08}>
+              <TiltCard className="card hoverable">
+                <div className="feature-icon">{f.icon}</div>
+                <h2>{f.title}</h2>
+                <p className="muted" style={{ margin: 0 }}>
+                  {f.body}
+                </p>
+              </TiltCard>
+            </Reveal>
           ))}
         </div>
 
-        <div className="card" style={{ marginTop: 18 }}>
-          <h2>Scope of this pilot</h2>
-          <p className="muted" style={{ margin: 0 }}>
-            This release runs one coordinated workflow (strategy, research notes, campaign plan,
-            content pack, quality review) and a manual export/handoff for publishing — not fully
-            autonomous posting, ad spend changes, or guaranteed marketing results.
-          </p>
-        </div>
+        <Reveal delay={0.2}>
+          <div className="card" style={{ marginTop: 18 }}>
+            <h2>Scope of this pilot</h2>
+            <p className="muted" style={{ margin: 0 }}>
+              This release runs one coordinated workflow (strategy, research notes, campaign plan,
+              content pack, quality review) and a manual export/handoff for publishing — not fully
+              autonomous posting, ad spend changes, or guaranteed marketing results.
+            </p>
+          </div>
+        </Reveal>
       </div>
     </div>
   )

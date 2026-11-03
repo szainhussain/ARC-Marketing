@@ -16,10 +16,15 @@ class ResearchNotesSchema(Schema):
     scope_note = fields.String(load_default="")
 
 
+class TimelinePhaseSchema(Schema):
+    phase = fields.String(required=True)
+    activities = fields.List(fields.String(), load_default=list)
+
+
 class CampaignPlanSchema(Schema):
     summary = fields.String(required=True)
     channels = fields.List(fields.String(), required=True)
-    timeline = fields.List(fields.Dict(), load_default=list)
+    timeline = fields.List(fields.Nested(TimelinePhaseSchema), load_default=list)
     success_metrics = fields.List(fields.String(), load_default=list)
     assumptions = fields.List(fields.String(), load_default=list)
 

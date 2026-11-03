@@ -98,3 +98,13 @@ help pages where found (Google Ads RSA, Meta ad specs); left explicitly
 `limit_confirmed: false` where no official source was found (Instagram's
 organic caption limit, TikTok's ad-text limit and CTA list) rather than
 using unofficial numbers from marketing blogs.
+
+## motion (Framer Motion) — frontend animation
+
+Added for the ARC rebrand/redesign (`docs/DECISIONS.md` D10): scroll
+reveals, hero entrance, and `useReducedMotion` for automatic
+prefers-reduced-motion handling. `frontend/src/components/motion/` wraps
+it into three small reusable components (`Reveal`, `TiltCard`,
+`AnimatedNumber`) rather than scattering raw `motion.div` usage across
+pages. The 3D tilt effect itself is plain CSS custom properties, not a
+`motion` feature — kept framework-light since only one element needs it.

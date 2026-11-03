@@ -1,12 +1,15 @@
-# Marketing Department Harness
+# ARC — Strategy. Plan. Execution.
 
-A multi-tenant SaaS platform that gives SMBs a coordinated AI marketing
-workflow: business profile → campaign brief → strategy/research/plan/content
-→ quality review → human approval → manual handoff/export. See
+**ARC** (formerly "Marketing Department Harness" during early build —
+see `docs/DECISIONS.md` D10 for the rename) is a multi-tenant SaaS
+platform that gives SMBs a coordinated AI marketing workflow: business
+profile → campaign brief → strategy/research/plan/content → quality
+review → human approval → manual handoff/export. See
 `marketing_department_harness_complete_specification.md` for the full
 product, UI/UX, architecture, and governance specification this build
-follows, and `docs/IMPLEMENTATION_PLAN.md` for what has actually been built
-versus what remains.
+follows (that source document keeps its original name — it's the
+historical brief, not branding), and `docs/IMPLEMENTATION_PLAN.md` for
+what has actually been built versus what remains.
 
 **Status: local prototype / pilot candidate.** Not production-ready — see
 "Known limitations" below and `docs/DECISIONS.md`.
@@ -15,7 +18,9 @@ versus what remains.
 
 - Backend: Python 3.12+ / Flask, SQLAlchemy + Alembic, SQLite (dev) or
   PostgreSQL (docker-compose / production).
-- Frontend: React 19 + TypeScript, Vite, React Router.
+- Frontend: React 19 + TypeScript, Vite, React Router, `motion` (Framer
+  Motion) for the dark, scroll-reveal/3D-tilt landing design — see
+  `docs/DECISIONS.md` D10.
 - AI: provider-neutral adapter, Anthropic and Groq (OpenAI-compatible,
   free-tier-friendly) implementations included. Runs in a
   documented `capability_unavailable` state when no API key is configured —

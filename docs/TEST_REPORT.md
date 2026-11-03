@@ -246,3 +246,23 @@ smoother manual export instead. Verified three ways:
    per-field character counters (`30/30`, `90/90`), truncation notes, the
    "Google requires 3+ headlines" reminder, asset checklist, source
    citation, and working Copy buttons. Zero unexpected console errors.
+
+## ARC rebrand + dark motion redesign
+
+Verified: `npm run build` and `npm run lint` clean after the full visual
+rebuild (new `index.css` dark theme, `motion` package, three new motion
+components, landing/dashboard/app-shell redesign). Browser-driven journey
+rerun twice after the change: once to confirm the new design renders
+correctly (landing hero, scroll-reveal feature cards, dashboard KPI
+tiles, onboarding form, campaign workspace with real AI-generated
+deliverables — all screenshotted and visually inspected, including
+specifically checking dark-mode text contrast on the densest screens),
+and once more after fixing the `CampaignPlanSchema.timeline` bug (see
+`docs/DECISIONS.md` D10) to confirm the backend fix. Confirmed via direct
+DOM inspection (not just a static screenshot) that `Reveal`'s
+scroll-triggered animation actually fires on real scroll — the initial
+full-page screenshot looked like it might not have, which turned out to
+be a true positive worth checking rather than assuming a screenshot
+artifact. Backend: 24/24 tests passing, including the
+`test_workflow_success_path.py` fixture updated to match the hardened
+timeline schema.

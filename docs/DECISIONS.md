@@ -205,3 +205,43 @@ characters" for Instagram) that circulate in marketing blogs. If a real
 official source for either surfaces later, update
 `app/integrations/export_formats.py`'s docstrings and `FieldCheck` calls
 with the citation — don't just add a number.
+
+## D10 — Rebrand to ARC; dark, motion-driven redesign; timeline schema hardened
+
+**Decision:** Renamed the product from "Marketing Department Harness" to
+**ARC** across all user-facing surfaces (frontend nav/landing/page title,
+`frontend/package.json`), and rebuilt the frontend's visual design:
+dark theme (near-black `#020617` background, electric cyan/indigo accent
+— the color choice ties directly to the name: an electric arc), animated
+hero (ambient gradient drift, grid overlay, gradient-text headline),
+scroll-reveal and 3D-tilt-on-hover components (`frontend/src/components/
+motion/`, built on the `motion` package — Framer Motion's current name),
+and animated KPI counters on the dashboard. Design direction (dark,
+restrained motion over loud 3D) was chosen by the user from a set of
+real reference sites (resend.com) after reviewing several; color palette
+sourced from the `ui-ux-pro-max` skill's "API Developer Portal" dark-SaaS
+catalog entry, with the accent swapped to cyan for the brand-name tie-in.
+The original spec files
+(`marketing_department_harness_complete_specification.md` and the
+`marketing_department_harness_deliverables/` pack) were deliberately
+**not** renamed — they're the historical source brief this build follows,
+not branding.
+
+**Real bug found and fixed during this work:** `CampaignPlanSchema.timeline`
+was `fields.List(fields.Dict())` — no enforced inner shape. The frontend's
+`DeliverableContent.tsx` always read `phase.activities`, but a real Groq
+response used `key_activities` instead (different run, same schema gap),
+so the rendered timeline silently showed phase titles with no activity
+list — not a crash, just quietly incomplete output. Fixed by adding
+`TimelinePhaseSchema` (`phase`, `activities`) and nesting it properly
+(`fields.List(fields.Nested(TimelinePhaseSchema))`). This also sharpens
+the AI prompt automatically — `_describe_field()` already turns a nested
+schema into an exact "list of objects, each with keys: phase, activities"
+hint instead of the generic "freeform key/value pairs" hint a bare
+`Dict()` produces — so this fix addresses the prompt-precision root cause,
+not just the symptom. **Lesson for future
+schema fields holding structured list items: always use
+`fields.Nested(...)`, never a bare `fields.Dict()`** — a bare `Dict()`
+gives the model (and whoever reads the schema) no contract for what keys
+should exist, which is exactly the kind of under-specification this
+project's own governance principles argue against elsewhere.

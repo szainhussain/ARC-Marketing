@@ -1,6 +1,11 @@
-# CLAUDE.md — Marketing Department Harness
+# CLAUDE.md — ARC (formerly "Marketing Department Harness")
 
-Project instructions for Claude Code sessions working on this repo. Read
+Project instructions for Claude Code sessions working on this repo. The
+product is branded **ARC** ("Strategy. Plan. Execution.") as of
+`docs/DECISIONS.md` D10 — the repo folder name and internal code
+(`app/`, model/class names, etc.) were deliberately left unrenamed, since
+that would be a large, low-value refactor unrelated to branding; only
+user-facing surfaces (frontend UI, page title, README) changed. Read
 `marketing_department_harness_complete_specification.md` and
 `docs/IMPLEMENTATION_PLAN.md` before making architectural changes.
 
@@ -133,9 +138,18 @@ allows the cross-port request. This caused a real bug during this build
   `docs/12_AGENT_EXPANSION_ROADMAP.md`) means adding one renderer function
   there, keyed into `RENDERERS`; keep the collapsible "View raw JSON"
   fallback for transparency/debugging.
-- Design tokens live in `index.css`'s `:root` (B2B navy/blue palette,
-  chosen via the `.claude/skills/ui-ux-pro-max` skill's color catalog —
-  query it again for new palette/style decisions rather than guessing).
+- Design tokens live in `index.css`'s `:root` (ARC's dark theme — near-
+  black background, electric cyan/indigo accent — chosen via the
+  `.claude/skills/ui-ux-pro-max` skill's color catalog, see
+  `docs/DECISIONS.md` D10; query the skill again for new palette/style
+  decisions rather than guessing).
+- Animation goes through `frontend/src/components/motion/` (`Reveal` for
+  scroll-triggered fade-in, `TiltCard` for the 3D hover effect,
+  `AnimatedNumber` for counting KPI values) — don't add raw `motion.div`
+  usage or hand-rolled animation loops elsewhere; extend these three or
+  add a new one in the same directory. `Reveal` and `AnimatedNumber`
+  already handle `prefers-reduced-motion` internally (via `motion`'s
+  `useReducedMotion`) — don't re-guard them.
 
 ## Platform export formatting (not a connector)
 
