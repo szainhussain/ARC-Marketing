@@ -1,0 +1,23 @@
+import uuid
+from datetime import datetime, timezone
+
+from app.extensions import db
+
+
+def new_uuid() -> str:
+    return str(uuid.uuid4())
+
+
+def utcnow() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+class UUIDPrimaryKeyMixin:
+    id = db.Column(db.String(36), primary_key=True, default=new_uuid)
+
+
+class TimestampMixin:
+    created_at = db.Column(db.DateTime(timezone=True), default=utcnow, nullable=False)
+    updated_at = db.Column(
+        db.DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False
+    )

@@ -1,0 +1,16 @@
+# Local development/test requirements. Excludes psycopg2-binary, which has
+# no prebuilt wheel for very new host Python versions (e.g. 3.14) and
+# requires pg_config to build from source. Local dev/test uses SQLite
+# instead (see app/config.py). Docker/production uses requirements.txt
+# with psycopg2-binary inside a pinned-Python-version image.
+Flask==3.1.0
+Flask-SQLAlchemy==3.1.1
+Flask-Migrate==4.0.7
+Flask-Login==0.6.3
+Flask-WTF==1.2.2
+Flask-CORS==5.0.0
+marshmallow==3.23.1
+python-dotenv==1.0.1
+anthropic==0.40.0
+pytest==8.3.4
+pytest-cov==6.0.0

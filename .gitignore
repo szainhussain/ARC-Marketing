@@ -1,0 +1,39 @@
+# Environment
+.env
+.env.local
+*.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+instance/
+
+# Node / frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+npm-debug.log*
+
+# Database
+*.sqlite3
+*.db
+
+# Uploads (local dev private storage)
+storage/uploads/
+
+# IDE / OS
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Claude Code worktrees
+.claude/worktrees/
