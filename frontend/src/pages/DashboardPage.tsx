@@ -20,12 +20,20 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!activeOrganizationId) return
+    let cancelled = false
     apiRequest<{ summary: Summary }>(`/organizations/${activeOrganizationId}/reports/summary`).then(
-      (d) => setSummary(d.summary),
+      (d) => {
+        if (!cancelled) setSummary(d.summary)
+      },
     )
     apiRequest<{ campaigns: Campaign[] }>(`/organizations/${activeOrganizationId}/campaigns`).then(
-      (d) => setCampaigns(d.campaigns),
+      (d) => {
+        if (!cancelled) setCampaigns(d.campaigns)
+      },
     )
+    return () => {
+      cancelled = true
+    }
   }, [activeOrganizationId])
 
   if (!activeOrganizationId) {
@@ -41,29 +49,35 @@ export default function DashboardPage() {
   return (
     <div className="page">
       <h1>Overview</h1>
+
       {summary && (
-        <div className="card">
-          <h2>Workspace summary</h2>
-          <table className="simple">
-            <tbody>
-              <tr>
-                <td>Campaigns</td>
-                <td>{summary.total_campaigns}</td>
-              </tr>
-              <tr>
-                <td>Workflow runs completed</td>
-                <td>
-                  {summary.completed_workflow_runs} / {summary.total_workflow_runs}
-                </td>
-              </tr>
-              <tr>
-                <td>Estimated AI cost ({summary.cost_basis})</td>
-                <td>${summary.estimated_ai_cost_usd.toFixed(4)}</td>
-              </tr>
-            </tbody>
-          </table>
-          <p className="muted">{summary.note}</p>
-        </div>
+        <>
+          <div className="kpi-grid">
+            <div className="kpi-tile">
+              <div className="kpi-label">Campaigns</div>
+              <div className="kpi-value">{summary.total_campaigns}</div>
+            </div>
+            <div className="kpi-tile">
+              <div className="kpi-label">Workflow runs</div>
+              <div className="kpi-value">
+                {summary.completed_workflow_runs}
+                <span style={{ fontSize: '1rem', color: 'var(--color-muted-fg)', fontWeight: 600 }}>
+                  {' '}
+                  / {summary.total_workflow_runs}
+                </span>
+              </div>
+              <div className="kpi-sub">completed</div>
+            </div>
+            <div className="kpi-tile">
+              <div className="kpi-label">Estimated AI cost</div>
+              <div className="kpi-value">${summary.estimated_ai_cost_usd.toFixed(4)}</div>
+              <div className="kpi-sub">{summary.cost_basis}</div>
+            </div>
+          </div>
+          <p className="muted" style={{ marginTop: -6, marginBottom: 20 }}>
+            {summary.note}
+          </p>
+        </>
       )}
 
       <div className="card">

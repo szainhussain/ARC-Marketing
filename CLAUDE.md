@@ -24,8 +24,15 @@ See `docs/DECISIONS.md` for why things are built the way they are.
 - `app/agents/` — thin stage classes (CMO planner, research analyst,
   marketing manager, content creator, quality reviewer), not autonomous
   processes. Each stage has one task_type and one Marshmallow output schema.
-- `app/ai/` — provider-neutral adapter. Never import `anthropic` (or any
-  SDK) outside `app/ai/provider_adapter.py`.
+- `app/ai/` — provider-neutral adapter. Never import `anthropic`, `groq`,
+  or any SDK outside `app/ai/provider_adapter.py`. Two providers exist
+  (`AnthropicProvider`, `GroqProvider`); a third means one new class
+  implementing `AIProvider`, nothing else changes. Both SDK clients are
+  constructed with `max_retries=0` — keep this on any new provider too,
+  or its SDK's internal retry-on-429 sleep can hang a request for tens of
+  seconds before this app's own bounded retry/timeout ever sees it (this
+  actually happened — a real ~41s hang on a Groq rate limit — see
+  `docs/DECISIONS.md` D8).
 - `app/workflows/campaign_workflow.py` — the one pipeline that exists today
   (strategy → research_notes → campaign_plan → content_pack → qa_report),
   run synchronously in the request. Stops cleanly on the first failed
@@ -55,7 +62,14 @@ See `docs/DECISIONS.md` for why things are built the way they are.
    the provider isn't actually configured.
 6. All AI output is validated against a Marshmallow schema in
    `app/ai/schemas.py` before it touches a deliverable. Don't persist raw
-   model text as a deliverable's content.
+   model text as a deliverable's content. The prompt built in
+   `_build_prompt()` includes a per-field type hint generated from the
+   schema itself (`_describe_field()`) — keep it schema-derived rather
+   than hand-written per field if you add a new schema; a real test
+   against Groq showed weaker-instruction-following models substitute
+   objects for plain-string lists (and vice versa) without an explicit
+   hint, which schema validation then correctly rejects rather than
+   silently accepting.
 7. Idempotency keys are required (and enforced via a unique DB constraint)
    on campaign creation, workflow-run start, and external-action execution.
 
@@ -109,9 +123,19 @@ allows the cross-port request. This caused a real bug during this build
   cancellation-flag guard (see `OnboardingPage.tsx`) — React 19 StrictMode
   double-invokes mount effects in dev, and an unguarded late response can
   silently overwrite state a user already changed. This caused a real data
-  loss bug during this build; the dashboard/reports/campaign-list pages
-  don't yet have this guard since they're read-only (lower risk), but
-  apply it to any new page with form state.
+  loss bug during this build; the dashboard already has this guard,
+  reports/campaign-list pages don't yet since they're read-only (lower
+  risk), but apply it to any new page with form state.
+- Render deliverable content through `components/DeliverableContent.tsx`
+  (one renderer per `deliverable_type`, e.g. `Strategy`, `CampaignPlan`),
+  not a raw `JSON.stringify(...)` dump — that was the actual UI before a
+  redesign fixed it. Adding a new deliverable type (per
+  `docs/12_AGENT_EXPANSION_ROADMAP.md`) means adding one renderer function
+  there, keyed into `RENDERERS`; keep the collapsible "View raw JSON"
+  fallback for transparency/debugging.
+- Design tokens live in `index.css`'s `:root` (B2B navy/blue palette,
+  chosen via the `.claude/skills/ui-ux-pro-max` skill's color catalog —
+  query it again for new palette/style decisions rather than guessing).
 
 ## What NOT to do without asking first
 

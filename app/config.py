@@ -23,7 +23,12 @@ class BaseConfig:
 
     AI_PROVIDER = os.environ.get("AI_PROVIDER", "anthropic")
     ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
-    AI_MODEL = os.environ.get("AI_MODEL", "claude-sonnet-5")
+    GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
+    _AI_MODEL_DEFAULTS = {
+        "anthropic": "claude-sonnet-5",
+        "groq": "openai/gpt-oss-120b",
+    }
+    AI_MODEL = os.environ.get("AI_MODEL") or _AI_MODEL_DEFAULTS.get(AI_PROVIDER, "claude-sonnet-5")
     AI_MAX_RETRIES = int(os.environ.get("AI_MAX_RETRIES", "2"))
     AI_TIMEOUT_SECONDS = int(os.environ.get("AI_TIMEOUT_SECONDS", "60"))
     AI_WORKFLOW_BUDGET_USD = float(os.environ.get("AI_WORKFLOW_BUDGET_USD", "1.00"))

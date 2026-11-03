@@ -108,11 +108,22 @@ marks the current task `failed` with a safe (no stack trace, no key
 material) `error_summary`, and stops — it does not attempt later stages
 with missing upstream context.
 
-`AnthropicProvider` does one bounded repair retry (2 attempts total) if the
-model's JSON doesn't parse or doesn't validate against the schema, then
-raises `InvalidOutput`. Estimated cost is computed from a clearly-labeled
+`AnthropicProvider` and `GroqProvider` (OpenAI-compatible, added in D8)
+both do one bounded repair retry (2 attempts total) if the model's JSON
+doesn't parse or doesn't validate against the schema, then raise
+`InvalidOutput`. Estimated cost is computed from a clearly-labeled
 placeholder per-token rate (`provider_adapter.py`) — not a real invoice
-figure; see the "estimate" labeling in the reports API and UI.
+figure; see the "estimate" labeling in the reports API and UI. Both
+provider SDK clients are constructed with `max_retries=0` — the SDKs'
+own default retry-on-429/5xx behavior sleeps internally and would
+otherwise block a single call for far longer than this app's own
+timeout/retry budget before the typed error ever surfaces (observed: a
+~41s hang on a real Groq rate limit before this was disabled). The prompt
+built in `_build_prompt()` includes a per-field type hint derived from
+each Marshmallow field (`_describe_field()`) — added after a real
+schema-validation failure where an open-weight model substituted objects
+for a plain-string list field; see `docs/DECISIONS.md` D8 for the full
+story.
 
 ## Frontend architecture
 

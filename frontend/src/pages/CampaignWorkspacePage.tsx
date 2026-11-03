@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { apiRequest, ApiError } from '../api/client'
+import DeliverableContent from '../components/DeliverableContent'
 import { useWorkspace } from '../context/WorkspaceContext'
 import type { Approval, Campaign, Deliverable, ExternalAction, WorkflowRun } from '../api/types'
 
@@ -170,7 +171,7 @@ export default function CampaignWorkspacePage() {
                 Version {d.current_version?.version_number} · review:{' '}
                 <span className={`status-pill ${d.review_status}`}>{d.review_status}</span>
               </p>
-              <pre className="content-json">{JSON.stringify(d.current_version?.content, null, 2)}</pre>
+              <DeliverableContent deliverableType={d.deliverable_type} content={d.current_version?.content} />
 
               {!approval && (
                 <button onClick={() => requestApproval(d.id)}>Request approval to hand off</button>

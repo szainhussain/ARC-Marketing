@@ -109,3 +109,53 @@ and none of them solve a problem this build currently has (the Flask
 workflow engine is sufficient for the 5-stage pipeline; no design-system
 generation need yet; no multi-agent orchestration need yet). Revisit if a
 concrete need appears — do not install speculatively.
+
+## D8 — Added Groq as a second AI provider; disabled SDK-internal retries on both
+
+**Decision:** `app/ai/provider_adapter.py` now has `GroqProvider` alongside
+`AnthropicProvider`, both implementing the same `AIProvider` interface.
+`get_provider()` branches on `AI_PROVIDER` (`anthropic` | `groq`). Both
+provider clients are now constructed with `max_retries=0`.
+
+**Why:** The user had a Groq API key (free-tier-friendly, no Anthropic key
+available) and wanted real AI generation verified, not just the
+`capability_unavailable` path. Groq serves open-weight models through an
+OpenAI-compatible API — a different request/response shape from
+Anthropic's SDK, but the same `generate_structured()` contract, which is
+exactly what the provider-neutral design was for (see D1/D3 and
+`docs/12_AGENT_EXPANSION_ROADMAP.md`'s "AI provider adapter" row — this is
+that design surviving contact with a real second provider, unmodified).
+
+**What actually happened when tested against the real API** (see
+`docs/TEST_REPORT.md` for the full log):
+1. The model ID from Groq's own quickstart docs
+   (`llama-3.3-70b-versatile`) no longer exists on the current API —
+   confirmed via `client.models.list()` and switched to
+   `openai/gpt-oss-120b`, which is live. **Docs can be stale; the live
+   models endpoint is the source of truth.**
+2. `marketing_manager`'s `success_metrics` (list of strings) and
+   `timeline` (list of objects) fields initially failed schema validation
+   — the open-weight model returned objects where strings were expected,
+   and vice versa on the fix's first pass. Fixed by adding explicit
+   per-field type hints to the prompt (`_describe_field()` in
+   `provider_adapter.py`), generated from the Marshmallow schema itself
+   rather than hand-written per field — so it stays correct if a schema
+   changes. This is a genuine difference from Claude's instruction-
+   following, not a bug in the schema or the pipeline.
+3. Hit Groq's free-tier rate limit (8,000 tokens/minute) partway through
+   a 5-stage run — handled correctly: `RateLimited` raised, task marked
+   `failed` with the real error message, no fabricated output, no
+   duplicate billing risk (nothing executes on a failed AI stage).
+4. That same rate-limit response initially caused the whole request to
+   hang for ~41 seconds before failing, because both the `anthropic` and
+   `groq` SDKs retry 429/5xx responses internally by default, with their
+   own sleep — layered on top of this app's own bounded-retry loop
+   without either layer knowing about the other. Fixed by passing
+   `max_retries=0` to both SDK clients, making this app's own retry/
+   timeout/budget logic the only retry layer, exactly as the architecture
+   doc already claimed it was before this was actually tested end-to-end
+   against a rate-limited real provider.
+
+**Consequence:** `.env`'s `AI_MODEL` default is now provider-dependent
+(`app/config.py:_AI_MODEL_DEFAULTS`) rather than a single hardcoded
+string, since Anthropic and Groq model IDs don't share a namespace.

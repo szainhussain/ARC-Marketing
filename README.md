@@ -16,7 +16,8 @@ versus what remains.
 - Backend: Python 3.12+ / Flask, SQLAlchemy + Alembic, SQLite (dev) or
   PostgreSQL (docker-compose / production).
 - Frontend: React 19 + TypeScript, Vite, React Router.
-- AI: provider-neutral adapter, Anthropic implementation included. Runs in a
+- AI: provider-neutral adapter, Anthropic and Groq (OpenAI-compatible,
+  free-tier-friendly) implementations included. Runs in a
   documented `capability_unavailable` state when no API key is configured —
   it never fabricates output.
 - Auth: email/password, Flask-Login session cookies, Flask-WTF CSRF.
@@ -38,6 +39,14 @@ export FLASK_APP=wsgi.py
 flask db upgrade                      # creates instance/dev.db
 flask run
 ```
+
+To enable real AI generation, set in `.env`: either `AI_PROVIDER=anthropic`
++ `ANTHROPIC_API_KEY=sk-ant-...`, or `AI_PROVIDER=groq` +
+`GROQ_API_KEY=gsk_...` (Groq has a free tier — get a key at
+console.groq.com). `AI_MODEL` defaults per-provider
+(`app/config.py:_AI_MODEL_DEFAULTS`) if left unset. Restart the backend
+after changing `.env`. With neither key set, the app runs correctly in a
+documented `capability_unavailable` state instead of fabricating output.
 
 Backend serves on `http://127.0.0.1:5000` (equivalently `http://localhost:5000`).
 
@@ -112,10 +121,14 @@ docs/             Architecture, API, security, test report, decisions, deploymen
 
 ## Known limitations (read before pitching this as "done")
 
-- **No live AI generation tested** without a real `ANTHROPIC_API_KEY` — the
-  adapter and schema validation are implemented and unit-tested with a fake
-  provider, but never exercised against the real Anthropic API in this
-  session.
+- **Live AI generation verified against Groq, not against Anthropic.** A
+  real Groq key was used this session (free tier) — see `docs/DECISIONS.md`
+  D8 and `docs/TEST_REPORT.md` for what broke (a stale model ID, a schema-
+  validation gap, an SDK-internal-retry hang) and was fixed. The Anthropic
+  path is still only unit-tested with a fake provider, never exercised
+  against a real `ANTHROPIC_API_KEY`. Groq's free tier is rate-limited
+  (8,000 tokens/minute as observed) — the full 5-stage pipeline hasn't yet
+  been seen completing in one run without hitting it.
 - **Only manual handoff/export** is implemented for external actions — no
   live publishing connector (that's M11 in the backlog, deliberately
   deferred until a pilot channel is chosen).

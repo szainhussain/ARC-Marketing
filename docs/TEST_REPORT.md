@@ -134,14 +134,87 @@ of the same race is a wasted duplicate network call, not data loss — left
 as a documented cleanup item rather than fixed under time pressure for a
 non-data-loss case.
 
+## Real AI provider verification (Groq) — later in this session
+
+The user supplied a real Groq API key. A `GroqProvider` was added (see
+`docs/DECISIONS.md` D8) and tested against the live API, not just a fake
+provider — this supersedes the "no real provider call tested" gap noted
+below for Groq specifically (Anthropic is still untested against a real
+key).
+
+1. **Direct provider smoke test** (`GroqProvider.generate_structured()`
+   called directly, bypassing the HTTP layer): first attempt failed with
+   `model_not_found` for the model ID from Groq's own quickstart docs
+   (`llama-3.3-70b-versatile`) — confirmed via `client.models.list()` that
+   it's no longer live and switched to `openai/gpt-oss-120b`. Second
+   attempt succeeded: real strategy content returned, schema-valid,
+   200 input / 535 output tokens.
+2. **Full pipeline through the running app** (browser-driven, same
+   Playwright setup as above), run repeatedly while fixing what broke:
+   - Run 1: `cmo_planner` and `research_analyst` completed with real
+     content; `marketing_manager` failed `InvalidOutput` —
+     `success_metrics` (expected list of strings) came back as a list of
+     `{metric, target}` objects.
+   - Fix: added per-field type hints to the prompt, generated from the
+     schema. Run 2: `success_metrics` fixed, but `timeline` (expected list
+     of objects) now failed the opposite way — a bug in the new hint logic
+     itself (it mishandled `List(Dict())`, telling the model to return
+     strings). Fixed; re-verified by rereading the schema-derived hint
+     logic against all four field shapes used across the 5 schemas
+     (string, list-of-string, list-of-nested-object, list-of-dict).
+   - Run 3: `cmo_planner`, `research_analyst`, `marketing_manager` all
+     completed with real, coherent content (full campaign plan with a
+     5-phase timeline, channels, success metrics); `content_creator` hit
+     Groq's free-tier rate limit (8,000 tokens/minute) — correctly
+     surfaced as `RateLimited`, task `failed`, no fabrication.
+   - That run also exposed a ~41s hang before the `RateLimited` error
+     reached the frontend (the SDK's own internal retry-on-429 sleep,
+     stacking with this app's bounded retry). Fixed with
+     `max_retries=0` on both provider clients. Re-verified: the next
+     rate-limited run failed in under a second instead of ~41s.
+3. **Confirmed**: real, schema-valid AI generation now works end-to-end
+   through the actual running app for 3 of 5 stages before hitting the
+   free tier's per-minute quota in testing (quota resets; a production
+   account or paced requests would complete all 5). The failure modes
+   that did occur (stale model ID, schema mismatch, rate limit, SDK retry
+   hang) were all caught by actually running it against the real API
+   rather than assumed — and all are now fixed and documented, not just
+   patched silently.
+
+## UI/UX redesign (later in this session)
+
+Per a user request and using the installed `ui-ux-pro-max` skill for
+grounded color/style choices (not ad hoc), the frontend's design system
+(`index.css`) was rebuilt (B2B navy/blue palette, card shadows/hover,
+KPI tiles, a landing-page workflow-step diagram) and — the change with
+the most real impact — deliverable content on the campaign workspace page
+now renders as structured sections (headings, bullet lists, a visual
+timeline, channel-variant cards) via a new `DeliverableContent` component,
+instead of a raw `JSON.stringify` dump in a black `<pre>` block. Verified
+by rerunning the same browser-driven journey used throughout this session
+and visually inspecting the resulting screenshots (shown to the user
+directly), plus `npm run build` and `npm run lint` passing clean. A
+collapsible "View raw JSON" is kept for every deliverable as a transparency/
+debugging fallback.
+
 ## What was not tested
 
 - No load/concurrency testing.
-- No test against a real Anthropic API call (no key available in this
-  session) — only against the fake-provider success path and the
-  no-provider-configured failure path.
+- No test against a real Anthropic API call with a real key in this
+  session (Groq was tested against the real API — see above; Anthropic
+  was only tested against the fake-provider success path and the
+  no-provider-configured failure path).
 - No automated test for the kill switch or the monthly usage limit (both
   implemented; manual-only verification, see `docs/SECURITY_AND_GOVERNANCE.md`).
 - No accessibility audit beyond the label-association fix above (no
-  axe-core or similar scan run).
+  axe-core or similar scan run) — the UI redesign did not add a fresh
+  accessibility scan either; it reused the existing `htmlFor`/`id`
+  conventions from `CLAUDE.md`.
 - No cross-browser testing (Chromium only).
+- The full 5-stage pipeline has not been observed completing end-to-end
+  with real AI content in one run in this session — only 3 of 5 stages at
+  a time before hitting the Groq free tier's per-minute rate limit. The
+  pipeline logic for the untested 2 stages (`content_creator`,
+  `quality_reviewer`) is unchanged from what passed the fake-provider test
+  in `test_workflow_success_path.py`, but hasn't been seen succeed against
+  a real model in the same run as the other three.

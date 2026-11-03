@@ -8,6 +8,7 @@
 | Marshmallow 3.23 | Request/response and AI-output schema validation | Chosen over Pydantic for simpler native Flask integration; spec allows either, says "choose one consistently" |
 | SQLAlchemy 2.1 + Alembic | ORM + migrations | |
 | `anthropic` 0.40 (Python SDK) | AI provider adapter | Only imported inside `app/ai/provider_adapter.py`, lazily, so the app still runs with the package absent/provider unconfigured |
+| `groq` 1.7.0 (Python SDK) | Second AI provider (OpenAI-compatible, free-tier-friendly) | Same lazy-import pattern as `anthropic`. Verified against the real API this session — see `docs/DECISIONS.md` D8 and `docs/TEST_REPORT.md` for what broke and was fixed (stale model ID, schema-validation prompt gap, SDK-internal retry hang) |
 | `psycopg2-binary` 2.9.10 | PostgreSQL driver | In `requirements.txt` (Docker/production) only — excluded from `requirements-dev.txt` because it has no prebuilt wheel for the host's Python 3.14 in this session; see `docs/DECISIONS.md` D2 |
 | `gunicorn` 23.0 | Production WSGI server (Docker) | |
 | `pytest`, `pytest-cov` | Test framework | 22 tests, see `docs/TEST_REPORT.md` |
