@@ -9,7 +9,11 @@ def _bool_env(name: str, default: bool) -> bool:
 
 
 def _database_url() -> str:
-    url = os.environ.get("DATABASE_URL", "sqlite:///dev.db")
+    url = (os.environ.get("DATABASE_URL") or "sqlite:///dev.db").strip()
+    # Tolerate the "psql '<url>'" snippet some dashboards show, and quotes.
+    if url.startswith("psql "):
+        url = url[len("psql "):].strip()
+    url = url.strip("'\"")
     # Some hosts hand out "postgres://", which SQLAlchemy 2 no longer accepts.
     if url.startswith("postgres://"):
         url = "postgresql://" + url[len("postgres://"):]
