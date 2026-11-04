@@ -17,6 +17,10 @@ def _database_url() -> str:
     # Some hosts hand out "postgres://", which SQLAlchemy 2 no longer accepts.
     if url.startswith("postgres://"):
         url = "postgresql://" + url[len("postgres://"):]
+    # SQLAlchemy 2.1 defaults "postgresql://" to the psycopg (v3) driver; we
+    # ship psycopg2-binary, so name it explicitly.
+    if url.startswith("postgresql://"):
+        url = "postgresql+psycopg2://" + url[len("postgresql://"):]
     return url
 
 

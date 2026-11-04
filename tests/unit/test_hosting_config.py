@@ -3,12 +3,17 @@ from app.config import _database_url, _origins
 
 def test_postgres_scheme_is_normalised(monkeypatch):
     monkeypatch.setenv("DATABASE_URL", "postgres://u:p@host/db?sslmode=require")
-    assert _database_url() == "postgresql://u:p@host/db?sslmode=require"
+    assert _database_url() == "postgresql+psycopg2://u:p@host/db?sslmode=require"
 
 
 def test_pasted_psql_snippet_is_tolerated(monkeypatch):
     monkeypatch.setenv("DATABASE_URL", "  psql 'postgresql://u:p@host/db?sslmode=require'  ")
-    assert _database_url() == "postgresql://u:p@host/db?sslmode=require"
+    assert _database_url() == "postgresql+psycopg2://u:p@host/db?sslmode=require"
+
+
+def test_explicit_driver_is_kept(monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", "postgresql+psycopg2://u:p@host/db")
+    assert _database_url() == "postgresql+psycopg2://u:p@host/db"
 
 
 def test_multiple_frontend_origins(monkeypatch):
