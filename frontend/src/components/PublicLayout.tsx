@@ -124,7 +124,9 @@ export default function PublicLayout() {
         </div>
         <div className="footer-fine">
           <span>© {new Date().getFullYear()} ARC. Outcomes depend on your business, data, channels and budget.</span>
-          <span className="mono">Strategy · Plan · Execution</span>
+          <span className="mono">
+            Strategy · Plan · Execution · <span data-testid="build">build {__APP_COMMIT__}</span>
+          </span>
         </div>
       </footer>
     </div>

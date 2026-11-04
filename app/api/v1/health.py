@@ -1,3 +1,5 @@
+import os
+
 from flask import jsonify
 from sqlalchemy import text
 
@@ -7,7 +9,9 @@ from app.extensions import db
 
 @api_v1.route("/health/live", methods=["GET"])
 def live():
-    return jsonify({"status": "ok"}), 200
+    # Render sets RENDER_GIT_COMMIT; lets you confirm which commit is live.
+    commit = (os.environ.get("RENDER_GIT_COMMIT") or "")[:7] or None
+    return jsonify({"status": "ok", "commit": commit}), 200
 
 
 @api_v1.route("/health/ready", methods=["GET"])
