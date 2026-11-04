@@ -1,0 +1,44 @@
+# Render Blueprint — free tier: one web service that also runs the agent
+# worker in-process. Database: a free Neon PostgreSQL (paste its URL as
+# DATABASE_URL). See docs/DEPLOYMENT.md "Free hosting".
+services:
+  - type: web
+    name: arc-api
+    runtime: python
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: >-
+      flask db upgrade && flask seed-plans &&
+      gunicorn --workers 1 --threads 4 --timeout 240 --bind 0.0.0.0:$PORT wsgi:app
+    healthCheckPath: /api/v1/health/live
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: FLASK_APP
+        value: wsgi.py
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false          # paste your Neon connection string
+      - key: FRONTEND_ORIGIN
+        sync: false          # e.g. https://arc-marketing.vercel.app (comma-separate several)
+      - key: AI_PROVIDER
+        value: groq
+      - key: GROQ_API_KEY
+        sync: false          # paste your Groq key
+      - key: RUN_EMBEDDED_WORKER
+        value: "true"
+      - key: SESSION_COOKIE_SECURE
+        value: "true"
+      - key: SESSION_COOKIE_SAMESITE
+        value: None          # frontend and API are on different domains
+      - key: WTF_CSRF_SSL_STRICT
+        value: "false"       # same reason; CSRF token + CORS still enforced
+      - key: BILLING_PROVIDER
+        value: test
+      - key: AI_TIMEOUT_SECONDS
+        value: "60"

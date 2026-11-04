@@ -17,7 +17,7 @@ def create_app(config_name: str | None = None) -> Flask:
     limiter.init_app(app)
     cors.init_app(
         app,
-        resources={r"/api/*": {"origins": app.config["FRONTEND_ORIGIN"]}},
+        resources={r"/api/*": {"origins": app.config["FRONTEND_ORIGINS"]}},
         supports_credentials=True,
     )
 

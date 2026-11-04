@@ -2,6 +2,24 @@
 
 **Status: runs locally and in Docker Compose. Not deployed anywhere.**
 
+## Free hosting (Vercel + Render free + Neon free)
+
+| Piece | Where | Notes |
+|---|---|---|
+| Frontend | Vercel (Hobby) | Root `frontend`; env `VITE_API_BASE_URL=https://<render-service>.onrender.com/api/v1` |
+| API + agent worker | Render free web service via `render.yaml` | Worker runs in-process (`RUN_EMBEDDED_WORKER=true`, 1 gunicorn worker) |
+| PostgreSQL | Neon free | Paste its connection string as `DATABASE_URL` |
+
+Free-tier trade-offs (verify current terms on each provider's pricing page):
+the Render service sleeps after ~15 minutes without traffic and takes about a
+minute to wake, and the in-process worker pauses while it sleeps (queued
+work resumes on the next request; open campaign pages poll, which keeps it
+awake during a run). Uploaded files live on ephemeral disk and are lost on
+redeploy/restart. Frontend and API on different domains need
+`SESSION_COOKIE_SAMESITE=None` and `WTF_CSRF_SSL_STRICT=false` (set in the
+blueprint); Safari may still block the cross-site cookie — a custom domain
+(`app.` + `api.` subdomains) fixes that.
+
 ## Processes
 
 | Process | Command | Scale |

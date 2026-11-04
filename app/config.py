@@ -8,13 +8,35 @@ def _bool_env(name: str, default: bool) -> bool:
     return value.strip().lower() in ("1", "true", "yes", "on")
 
 
+def _database_url() -> str:
+    url = os.environ.get("DATABASE_URL", "sqlite:///dev.db")
+    # Some hosts hand out "postgres://", which SQLAlchemy 2 no longer accepts.
+    if url.startswith("postgres://"):
+        url = "postgresql://" + url[len("postgres://"):]
+    return url
+
+
+def _origins() -> list[str]:
+    raw = os.environ.get("FRONTEND_ORIGIN", "http://localhost:5173")
+    return [o.strip().rstrip("/") for o in raw.split(",") if o.strip()]
+
+
 class BaseConfig:
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-only-insecure-key")
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///dev.db")
+    SQLALCHEMY_DATABASE_URI = _database_url()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True}
 
-    FRONTEND_ORIGIN = os.environ.get("FRONTEND_ORIGIN", "http://localhost:5173")
+    # Comma-separated list allowed for CORS; the first is used in emailed links.
+    FRONTEND_ORIGINS = _origins()
+    FRONTEND_ORIGIN = FRONTEND_ORIGINS[0]
+    # Flask-WTF's HTTPS Referer check requires same-origin requests; turn it
+    # off only when the frontend is on a different domain (the CSRF token
+    # header + CORS allowlist still protect every mutating request).
+    WTF_CSRF_SSL_STRICT = _bool_env("WTF_CSRF_SSL_STRICT", True)
+    # Run the agent worker as a thread inside the web process (free hosting
+    # tiers without background workers). Use 1 gunicorn worker with it.
+    RUN_EMBEDDED_WORKER = _bool_env("RUN_EMBEDDED_WORKER", False)
 
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SECURE = _bool_env("SESSION_COOKIE_SECURE", False)
