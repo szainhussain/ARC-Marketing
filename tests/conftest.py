@@ -14,6 +14,16 @@ def app():
         db.drop_all()
 
 
+@pytest.fixture(autouse=True)
+def _reset_provider_cooldown():
+    # The worker's rate-limit cooldown is process-wide; don't leak it between tests.
+    import app.workflows.engine as engine
+
+    engine._provider_cooldown_until = None
+    yield
+    engine._provider_cooldown_until = None
+
+
 @pytest.fixture()
 def client(app):
     return app.test_client()

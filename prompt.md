@@ -450,7 +450,7 @@ For every proposed external repository or package:
 7. Add documentation and tests for any adopted functionality.
 8. Defer it if the benefit does not justify the complexity.
 
-Maintain `docs/TOOLS_AND_DEPENDENCIES.md` listing adopted, evaluated, deferred, and rejected tools with rationale.
+Maintain `docs/TOOLS_AND_SKILLS.md` listing adopted, evaluated, deferred, and rejected tools with rationale.
 
 # 7. MCP SERVERS — USE SELECTIVELY AND SECURELY
 
@@ -576,7 +576,7 @@ A future agent must not receive broader permissions simply because it has a new 
 
 ### Expansion plan
 
-Create `docs/12_AGENT_EXPANSION_ROADMAP.md` describing:
+Create `docs/12_AGENT_ROADMAP.md` describing:
 
 - How each of the 12 roles maps to capabilities.
 - Which roles can share services.
@@ -745,8 +745,8 @@ Create or maintain:
 - `docs/ARCHITECTURE.md`
 - `docs/API.md`
 - `docs/SECURITY_AND_GOVERNANCE.md`
-- `docs/TOOLS_AND_DEPENDENCIES.md`
-- `docs/12_AGENT_EXPANSION_ROADMAP.md`
+- `docs/TOOLS_AND_SKILLS.md`
+- `docs/12_AGENT_ROADMAP.md`
 - `docs/TEST_REPORT.md`
 - `docs/DECISIONS.md` — material architecture and product decisions.
 - `docs/DEPLOYMENT.md`

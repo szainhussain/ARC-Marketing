@@ -53,6 +53,8 @@ time in this session (see `docs/TEST_REPORT.md`).
 
 ## D4 — Synchronous workflow execution, no queue yet
 
+> **Superseded by D11 (2026-11-03).** Kept for history.
+
 **Decision:** `start_campaign_workflow` runs all 5 pipeline stages inline
 in the request/response cycle of `POST .../runs` (returns `202` once
 started, but the work has actually already completed or failed by the time
@@ -123,7 +125,7 @@ available) and wanted real AI generation verified, not just the
 OpenAI-compatible API — a different request/response shape from
 Anthropic's SDK, but the same `generate_structured()` contract, which is
 exactly what the provider-neutral design was for (see D1/D3 and
-`docs/12_AGENT_EXPANSION_ROADMAP.md`'s "AI provider adapter" row — this is
+`docs/12_AGENT_ROADMAP.md`'s "AI provider adapter" row — this is
 that design surviving contact with a real second provider, unmodified).
 
 **What actually happened when tested against the real API** (see
@@ -245,3 +247,112 @@ schema fields holding structured list items: always use
 gives the model (and whoever reads the schema) no contract for what keys
 should exist, which is exactly the kind of under-specification this
 project's own governance principles argue against elsewhere.
+
+## D11 — Durable DB-backed task queue + separate worker (supersedes D4)
+
+**Decision:** A campaign run is now 12 `Task` rows linked by
+`TaskDependency` rows. `POST .../runs` only *enqueues* them (so `202` is
+true now) and a separate process, `flask worker` (`app/cli.py`), executes
+them via `app/workflows/engine.py`. No Redis, Celery, or RQ.
+
+**Why:** The synchronous pipeline could never finish a full run on the
+Groq free tier (8,000 tokens/minute) — the request died on the first
+429. A worker that persists state and retries with backoff fixes that
+directly. The database is already the source of truth for runs, tasks,
+deliverables and approvals; putting the queue there too means one store
+to back up, one transaction boundary, and nothing new to deploy. At this
+scale (tens of tasks per run, a few concurrent workspaces) a polled table
+is well within what SQLite/Postgres handle.
+
+**How it stays correct:**
+- *No double execution:* a task is claimed with a conditional `UPDATE ...
+  WHERE id = ? AND status = <the status we read>`; only one worker's update
+  can match. Tested in `test_task_cannot_be_claimed_twice`.
+- *Crash recovery:* a claimed task gets `lease_expires_at` (3 x AI timeout
+  + 30s). Any worker that finds an expired lease puts the task back to
+  `retrying` (or `failed` once attempts are exhausted).
+- *Retries:* `RateLimited`, `AIRequestTimeout`, `InvalidOutput` and other
+  provider errors retry with exponential backoff + jitter (base 5s, cap
+  120s); a provider `retry-after` wins if longer. `ProviderUnavailable`
+  and `BudgetExceeded` fail immediately — retrying a missing key is
+  pointless (rule 5 in CLAUDE.md still holds: `capability_unavailable:`).
+- *Cancellation while running:* the engine re-reads the task after the
+  model returns and discards the output if the task is no longer
+  `running`.
+- *Independent branches continue:* one failed agent only blocks agents
+  that depend on it; the run settles as `failed` once nothing else can
+  progress, and a person's retry re-opens it.
+
+**When to revisit:** if a single worker can't keep up (many workspaces
+running at once) run several workers — the claim is already safe for
+that. Move to a real broker only if polling load on the DB becomes a
+measured problem, or if tasks need sub-second latency.
+
+## D12 — The 12 agents as versioned specs, not classes
+
+**Decision:** Each agent is an `AgentSpec` (`app/agents/base.py`) in
+`app/agents/definitions.py`: id, number, version, role, instructions, one
+output schema, `depends_on`, a `reads` allowlist, budget and retry policy,
+external-action policy, honest integration status, and automated
+evaluation checks. The five old per-stage classes were removed.
+
+**Why:** the agents differ in *data*, not behavior — the same "build
+input -> call provider -> validate schema" loop runs for all of them. A
+spec makes every agent's permissions visible in one file and testable
+(`tests/unit/test_agent_registry.py`), and the registry refuses to import
+if a dependency is misspelled or cyclic.
+
+**Notable choices:**
+- The `reads` allowlist is enforced by the engine (`_upstream_outputs`),
+  not by the prompt. An agent physically never receives output it isn't
+  allowed to see. Input builders then pick specific fields so each call
+  stays small — necessary on free-tier rate limits.
+- Agent 11 (Marketing Ops/QA) keeps the existing `qa_report` type and
+  receives code-level evaluation results (prohibited phrases, invented
+  contact details) as confirmed issues — deterministic checks the model
+  can't argue its way out of.
+- Agent 5 (Paid Media) has `external_action_policy =
+  never_executable_spend_is_human_only`; no code path lets an agent change
+  spend.
+- Prompts state the agent's role and that all input is untrusted data,
+  never instructions (prompt-injection hygiene for business-profile text).
+- `AgentExecution` records `agent_version` on every attempt, so changing
+  an agent's instructions later never misattributes older output.
+
+## D13 — Design system: CSS tokens + own components, not Tailwind/shadcn
+
+**Decision:** Keep the existing token-based CSS (`index.css` `:root`,
+`styles/components.css`) and a small typed component library
+(`components/ui`), re-tokened to the brief's palette (#08090B, #111317,
+#F5F5F0, #A1A4A5, ice-blue #9FD8FF) with Inter (UI), Instrument Serif
+(display) and JetBrains Mono (metadata) — all SIL OFL.
+
+**Why:** the brief says not to add libraries when existing ones solve the
+problem. Migrating ~40 pages to Tailwind/shadcn would be a large rewrite
+with no user-visible gain; the components needed (dialog, drawer, tabs,
+toasts, table, KPI, timeline, command palette, confirm) are small and are
+covered by tests. Resend was a benchmark only: no logo, copy, layout or
+assets copied; ARC's mark is an original SVG.
+
+## D14 — Knowledge: recent approved entries, no vector store
+
+Agents 01 and 02 receive up to 8 most recent *approved* knowledge entries
+(400 chars each) as untrusted data. No embeddings: the library is small
+per workspace and there's no evidence yet that retrieval quality needs
+it. Revisit when workspaces exceed ~200 entries.
+
+## D15 — Billing via a provider adapter with a signed test mode
+
+Plan state changes only from verified, idempotent payment events. Locally
+the `test` provider completes checkout by sending a *signed* event through
+the same webhook path, so the lifecycle is exercised end to end without
+faking a real payment. The Stripe adapter is implemented but unexercised
+(no keys). Production defaults to `none`.
+
+## D16 — Deterministic fixture AI provider for E2E only
+
+`AI_PROVIDER=fixture` works only with `ALLOW_FIXTURE_PROVIDER=true` and
+never under `ProductionConfig`; its outputs are marked "[E2E fixture]".
+This satisfies the brief's "deterministic fake providers for CI" without
+weakening CLAUDE.md rule 5: an unconfigured provider still yields
+`capability_unavailable`, never fabricated content.

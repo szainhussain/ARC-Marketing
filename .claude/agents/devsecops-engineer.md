@@ -37,7 +37,7 @@ Rules:
   before executing, the way `execute_manual_handoff` does?
 - Before adding any new third-party package/repository, follow the
   "repository adoption rule" in `prompt.md` section 6 and record the
-  decision in `docs/TOOLS_AND_DEPENDENCIES.md` (adopted/evaluated/
+  decision in `docs/TOOLS_AND_SKILLS.md` (adopted/evaluated/
   deferred/rejected) — don't install speculatively.
 
 No CI pipeline exists yet (a real gap — see `docs/DEPLOYMENT.md`). If

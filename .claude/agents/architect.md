@@ -15,7 +15,7 @@ Before proposing or making a change:
 2. Read `docs/DECISIONS.md` so you don't re-litigate or silently reverse a
    documented decision — if you do reverse one, add a new dated entry
    explaining why, don't edit the old one away.
-3. Check `docs/12_AGENT_EXPANSION_ROADMAP.md` before adding a new agent
+3. Check `docs/12_AGENT_ROADMAP.md` before adding a new agent
    role or workflow stage — follow the existing `AgentStage` /
    `AIProvider` / `Connector` contracts rather than inventing parallel
    abstractions.

@@ -49,6 +49,10 @@ def execute_manual_handoff(
     if org.kill_switch_enabled or current_app.config.get("KILL_SWITCH_ENABLED"):
         raise PermissionDenied("External actions are currently disabled by the kill switch.")
 
+    from app.services.platform_service import check_entitlement
+
+    check_entitlement(organization_id, "monthly_exports")
+
     approval = get_approval_or_404(organization_id, approval_id)
     if approval.decision != DECISION_APPROVED:
         raise Conflict("This action has not been approved.")
@@ -60,6 +64,15 @@ def execute_manual_handoff(
         raise Conflict(
             "The deliverable has changed since approval; this action can no longer execute."
         )
+
+    if target_platform is not None:
+        from app.models.integration import Integration
+
+        disabled = Integration.query.filter_by(
+            organization_id=organization_id, provider=f"manual_export:{target_platform}", state="disabled"
+        ).first()
+        if disabled:
+            raise PermissionDenied("This export destination is disabled for the workspace.")
 
     if target_platform is not None and target_platform not in PLATFORM_FORMATTERS:
         raise ValidationError(

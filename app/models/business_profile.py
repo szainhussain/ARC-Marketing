@@ -38,6 +38,17 @@ class BusinessProfile(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
     prohibited_phrases = db.Column(db.Text)
     constraints = db.Column(db.Text)
 
+    # Extended onboarding (brief §12)
+    business_description = db.Column(db.Text)
+    competitors = db.Column(db.Text)
+    channels = db.Column(db.Text)
+    budget_range = db.Column(db.String(64))
+    existing_systems = db.Column(db.Text)
+    reporting_expectations = db.Column(db.Text)
+    timezone = db.Column(db.String(64))
+    language = db.Column(db.String(64))
+    onboarding_step = db.Column(db.Integer, default=0, nullable=False)
+
     onboarding_completed = db.Column(db.Boolean, default=False, nullable=False)
 
     organization = db.relationship("Organization", back_populates="business_profile")
@@ -75,5 +86,15 @@ class BusinessProfile(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
             "preferred_phrases": self.preferred_phrases,
             "prohibited_phrases": self.prohibited_phrases,
             "constraints": self.constraints,
+            "business_description": self.business_description,
+            "competitors": self.competitors,
+            "channels": self.channels,
+            "budget_range": self.budget_range,
+            "existing_systems": self.existing_systems,
+            "reporting_expectations": self.reporting_expectations,
+            "timezone": self.timezone,
+            "language": self.language,
+            "onboarding_step": self.onboarding_step,
+            "completeness_warnings": self.completeness_warnings(),
             "onboarding_completed": self.onboarding_completed,
         }

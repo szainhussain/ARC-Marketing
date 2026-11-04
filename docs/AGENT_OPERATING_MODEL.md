@@ -1,17 +1,15 @@
 # The 12-Agent Department — Operating Model
 
 This is the detailed role design referenced by
-`docs/12_AGENT_EXPANSION_ROADMAP.md`. It defines all 12 roles with
+`docs/12_AGENT_ROADMAP.md`. It defines all 12 roles with
 machine-readable-shaped contracts (mission, inputs, outputs, tools,
 permissions, acceptance criteria, escalation rules, usage limits), refined
 to eliminate overlapping responsibility and unclear accountability.
 
-**This is a design document, not an implementation claim.** Only the 5
-roles mapped in "Pilot implementation status" below exist as code today
-(`app/agents/*.py`). Building out the remaining 7 means adding one
-`AgentStage` subclass + one Marshmallow schema each, following the exact
-pattern already in the codebase — not a rewrite. See `/CLAUDE.md` and
-`docs/ARCHITECTURE.md` for the mechanics.
+**Update (2026-11-03):** all 12 agents now exist as code — see
+`docs/AGENT_SYSTEM.md` for what is implemented and `app/agents/definitions.py`
+for the source of truth. This document remains the role design they were
+built from; where the two differ, the code and AGENT_SYSTEM.md win.
 
 ## Design principles (how overlap and unclear accountability are avoided)
 
@@ -716,7 +714,7 @@ design principle 1.
 | 11 Marketing Operations | Not implemented (no connectors to operate exist yet) | — |
 | 12 Reporting/Scheduling/QA | Partially implemented (QA only; scheduling/broader reporting not built) | `app/agents/quality_reviewer.py` |
 
-Per `docs/12_AGENT_EXPANSION_ROADMAP.md`'s proposed rollout order: role 07
+Per `docs/12_AGENT_ROADMAP.md`'s proposed rollout order: role 07
 gets a real retrieval tool next, then role 03 (closest to today's content
 pipeline), then role 12 expands into real scheduling/reporting. Building a
 new role means: one schema in `app/ai/schemas.py`, one `AgentStage`

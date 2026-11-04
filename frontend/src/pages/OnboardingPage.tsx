@@ -1,179 +1,224 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { Check } from 'lucide-react'
 import { apiRequest, ApiError } from '../api/client'
+import { ErrorState, Field, PageHeader, PageSkeleton, useToast } from '../components/ui'
 import { useWorkspace } from '../context/WorkspaceContext'
-import type { BusinessProfile } from '../api/types'
 
-const emptyProfile: Partial<BusinessProfile> = {
-  business_name: '',
-  website: '',
-  industry: '',
-  regions_served: '',
-  business_type: 'b2c',
-  products_services: '',
-  target_audience: '',
-  customer_problem: '',
-  differentiators: '',
-  primary_goal: '',
-  tone_of_voice: '',
-  preferred_phrases: '',
-  prohibited_phrases: '',
-  constraints: '',
-}
+type Profile = Record<string, string | number | boolean | null | string[]>
+type FieldDef = { key: string; label: string; type?: 'text' | 'textarea' | 'select' | 'url'; options?: [string, string][]; hint?: string; required?: boolean }
 
-export default function OnboardingPage() {
-  const { activeOrganizationId } = useWorkspace()
+const SECTIONS: { title: string; description: string; fields: FieldDef[] }[] = [
+  {
+    title: 'Business',
+    description: 'The basics every agent works from.',
+    fields: [
+      { key: 'business_name', label: 'Business name', required: true },
+      { key: 'business_description', label: 'What the business does', type: 'textarea' },
+      { key: 'industry', label: 'Industry', required: true },
+      { key: 'website', label: 'Website', type: 'url', hint: 'Used as context only; ARC never crawls it.' },
+      { key: 'business_type', label: 'Business model', type: 'select', options: [['b2c', 'B2C'], ['b2b', 'B2B'], ['both', 'Both'], ['nonprofit', 'Nonprofit'], ['other', 'Other']] },
+      { key: 'regions_served', label: 'Countries and markets' },
+    ],
+  },
+  {
+    title: 'Offer & audience',
+    description: 'Who you serve and why they choose you.',
+    fields: [
+      { key: 'products_services', label: 'Main products/services', type: 'textarea', required: true },
+      { key: 'target_audience', label: 'Best-fit audience / customer', type: 'textarea', required: true, hint: 'Ideal customer profiles and segments.' },
+      { key: 'customer_problem', label: 'Problem you solve', type: 'textarea' },
+      { key: 'differentiators', label: 'Value proposition & differentiators', type: 'textarea' },
+      { key: 'competitors', label: 'Competitors', type: 'textarea', hint: 'Names only; agents won\'t invent facts about them.' },
+    ],
+  },
+  {
+    title: 'Brand voice',
+    description: 'How you sound — and what you never say.',
+    fields: [
+      { key: 'tone_of_voice', label: 'Tone of voice', type: 'textarea' },
+      { key: 'preferred_phrases', label: 'Preferred phrases / messaging guidelines', type: 'textarea' },
+      { key: 'prohibited_phrases', label: 'Prohibited phrases', type: 'textarea', hint: 'Comma or line separated. Every agent output is checked against these in code.' },
+      { key: 'constraints', label: 'Legal / compliance constraints', type: 'textarea' },
+    ],
+  },
+  {
+    title: 'Goals & channels',
+    description: 'What success looks like and where you market.',
+    fields: [
+      { key: 'primary_goal', label: 'Primary campaign goal', required: true },
+      { key: 'channels', label: 'Channels you use', hint: 'e.g. Instagram, TikTok, Google Ads, email' },
+      { key: 'budget_range', label: 'Typical monthly marketing budget', type: 'select', options: [['', 'Prefer not to say'], ['<1k', 'Under $1k'], ['1k-5k', '$1k–5k'], ['5k-20k', '$5k–20k'], ['20k+', '$20k+']] },
+      { key: 'existing_systems', label: 'Existing marketing systems', type: 'textarea', hint: 'CRM, analytics, email tools…' },
+      { key: 'reporting_expectations', label: 'Reporting expectations', type: 'textarea' },
+    ],
+  },
+  {
+    title: 'Operating preferences',
+    description: 'Language, time zone and how much autonomy you want.',
+    fields: [
+      { key: 'timezone', label: 'Time zone', hint: 'e.g. Europe/London' },
+      { key: 'language', label: 'Content language', hint: 'e.g. English (UK)' },
+    ],
+  },
+]
+
+export function ProfileForm({ mode }: { mode: 'wizard' | 'edit' }) {
+  const { activeOrganizationId: orgId } = useWorkspace()
   const navigate = useNavigate()
-  const [profile, setProfile] = useState<Partial<BusinessProfile>>(emptyProfile)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
+  const toast = useToast()
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [step, setStep] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    if (!activeOrganizationId) return
+    if (!orgId) return
     let cancelled = false
-    apiRequest<{ business_profile: BusinessProfile }>(
-      `/organizations/${activeOrganizationId}/business-profile`,
-    )
-      .then((data) => {
-        // Guards against React StrictMode's double effect invocation (and
-        // any other duplicate in-flight request): without this, a late
-        // response from an earlier, superseded fetch can land after the
-        // user has already started editing and silently overwrite what
-        // they typed with stale (often empty) data.
-        if (!cancelled) setProfile(data.business_profile)
+    apiRequest<{ business_profile: Profile }>(`/organizations/${orgId}/business-profile`)
+      .then((d) => {
+        if (cancelled) return
+        setProfile(d.business_profile)
+        if (mode === 'wizard') setStep(Math.min(Number(d.business_profile.onboarding_step) || 0, SECTIONS.length))
       })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
+      .catch((err) => !cancelled && setError(err instanceof ApiError ? err.message : 'Could not load profile.'))
     return () => {
       cancelled = true
     }
-  }, [activeOrganizationId])
+  }, [orgId, mode])
 
-  function field<K extends keyof BusinessProfile>(key: K) {
-    return {
-      id: key as string,
-      value: (profile[key] as string) || '',
-      onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
-        setProfile((p) => ({ ...p, [key]: e.target.value })),
+  if (error && !profile) return <ErrorState message={error} />
+  if (!profile) return <PageSkeleton />
+
+  const sections = mode === 'wizard' ? (step < SECTIONS.length ? [SECTIONS[step]] : []) : SECTIONS
+
+  async function save(nextStep?: number, complete = false) {
+    if (!orgId || !profile) return
+    const fields = sections.flatMap((s) => s.fields)
+    const local: Record<string, string> = {}
+    if (complete || mode === 'edit') {
+      for (const f of fields) if (f.required && !String(profile[f.key] || '').trim()) local[f.key] = 'Required'
     }
-  }
-
-  async function save(markComplete: boolean) {
-    if (!activeOrganizationId) return
+    if (String(profile.website || '') && !/^https?:\/\//.test(String(profile.website))) local.website = 'Start with https://'
+    setErrors(local)
+    if (Object.keys(local).length) return
     setSaving(true)
     setError(null)
-    setMessage(null)
     try {
-      await apiRequest(`/organizations/${activeOrganizationId}/business-profile`, {
-        method: 'PATCH',
-        body: { ...profile, mark_onboarding_completed: markComplete },
-      })
-      if (markComplete) {
-        navigate('/app')
-      } else {
-        setMessage('Saved. You can come back and finish this later.')
-      }
+      const body: Record<string, unknown> = {}
+      for (const f of SECTIONS.flatMap((s) => s.fields)) body[f.key] = profile[f.key] ?? ''
+      if (nextStep != null) body.onboarding_step = nextStep
+      if (complete) body.mark_onboarding_completed = true
+      const r = await apiRequest<{ business_profile: Profile }>(`/organizations/${orgId}/business-profile`, { method: 'PATCH', body })
+      setProfile(r.business_profile)
+      if (nextStep != null) setStep(nextStep)
+      if (complete) {
+        toast({ title: 'Profile saved. Your team is ready.', tone: 'success' })
+        navigate('/app/campaigns/new')
+      } else if (mode === 'edit') toast({ title: 'Brand profile saved', tone: 'success' })
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not save profile.')
+      setError(err instanceof ApiError ? err.message : 'Could not save.')
     } finally {
       setSaving(false)
     }
   }
 
-  if (loading) return <div className="page">Loading…</div>
+  const input = (f: FieldDef) => {
+    const common = {
+      id: `bp-${f.key}`,
+      value: String(profile[f.key] ?? ''),
+      onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+        setProfile((p) => ({ ...(p as Profile), [f.key]: e.target.value })),
+    }
+    if (f.type === 'textarea') return <textarea rows={3} {...common} />
+    if (f.type === 'select')
+      return (
+        <select {...common}>
+          {f.options?.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+        </select>
+      )
+    return <input type={f.type === 'url' ? 'url' : 'text'} {...common} />
+  }
 
   return (
+    <>
+      {mode === 'wizard' && (
+        <div className="wizard-steps" aria-label="Onboarding steps">
+          {[...SECTIONS.map((s) => s.title), 'Automation & review'].map((t, i) => (
+            <button key={t} className={i === step ? 'chip active' : 'chip'} onClick={() => setStep(i)} aria-current={i === step ? 'step' : undefined}>
+              {i < step && <Check size={13} aria-hidden="true" />} {i + 1}. {t}
+            </button>
+          ))}
+        </div>
+      )}
+      {error && <ErrorState message={error} />}
+      {sections.map((s) => (
+        <div key={s.title} className="card">
+          <h2>{s.title}</h2>
+          <p className="muted small" style={{ marginTop: -8 }}>{s.description}</p>
+          <div className="form-grid">
+            {s.fields.map((f) => (
+              <Field key={f.key} id={`bp-${f.key}`} label={`${f.label}${f.required ? ' *' : ''}`} hint={f.hint} error={errors[f.key]}>
+                {input(f)}
+              </Field>
+            ))}
+          </div>
+        </div>
+      ))}
+      {mode === 'wizard' && step >= SECTIONS.length && (
+        <div className="card">
+          <h2>Automation & review</h2>
+          <p className="muted">
+            By default your agents research, plan and draft on their own; anything that leaves the workspace needs your
+            approval, and no agent can ever change ad spend. You can tighten this so runs wait for an approver before
+            starting, set budgets and concurrency, or pause everything at any time.
+          </p>
+          <p>
+            <Link to="/app/settings/automation">Review automation policies →</Link>
+          </p>
+          {(profile.completeness_warnings as string[])?.length > 0 && (
+            <div className="banner warning">
+              Still missing: {(profile.completeness_warnings as string[]).map((w) => w.replace(/_/g, ' ')).join(', ')}. Agents
+              won't start until these are filled in.
+            </div>
+          )}
+        </div>
+      )}
+      <div className="head-actions">
+        {mode === 'wizard' ? (
+          <>
+            {step > 0 && <button className="secondary" onClick={() => setStep(step - 1)}>Back</button>}
+            {step < SECTIONS.length ? (
+              <button disabled={saving} onClick={() => save(step + 1)}>{saving ? 'Saving…' : 'Save and continue'}</button>
+            ) : (
+              <button disabled={saving} onClick={() => save(SECTIONS.length, true)}>Finish and create a campaign</button>
+            )}
+            <span className="muted small">Progress is saved at every step.</span>
+          </>
+        ) : (
+          <button disabled={saving} onClick={() => save()}>{saving ? 'Saving…' : 'Save brand profile'}</button>
+        )}
+      </div>
+    </>
+  )
+}
+
+export default function OnboardingPage() {
+  return (
     <div className="page">
-      <h1>Tell us about your business</h1>
-      <p className="muted">
-        This is reused across every campaign. You can skip fields and finish later — but a
-        workflow run will ask you to fill in anything that materially affects its output.
-      </p>
-      {error && <div className="banner error">{error}</div>}
-      {message && <div className="banner success">{message}</div>}
+      <PageHeader eyebrow="Setup" title="Set up your marketing department" description="Tell your agents about the business. You can change any of this later in Brand profile." />
+      <ProfileForm mode="wizard" />
+    </div>
+  )
+}
 
-      <div className="card">
-        <h2>Business basics</h2>
-        <div className="field">
-          <label htmlFor="business_name">Business name</label>
-          <input {...field('business_name')} />
-        </div>
-        <div className="field">
-          <label htmlFor="website">Website (optional)</label>
-          <input {...field('website')} />
-        </div>
-        <div className="field">
-          <label htmlFor="industry">Industry</label>
-          <input {...field('industry')} />
-        </div>
-        <div className="field">
-          <label htmlFor="regions_served">Regions served</label>
-          <input {...field('regions_served')} />
-        </div>
-        <div className="field">
-          <label htmlFor="business_type">Business type</label>
-          <select {...field('business_type')}>
-            <option value="b2b">B2B</option>
-            <option value="b2c">B2C</option>
-            <option value="both">Both</option>
-            <option value="nonprofit">Nonprofit / other</option>
-          </select>
-        </div>
-      </div>
-
-      <div className="card">
-        <h2>Offer and audience</h2>
-        <div className="field">
-          <label htmlFor="products_services">Main products/services</label>
-          <textarea {...field('products_services')} rows={2} />
-        </div>
-        <div className="field">
-          <label htmlFor="target_audience">Best-fit audience / customer</label>
-          <textarea {...field('target_audience')} rows={2} />
-        </div>
-        <div className="field">
-          <label htmlFor="customer_problem">Customer problem solved</label>
-          <textarea {...field('customer_problem')} rows={2} />
-        </div>
-        <div className="field">
-          <label htmlFor="differentiators">Differentiators / proof points</label>
-          <textarea {...field('differentiators')} rows={2} />
-        </div>
-        <div className="field">
-          <label htmlFor="primary_goal">Primary campaign goal</label>
-          <input {...field('primary_goal')} />
-        </div>
-      </div>
-
-      <div className="card">
-        <h2>Brand</h2>
-        <div className="field">
-          <label htmlFor="tone_of_voice">Tone of voice</label>
-          <input {...field('tone_of_voice')} />
-        </div>
-        <div className="field">
-          <label htmlFor="preferred_phrases">Preferred phrases</label>
-          <input {...field('preferred_phrases')} />
-        </div>
-        <div className="field">
-          <label htmlFor="prohibited_phrases">Prohibited phrases</label>
-          <input {...field('prohibited_phrases')} />
-        </div>
-        <div className="field">
-          <label htmlFor="constraints">Constraints / disclaimers</label>
-          <textarea {...field('constraints')} rows={2} />
-        </div>
-      </div>
-
-      <button className="secondary" onClick={() => save(false)} disabled={saving}>
-        Save and finish later
-      </button>{' '}
-      <button onClick={() => save(true)} disabled={saving}>
-        {saving ? 'Saving…' : 'Save and continue'}
-      </button>
+export function BrandPage() {
+  return (
+    <div className="page">
+      <PageHeader title="Brand profile" description="Every agent reads this. Prohibited phrases are enforced in code on every output."
+        actions={<Link to="/app/knowledge" className="btn secondary">Knowledge library</Link>} />
+      <ProfileForm mode="edit" />
     </div>
   )
 }

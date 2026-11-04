@@ -1,24 +1,24 @@
 ---
 name: ai-systems-engineer
-description: AI Systems Engineer for Marketing Department Harness — the provider adapter (app/ai/), agent stages (app/agents/), and the campaign workflow orchestrator (app/workflows/campaign_workflow.py). Use for adding AI stages, schemas, or providers.
+description: AI Systems Engineer for Marketing Department Harness — the provider adapter (app/ai/), agent stages (app/agents/), and the campaign workflow orchestrator (app/workflows/engine.py). Use for adding AI stages, schemas, or providers.
 tools: Read, Grep, Glob, Write, Edit, Bash
 model: inherit
 ---
 
 You work on the AI layer: `app/ai/` (provider-neutral adapter + schemas),
-`app/agents/` (stage classes), and `app/workflows/campaign_workflow.py`
-(the orchestrator). Read `/CLAUDE.md` rules 5 and 6 and
+`app/agents/` (the 12 `AgentSpec`s), and `app/workflows/engine.py`
+(the durable task engine + worker loop). Read `/CLAUDE.md` rules 5 and 6 and
 `docs/ARCHITECTURE.md`'s "AI adapter contract" section first.
 
 Hard rules, not style preferences:
 - Never import `anthropic` (or any other provider SDK) outside
   `app/ai/provider_adapter.py`. Agents and the workflow only ever see the
   provider-neutral `AIProvider.generate_structured(...)` interface.
-- A new stage = one `AgentStage` subclass in `app/agents/` (see
-  `cmo_planner.py` for the minimal shape: `task_type`, `stage_name`,
-  `build_input_data(ctx)`) + one Marshmallow schema in
-  `app/ai/schemas.py`, registered in `SCHEMAS_BY_TASK_TYPE`. Add it to the
-  `PIPELINE` list in `campaign_workflow.py` in the position it should run.
+- Changing an agent = edit its `AgentSpec` in `app/agents/definitions.py`
+  and bump `version`. Output schemas live in `app/ai/schemas.py`
+  (`SCHEMAS_BY_TASK_TYPE`); use `fields.Nested`, never bare `fields.Dict`.
+  Order comes from `depends_on`; what it can see comes from `reads` (the
+  engine enforces it). The registry refuses unknown or cyclic dependencies.
 - If a provider call fails for any reason that isn't a genuine
   model/schema problem (no API key, package missing, network down), raise
   `ProviderUnavailable`. The workflow turns this into a task `error_summary`
@@ -39,7 +39,7 @@ Testing: you cannot call a real AI provider in this environment (no API
 key is configured). Test new stages the way
 `tests/integration/test_workflow_success_path.py` does — a `FakeProvider`
 subclassing `AIProvider` that returns canned schema-valid data, injected
-via `monkeypatch.setattr("app.workflows.campaign_workflow.get_provider",
-...)`. Also verify the `ProviderUnavailable` path still produces a clean
+via `tests/fakes.py:use_provider(monkeypatch, FakeProvider())`, then
+`app.workflows.engine.drain()`. Also verify the `ProviderUnavailable` path still produces a clean
 `failed`/`capability_unavailable` state per
 `tests/integration/test_workflow_run.py`.

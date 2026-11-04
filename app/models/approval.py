@@ -6,6 +6,8 @@ DECISION_APPROVED = "approved"
 DECISION_REJECTED = "rejected"
 DECISION_CHANGES_REQUESTED = "changes_requested"
 DECISION_INVALIDATED = "invalidated"  # content changed after approval was requested
+DECISION_EXPIRED = "expired"
+DECISION_REVOKED = "revoked"  # approved, then withdrawn before execution
 
 VALID_DECISIONS = (
     DECISION_PENDING,
@@ -13,6 +15,8 @@ VALID_DECISIONS = (
     DECISION_REJECTED,
     DECISION_CHANGES_REQUESTED,
     DECISION_INVALIDATED,
+    DECISION_EXPIRED,
+    DECISION_REVOKED,
 )
 
 ACTION_MANUAL_HANDOFF = "manual_handoff"
@@ -44,6 +48,12 @@ class Approval(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
     decision = db.Column(db.String(32), default=DECISION_PENDING, nullable=False)
     decision_comment = db.Column(db.Text)
     decided_at = db.Column(db.DateTime(timezone=True))
+    # Context shown to the approver (brief §7).
+    requesting_agent_id = db.Column(db.String(64))
+    expected_outcome = db.Column(db.Text)
+    risk_level = db.Column(db.String(16))  # low|medium|high
+    risk_notes = db.Column(db.Text)  # JSON list of policy/evaluation checks
+    expires_at = db.Column(db.DateTime(timezone=True))
 
     def to_dict(self) -> dict:
         return {
@@ -55,5 +65,12 @@ class Approval(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
             "decision": self.decision,
             "decision_comment": self.decision_comment,
             "decided_at": self.decided_at.isoformat() if self.decided_at else None,
+            "decided_by_user_id": self.decided_by_user_id,
+            "requested_by_user_id": self.requested_by_user_id,
+            "requesting_agent_id": self.requesting_agent_id,
+            "expected_outcome": self.expected_outcome,
+            "risk_level": self.risk_level,
+            "risk_checks": __import__("json").loads(self.risk_notes) if self.risk_notes else [],
+            "expires_at": self.expires_at.isoformat() if self.expires_at else None,
             "created_at": self.created_at.isoformat(),
         }

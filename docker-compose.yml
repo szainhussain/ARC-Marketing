@@ -22,14 +22,36 @@ services:
       SECRET_KEY: ${SECRET_KEY:-dev-only-insecure-key-change-me}
       DATABASE_URL: postgresql://harness:harness@postgres:5432/marketing_harness
       FRONTEND_ORIGIN: http://localhost:5173
-      AI_PROVIDER: anthropic
+      AI_PROVIDER: ${AI_PROVIDER:-anthropic}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
-      AI_MODEL: ${AI_MODEL:-claude-sonnet-5}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      AI_MODEL: ${AI_MODEL:-}
+      BILLING_PROVIDER: ${BILLING_PROVIDER:-test}
+      UPLOAD_DIR: /app/storage/uploads
+    volumes:
+      - uploads:/app/storage/uploads
     ports:
       - "8000:8000"
     depends_on:
       postgres:
         condition: service_healthy
+
+  worker:
+    build: .
+    command: flask --app wsgi.py worker
+    environment:
+      FLASK_ENV: development
+      SECRET_KEY: ${SECRET_KEY:-dev-only-insecure-key-change-me}
+      DATABASE_URL: postgresql://harness:harness@postgres:5432/marketing_harness
+      AI_PROVIDER: ${AI_PROVIDER:-anthropic}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      AI_MODEL: ${AI_MODEL:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      backend:
+        condition: service_started
 
   frontend:
     build:
@@ -43,3 +65,4 @@ services:
 
 volumes:
   postgres_data:
+  uploads:

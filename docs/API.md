@@ -1,99 +1,53 @@
-# API Reference (v1) — as actually implemented
+# API Reference (v1)
 
-Base path: `/api/v1`. All routes except `/auth/*` and `/health/*` require
-an authenticated session (`401` otherwise). All `/organizations/<id>/*`
-routes additionally require active membership in that organization (`403`
-otherwise, identical message whether the org exists or not).
+Base `/api/v1`. Machine-readable spec generated from the live routes:
+`GET /api/v1/openapi.json`.
 
-This deviates from the flatter endpoint list sketched in
-`03_TECHNICAL_ARCHITECTURE.md` (e.g. `/api/v1/campaigns` assuming an
-implicit "active organization") by putting `organization_id` explicitly in
-the path for every tenant-scoped resource — chosen for unambiguous tenant
-scoping in both the route and the server-side membership check. The
-request/response error envelope, idempotency-key usage, and status-code
-conventions (403/404/409/429) follow the technical spec as drafted.
+## Conventions
 
-## Error envelope
+- **Auth:** session cookie (Flask-Login). `GET /auth/csrf-token`, then send
+  `X-CSRFToken` on every mutating request.
+- **Tenancy:** workspace resources live under `/organizations/{org}/…`;
+  membership is checked server-side (403, same message whether or not the
+  workspace exists). Another workspace's ids under your path → 404.
+- **Errors:** `{"error": {"code", "message", "details": [{"field","issue"}], "request_id"}}`.
+  400 validation · 401 auth · 403 permission · 404 · 409 state conflict · 429 plan/rate limit.
+- **Correlation:** every response has `X-Request-Id`; agent executions
+  carry the run id as `correlation_id`.
+- **Idempotency:** `Idempotency-Key` header required on run start and
+  external-action execute; `idempotency_key` body field on campaign create.
+- **Pagination:** `limit` (≤200) + `offset` on notifications, knowledge and
+  the deliverables index; responses include `page: {total, limit, offset}`.
 
-```json
-{"error": {"code": "VALIDATION_ERROR", "message": "...", "details": [{"field": "...", "issue": "..."}], "request_id": "uuid"}}
-```
+## Endpoints
 
-## Auth
+| Area | Endpoints |
+|---|---|
+| Health | `GET /health/live`, `GET /health/ready` |
+| Auth | `POST /auth/register`, `/auth/login`, `/auth/logout`, `/auth/forgot-password`, `/auth/reset-password`, `/auth/change-password`, `/auth/sign-out-everywhere`, `/auth/verify-email/request`, `/auth/verify-email`; `GET /me` |
+| Public | `GET /public/plans`, `/public/agents`, `/public/integrations`; `POST /public/contact` |
+| Workspaces | `POST /organizations`; `GET/PATCH /organizations/{org}`; `GET /organizations/{org}/export`; `POST/DELETE /organizations/{org}/deletion` |
+| Members | `GET /members`, `PATCH/DELETE /members/{id}`, `POST /invitations`, `DELETE /invitations/{id}`, `POST /invitations/accept` (top level) |
+| Business profile | `GET/PATCH /business-profile` |
+| Knowledge | `GET/POST /knowledge` (`status`, `q`), `PATCH /knowledge/{id}` |
+| Assets | `GET/POST /documents` (multipart `file`), `GET /documents/{id}/download`, `DELETE /documents/{id}` |
+| Campaigns | `GET/POST /campaigns`, `GET/PATCH/DELETE /campaigns/{id}`, `GET /campaigns/{id}/deliverables` |
+| Execution | `POST /campaigns/{id}/runs` (202, enqueue only), `GET /campaigns/{id}/runs`, `GET /runs/{id}`, `POST /runs/{id}/pause\|resume\|cancel\|approve-start` |
+| Agents | `GET /agents`, `GET /agents/{agent}`, `POST /agents/{agent}/pause\|resume`, `PATCH /agents/{agent}/settings` |
+| Tasks | `GET /tasks` (`status`, `agent_id`, `run_id`), `POST /tasks/{id}/retry\|cancel`, `GET /tasks/{id}/executions` |
+| Deliverables | `GET /deliverables` (`type`, `review_status`, `campaign_id`), `GET /deliverables/{id}`, `GET/POST /deliverables/{id}/versions` |
+| Approvals | `GET /approvals` (`decision`), `POST /approvals`, `POST /approvals/{id}/decision` (approved/rejected/changes_requested), `POST /approvals/{id}/revoke`, `POST /approvals/{id}/execute`, `POST /external-actions/{id}/confirm-publication` |
+| Calendar | `GET/POST /calendar` (`from`, `to`), `PATCH/DELETE /calendar/{id}`, `POST /calendar/from-deliverable` |
+| Integrations | `GET /integrations`, `GET /integrations/catalog`, `PATCH /integrations/{key}` |
+| Webhooks | `GET/POST /webhooks`, `DELETE /webhooks/{id}` |
+| Analytics | `GET /dashboard` (`days`, `campaign_id`), `GET /analytics` (`days`), `GET /reports/export.csv`, `GET /reports/summary` |
+| Usage & billing | `GET /usage`, `GET /billing`, `POST /billing/checkout`, `GET /billing/history`, `POST /billing/test-complete` (test mode only), `POST /billing/webhook` (top level, signed) |
+| Policies & ops | `GET /policies`, `PATCH /policies/{action}`, `GET /operations/summary`, `PATCH /operations/controls` |
+| Notifications & audit | `GET /notifications` (`unread=1`), `POST /notifications/read`, `GET /activity`, `GET /audit-events` |
 
-| Method | Path | Notes |
-|---|---|---|
-| GET | `/auth/csrf-token` | Call first; sets the session cookie and returns the token for `X-CSRFToken` |
-| POST | `/auth/register` | `{email, password, full_name}` → 201, logs in |
-| POST | `/auth/login` | `{email, password}` → 200; generic error message (no account enumeration) |
-| POST | `/auth/logout` | requires login |
-| GET | `/me` | current user + memberships (org id, name, role) |
+Paths in the table are relative to `/organizations/{org}` unless marked.
 
-## Health
+## Webhooks
 
-| Method | Path | Notes |
-|---|---|---|
-| GET | `/health/live` | always 200 if the process is up |
-| GET | `/health/ready` | 200 if a DB query succeeds, else 503 — never leaks internals |
-
-## Organizations / business profile
-
-| Method | Path | Notes |
-|---|---|---|
-| POST | `/organizations` | `{name}` → creates org + owner membership |
-| GET | `/organizations/<org_id>/business-profile` | creates an empty row on first read |
-| PATCH | `/organizations/<org_id>/business-profile` | partial update; `mark_onboarding_completed: true` sets `onboarding_completed` |
-
-## Campaigns
-
-| Method | Path | Notes |
-|---|---|---|
-| GET | `/organizations/<org_id>/campaigns` | list, newest first |
-| POST | `/organizations/<org_id>/campaigns` | requires `name`, `objective`; `idempotency_key` optional but recommended |
-| GET | `/organizations/<org_id>/campaigns/<id>` | |
-| PATCH | `/organizations/<org_id>/campaigns/<id>` | partial update |
-| DELETE | `/organizations/<org_id>/campaigns/<id>` | archives (status → `archived`), does not hard-delete |
-| GET | `/organizations/<org_id>/campaigns/<id>/deliverables` | all deliverables for the campaign |
-
-## Workflow runs
-
-| Method | Path | Notes |
-|---|---|---|
-| POST | `/organizations/<org_id>/campaigns/<id>/runs` | **requires** `Idempotency-Key` header (or `idempotency_key` in body) — 400 without it; 202 with the run (synchronous in this build — see `docs/DECISIONS.md` D4) |
-| GET | `/organizations/<org_id>/runs/<run_id>` | run + ordered task list |
-| POST | `/organizations/<org_id>/runs/<run_id>/cancel` | only valid from `created`/`queued`/`running`/`needs_input`; 409 otherwise |
-
-## Deliverables and versions
-
-| Method | Path | Notes |
-|---|---|---|
-| GET | `/organizations/<org_id>/deliverables/<id>` | current version only |
-| GET | `/organizations/<org_id>/deliverables/<id>/versions` | full history |
-| POST | `/organizations/<org_id>/deliverables/<id>/versions` | `{content: {...}, revision_reason?}` → new version; invalidates any pending approval on the previous version |
-
-## Approvals and external actions
-
-| Method | Path | Notes |
-|---|---|---|
-| POST | `/organizations/<org_id>/approvals` | `{deliverable_id, action_type?, action_payload?}` → ties to the deliverable's *current* version at request time |
-| POST | `/organizations/<org_id>/approvals/<id>/decision` | `{decision: approved\|rejected\|changes_requested, comment?}` — 403 unless the actor's role can approve; 409 if not `pending` |
-| POST | `/organizations/<org_id>/approvals/<approval_id>/execute` | **requires** `Idempotency-Key`; re-validates kill switch, approval decision, and version match immediately before "executing" (packaging) the manual handoff; 409 on any mismatch. Optional body field `target_platform` (`meta_instagram`\|`google_ads`\|`tiktok_ads`) — only meaningful when the deliverable is a `content_pack`; adds a `platform_export` to the response formatted to that platform's composer limits (see `app/integrations/export_formats.py`). 400 for an unrecognized platform. This never calls any external platform API — still manual copy/paste handoff. |
-| POST | `/organizations/<org_id>/external-actions/<id>/confirm-publication` | the *only* way `publication_status` becomes `manually_confirmed_published` |
-
-## Integrations, reports, audit
-
-| Method | Path | Notes |
-|---|---|---|
-| GET | `/organizations/<org_id>/integrations` | always empty in this build + an explanatory `note` — no live connector exists |
-| GET | `/organizations/<org_id>/reports/summary` | campaign/run counts + estimated AI cost, labeled `cost_basis: "estimate"` |
-| GET | `/organizations/<org_id>/usage` | last 200 `UsageRecord` rows |
-| GET | `/organizations/<org_id>/audit-events` | last 200 `AuditEvent` rows, newest first |
-
-## Not implemented (do not assume these exist)
-
-- Document upload (`Document` model exists, no route).
-- Comments on deliverables.
-- Team invite / role-change endpoints (role changes require direct DB
-  access today).
-- Any `/organizations/<id>/integrations/<provider>/connect` OAuth flow.
-- Password reset / account recovery.
+Outbound and payment-webhook signing, replay protection, retries and
+versioning: see `docs/INTEGRATIONS.md`.

@@ -99,3 +99,28 @@ screens built); billing; SSO; backup/restore drill; alerting.
 - Comments on deliverables (model would need adding; not in `app/models/`).
 - Notifications.
 - Any of M11 (live connector) or M12 (paid pilot instrumentation).
+
+## MaaS brief — staged delivery (started 2026-11-03)
+
+The MaaS master brief arrived truncated after §17; billing/plans use
+documented defaults until the rest is supplied.
+
+| Stage | Scope | Status |
+|---|---|---|
+| 1 | 12 real agents (versioned specs, schemas, `reads` allowlist, budgets, evaluation); durable DB-backed engine + `flask worker` (deps, retries/backoff, leases, pause/resume/cancel, budgets); Operations Center (`/app/operations`, agent detail, tasks, approvals inbox, activity, workspace controls) | **Done**, see TEST_REPORT "Stage 1" |
+| 2 | Business Command Center dashboard, public site pages, remaining app routes | Not started |
+| 3 | Billing/plans models and limits (needs brief §18+) | Not started |
+| 4 | Integrations framework beyond manual export | Not started; no live connector without user approval |
+
+### Status update (2026-11-04)
+
+Brief received in full (§1–25). Milestones 0–10 and 12–13 are implemented
+and tested locally; Milestone 11 (live integrations) is built to the
+supported boundary (catalog, enable/disable, signed webhooks, manual
+export) and blocked on credentials and your pilot-channel choice. See
+`docs/PRODUCT_REQUIREMENTS.md` for the per-requirement matrix and
+`docs/TEST_REPORT.md` "Stage 2" for evidence.
+
+Next concrete tasks: deploy (API + worker + Postgres + frontend), wire
+email delivery, choose a pilot channel for the first live connector, MFA,
+real provider pricing for cost estimates, Stripe test-mode run.

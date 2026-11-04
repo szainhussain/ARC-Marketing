@@ -1,9 +1,15 @@
-import { useCallback, useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useCallback, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
 import { apiRequest, ApiError } from '../api/client'
 import DeliverableContent from '../components/DeliverableContent'
 import PlatformExportView from '../components/PlatformExportView'
+import WorkflowGraphPanel from '../components/WorkflowGraphPanel'
+import { PageHeader, PageSkeleton, Tabs } from '../components/ui'
+import { useNavigate } from 'react-router-dom'
 import { useWorkspace } from '../context/WorkspaceContext'
+import { usePolling } from '../hooks/usePolling'
+import { humanize, money, relativeTime, statusLabel } from '../lib/labels'
+import { ACTIVE_RUN_STATUSES } from '../api/types'
 import type { Approval, Campaign, Deliverable, ExternalAction, WorkflowRun } from '../api/types'
 
 function uuid() {
@@ -17,7 +23,9 @@ const PLATFORM_OPTIONS = [
   { value: 'tiktok_ads', label: 'TikTok Ads' },
 ]
 
-export default function CampaignWorkspacePage() {
+type Section = 'overview' | 'workflow' | 'deliverables'
+
+export default function CampaignWorkspacePage({ section = 'overview' }: { section?: Section }) {
   const { campaignId } = useParams<{ campaignId: string }>()
   const { activeOrganizationId } = useWorkspace()
   const [campaign, setCampaign] = useState<Campaign | null>(null)
@@ -28,24 +36,75 @@ export default function CampaignWorkspacePage() {
   const [platformByDeliverable, setPlatformByDeliverable] = useState<Record<string, string>>({})
   const [error, setError] = useState<string | null>(null)
   const [starting, setStarting] = useState(false)
+  const [runBusy, setRunBusy] = useState(false)
 
   const orgId = activeOrganizationId
 
-  const loadAll = useCallback(async () => {
-    if (!orgId || !campaignId) return
-    const [campaignData, deliverablesData] = await Promise.all([
-      apiRequest<{ campaign: Campaign }>(`/organizations/${orgId}/campaigns/${campaignId}`),
-      apiRequest<{ deliverables: Deliverable[] }>(
-        `/organizations/${orgId}/campaigns/${campaignId}/deliverables`,
-      ),
-    ])
-    setCampaign(campaignData.campaign)
-    setDeliverables(deliverablesData.deliverables)
-  }, [orgId, campaignId])
+  const loadAll = useCallback(
+    async (isCancelled: () => boolean = () => false) => {
+      if (!orgId || !campaignId) return
+      try {
+        const [campaignData, deliverablesData, runsData] = await Promise.all([
+          apiRequest<{ campaign: Campaign }>(`/organizations/${orgId}/campaigns/${campaignId}`),
+          apiRequest<{ deliverables: Deliverable[] }>(
+            `/organizations/${orgId}/campaigns/${campaignId}/deliverables`,
+          ),
+          apiRequest<{ workflow_runs: WorkflowRun[] }>(
+            `/organizations/${orgId}/campaigns/${campaignId}/runs`,
+          ),
+        ])
+        if (isCancelled()) return
+        setCampaign(campaignData.campaign)
+        setDeliverables(deliverablesData.deliverables)
+        setRun(runsData.workflow_runs[0] || null)
+      } catch (err) {
+        if (!isCancelled()) setError(err instanceof ApiError ? err.message : 'Failed to load.')
+      }
+    },
+    [orgId, campaignId],
+  )
 
-  useEffect(() => {
-    loadAll().catch((err) => setError(err instanceof ApiError ? err.message : 'Failed to load.'))
-  }, [loadAll])
+  // Agents run in the background worker, so poll while the run is active.
+  const runActive = !!run && ACTIVE_RUN_STATUSES.includes(run.status)
+  usePolling(loadAll, [loadAll], { intervalMs: 3000, active: runActive })
+
+  const navigate = useNavigate()
+
+  async function controlRun(verb: 'pause' | 'resume' | 'cancel' | 'approve-start') {
+    if (!orgId || !run) return
+    setRunBusy(true)
+    setError(null)
+    try {
+      await apiRequest(`/organizations/${orgId}/runs/${run.id}/${verb}`, { method: 'POST' })
+      await loadAll()
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : `Could not ${verb} the run.`)
+    } finally {
+      setRunBusy(false)
+    }
+  }
+
+  async function retryTask(taskId: string) {
+    if (!orgId) return
+    setError(null)
+    try {
+      await apiRequest(`/organizations/${orgId}/tasks/${taskId}/retry`, { method: 'POST' })
+      // Show the change immediately; the next poll brings the full state.
+      setRun((prev) =>
+        prev && {
+          ...prev,
+          status: 'running',
+          error_summary: null,
+          tasks: prev.tasks.map((t) =>
+            t.id === taskId ? { ...t, status: 'ready', attempt_count: 0, error_summary: null } : t,
+          ),
+        },
+      )
+      await loadAll()
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not retry this task.')
+    }
+  }
 
   async function startRun() {
     if (!orgId || !campaignId) return
@@ -57,7 +116,6 @@ export default function CampaignWorkspacePage() {
         { method: 'POST', idempotencyKey: uuid() },
       )
       setRun(data.workflow_run)
-      await loadAll()
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not start workflow.')
     } finally {
@@ -121,70 +179,147 @@ export default function CampaignWorkspacePage() {
     }
   }
 
-  if (!campaign) return <div className="page">Loading…</div>
+  if (!campaign) return <PageSkeleton />
 
   return (
     <div className="page">
-      <h1>{campaign.name}</h1>
-      <p className="muted">{campaign.objective}</p>
+      <PageHeader
+        crumbs={[{ label: 'Campaigns', to: '/app/campaigns' }, { label: campaign.name }]}
+        title={campaign.name}
+        description={campaign.objective}
+      />
+      <Tabs
+        label="Campaign sections"
+        value={section}
+        onChange={(v) => navigate(`/app/campaigns/${campaignId}${v === 'overview' ? '' : `/${v}`}`)}
+        tabs={[
+          { value: 'overview', label: 'Overview' },
+          { value: 'workflow', label: 'Workflow' },
+          { value: 'deliverables', label: 'Deliverables', count: deliverables.length },
+        ]}
+      />
       {error && <div className="banner error">{error}</div>}
 
-      <div className="card">
-        <h2>Workflow</h2>
+      {section === 'overview' && <CampaignBrief campaign={campaign} />}
+
+      {section !== 'deliverables' && (<div className="card">
+        <div className="card-head">
+          <h2>
+            Department run{' '}
+            {run && <span className={`status-pill ${run.status}`}>{statusLabel(run.status)}</span>}
+          </h2>
+          <div className="head-actions">
+            {run && run.status === 'awaiting_approval' && (
+              <button className="small-btn" disabled={runBusy} onClick={() => controlRun('approve-start')}>
+                Approve start
+              </button>
+            )}
+            {run && ['queued', 'running'].includes(run.status) && (
+              <button className="secondary small-btn" disabled={runBusy} onClick={() => controlRun('pause')}>
+                Pause
+              </button>
+            )}
+            {run && run.status === 'paused' && (
+              <button className="small-btn" disabled={runBusy} onClick={() => controlRun('resume')}>
+                Resume
+              </button>
+            )}
+            {run && !['completed', 'cancelled'].includes(run.status) && (
+              <button className="danger small-btn" disabled={runBusy} onClick={() => controlRun('cancel')}>
+                Cancel run
+              </button>
+            )}
+            {(!run || ['completed', 'cancelled', 'failed', 'needs_input'].includes(run.status)) && (
+              <button onClick={startRun} disabled={starting}>
+                {starting ? 'Queuing…' : run ? 'Start a new run' : 'Run the marketing department'}
+              </button>
+            )}
+          </div>
+        </div>
         {!run && (
-          <button onClick={startRun} disabled={starting}>
-            {starting ? 'Starting…' : 'Run campaign workflow'}
-          </button>
+          <p className="muted">
+            Starting a run queues work for all 12 agents. Each waits for the agents it depends on, then
+            produces a draft deliverable for you to review. The worker process must be running (
+            <code>flask worker</code>).
+          </p>
         )}
         {run && (
           <>
-            <p>
-              Status: <span className={`status-pill ${run.status}`}>{run.status}</span>
+            <p className="muted small">
+              Started {relativeTime(run.created_at)} · estimated AI cost {money(run.estimated_cost_usd)}
+              {run.budget_usd != null && ` of ${money(run.budget_usd)} run budget`}
+              {runActive && ' · updating live'}
             </p>
             {run.error_summary && <div className="banner warning">{run.error_summary}</div>}
+            {run.status === 'queued' && run.tasks.every((t) => t.attempt_count === 0) && (
+              <div className="banner warning">
+                Queued and waiting for the worker. If nothing changes, make sure <code>flask worker</code> is
+                running.
+              </div>
+            )}
+            <WorkflowGraphPanel tasks={run.tasks} orgId={orgId as string} />
             <table className="simple">
               <thead>
                 <tr>
-                  <th>Stage</th>
+                  <th>Agent</th>
                   <th>Status</th>
+                  <th>Attempts</th>
                   <th>Note</th>
+                  <th aria-label="Actions" />
                 </tr>
               </thead>
               <tbody>
                 {run.tasks.map((t) => (
                   <tr key={t.id}>
-                    <td>{t.stage}</td>
                     <td>
-                      <span className={`status-pill ${t.status}`}>{t.status}</span>
+                      <Link to={`/app/operations/agents/${t.agent_id}`}>{t.agent_name}</Link>
                     </td>
-                    <td className="muted">{t.error_summary || ''}</td>
+                    <td>
+                      <span className={`status-pill ${t.status}`}>{statusLabel(t.status)}</span>
+                    </td>
+                    <td className="muted">
+                      {t.attempt_count}/{t.max_attempts}
+                    </td>
+                    <td className="muted small note-cell">
+                      {t.status === 'retrying' && t.next_attempt_at
+                        ? `Rate-limited or timed out; next try ${relativeTime(t.next_attempt_at)}.`
+                        : t.error_summary || ''}
+                    </td>
+                    <td>
+                      {t.status === 'failed' && run.status !== 'cancelled' && (
+                        <button className="small-btn" onClick={() => retryTask(t.id)}>
+                          Retry
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </>
         )}
-      </div>
+      </div>)}
 
-      <div className="card">
+      {section !== 'workflow' && (<div className="card">
         <h2>Deliverables</h2>
         {deliverables.length === 0 && (
           <p className="muted">
-            No deliverables yet. They appear here once the workflow completes a stage
-            successfully — nothing is fabricated if a stage cannot run.
+            No deliverables yet. Each agent's draft appears here as soon as it finishes; nothing is
+            fabricated if an agent cannot run.
           </p>
         )}
-        {deliverables.map((d) => {
+        {orderDeliverables(deliverables, run).map((d) => {
           const approval = approvalsByDeliverable[d.id]
           const action = approval ? actionsByApproval[approval.id] : undefined
           return (
             <div key={d.id} className="card">
-              <h2 style={{ textTransform: 'capitalize' }}>{d.deliverable_type.replace('_', ' ')}</h2>
+              <h2>{humanize(d.deliverable_type)}</h2>
               <p className="muted">
                 Version {d.current_version?.version_number} · review:{' '}
                 <span className={`status-pill ${d.review_status}`}>{d.review_status}</span>
               </p>
               <DeliverableContent deliverableType={d.deliverable_type} content={d.current_version?.content} />
+              {d.deliverable_type === 'social_calendar' && orgId && <CalendarImport orgId={orgId} deliverableId={d.id} />}
 
               {!approval && (
                 <button onClick={() => requestApproval(d.id)}>Request approval to hand off</button>
@@ -197,6 +332,9 @@ export default function CampaignWorkspacePage() {
                   {approval.decision === 'pending' && (
                     <>
                       <button onClick={() => decide(d.id, approval.id, 'approved')}>Approve</button>{' '}
+                      <button className="secondary" onClick={() => decide(d.id, approval.id, 'changes_requested')}>
+                        Request changes
+                      </button>{' '}
                       <button className="danger" onClick={() => decide(d.id, approval.id, 'rejected')}>
                         Reject
                       </button>
@@ -250,7 +388,78 @@ export default function CampaignWorkspacePage() {
             </div>
           )
         })}
+      </div>)}
+    </div>
+  )
+}
+
+function orderDeliverables(deliverables: Deliverable[], run: WorkflowRun | null): Deliverable[] {
+  const rank = new Map<string, number>()
+  run?.tasks.forEach((t) => {
+    if (t.deliverable_id) rank.set(t.deliverable_id, t.sequence_index)
+  })
+  return deliverables.slice().sort((a, b) => (rank.get(a.id) ?? 999) - (rank.get(b.id) ?? 999))
+}
+
+
+function CampaignBrief({ campaign }: { campaign: Campaign }) {
+  const rows: [string, string | null][] = [
+    ['Audience', campaign.audience],
+    ['Offer', campaign.offer],
+    ['Channels', campaign.channels],
+    ['Geography', campaign.geography],
+    ['Dates', campaign.start_date || campaign.end_date ? `${campaign.start_date || '—'} → ${campaign.end_date || '—'}` : null],
+    ['Budget guidance', campaign.budget_guidance],
+    ['Success metrics', campaign.success_metrics],
+    ['Constraints', campaign.constraints],
+  ]
+  const filled = rows.filter(([, v]) => v)
+  if (filled.length === 0) return null
+  return (
+    <div className="card">
+      <h2>Brief</h2>
+      <div className="form-grid">
+        {filled.map(([k, v]) => (
+          <div key={k} className="deliverable-section">
+            <div className="section-label">{k}</div>
+            <p className="deliverable-prose small">{v}</p>
+          </div>
+        ))}
       </div>
+    </div>
+  )
+}
+
+function CalendarImport({ orgId, deliverableId }: { orgId: string; deliverableId: string }) {
+  const [start, setStart] = useState(() => new Date(Date.now() + 86400000).toISOString().slice(0, 10))
+  const [message, setMessage] = useState<string | null>(null)
+  const [err, setErr] = useState<string | null>(null)
+  async function importIt() {
+    setErr(null)
+    try {
+      const r = await apiRequest<{ created: number }>(`/organizations/${orgId}/calendar/from-deliverable`, {
+        method: 'POST',
+        body: { deliverable_id: deliverableId, start_date: start },
+      })
+      setMessage(`${r.created} posts added to the content calendar.`)
+    } catch (e) {
+      setErr(e instanceof ApiError ? e.message : 'Could not add to calendar.')
+    }
+  }
+  return (
+    <div className="card" style={{ background: 'var(--color-bg-elevated)' }}>
+      <strong className="small">Schedule these posts</strong>
+      <p className="muted small">Adds one post per day from the start date to your content calendar. Nothing is published automatically.</p>
+      {message ? (
+        <div className="banner success">{message} <Link to="/app/calendar">Open calendar →</Link></div>
+      ) : (
+        <div className="head-actions">
+          <label htmlFor={`cal-start-${deliverableId}`} className="small">Start date</label>
+          <input id={`cal-start-${deliverableId}`} type="date" className="select-inline" value={start} onChange={(e) => setStart(e.target.value)} />
+          <button className="small-btn" onClick={importIt}>Add to calendar</button>
+        </div>
+      )}
+      {err && <div className="banner error">{err}</div>}
     </div>
   )
 }

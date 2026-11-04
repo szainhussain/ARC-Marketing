@@ -9,13 +9,28 @@ TYPE_RESEARCH_NOTES = "research_notes"
 TYPE_CAMPAIGN_PLAN = "campaign_plan"
 TYPE_CONTENT_PACK = "content_pack"
 TYPE_QA_REPORT = "qa_report"
+TYPE_SOCIAL_CALENDAR = "social_calendar"
+TYPE_OUTREACH_PLAN = "outreach_plan"
+TYPE_PAID_MEDIA_PLAN = "paid_media_plan"
+TYPE_SITE_OPTIMIZATION_PLAN = "site_optimization_plan"
+TYPE_CUSTOMER_INSIGHTS = "customer_insights"
+TYPE_ACCOUNT_PLAN = "account_plan"
+TYPE_CAMPAIGN_RECORD = "campaign_record"
 
+# One deliverable type per agent task_type (see app/agents/definitions.py).
 VALID_DELIVERABLE_TYPES = (
     TYPE_STRATEGY,
     TYPE_RESEARCH_NOTES,
     TYPE_CAMPAIGN_PLAN,
     TYPE_CONTENT_PACK,
     TYPE_QA_REPORT,
+    TYPE_SOCIAL_CALENDAR,
+    TYPE_OUTREACH_PLAN,
+    TYPE_PAID_MEDIA_PLAN,
+    TYPE_SITE_OPTIMIZATION_PLAN,
+    TYPE_CUSTOMER_INSIGHTS,
+    TYPE_ACCOUNT_PLAN,
+    TYPE_CAMPAIGN_RECORD,
 )
 
 REVIEW_DRAFT = "draft"

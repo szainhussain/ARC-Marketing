@@ -1,6 +1,6 @@
 ---
 name: verify-workflow
-description: Exercise the campaign workflow (strategy -> research -> plan -> content -> QA) end-to-end and confirm real, honest status reporting. Use after any change to app/agents/, app/ai/, or app/workflows/campaign_workflow.py.
+description: Exercise the 12-agent campaign run (durable engine + worker) end-to-end and confirm real, honest status reporting. Use after any change to app/agents/, app/ai/, or app/workflows/engine.py.
 ---
 
 The workflow has two paths to verify — both must be checked, not just the
@@ -23,21 +23,23 @@ regression of the single most important governance rule in this codebase
 ## 2. Success path (requires a fake or real provider)
 
 Prefer the fake-provider pattern over burning real API calls:
-`tests/integration/test_workflow_success_path.py` monkeypatches
-`app.workflows.campaign_workflow.get_provider` with a `FakeProvider`
-returning canned schema-valid data for each `task_type`. Run it directly:
+`tests/integration/test_workflow_success_path.py` and
+`tests/integration/test_engine.py` use `tests/fakes.py` (`FakeProvider`
+patched over `app.workflows.engine.get_provider`) and `engine.drain()` to
+run the worker inline. Run them directly:
 
 ```bash
-python -m pytest tests/integration/test_workflow_success_path.py -q
+python -m pytest tests/integration/test_workflow_success_path.py tests/integration/test_engine.py -q
 ```
 
-Confirm: all 5 tasks reach `completed`, the run reaches `completed`, one
-`Deliverable` + `DeliverableVersion` per stage exists, and a `UsageRecord`
-was written per stage with `is_actual: false`.
+Confirm: all 12 tasks reach `succeeded`, the run reaches `completed`, one
+`Deliverable` + `DeliverableVersion` per agent exists, one `AgentExecution`
+per attempt records the agent version, and a `UsageRecord` was written per
+agent with `is_actual: false`. For a real-provider check, run
+`flask worker` alongside `flask run` and watch `/app/operations`.
 
-If you added a new stage: add its `task_type` to `FAKE_OUTPUTS` in that
-test file and confirm it slots into the pipeline in the right order (check
-`PIPELINE` in `campaign_workflow.py`).
+If you added or changed an agent: update `FAKE_OUTPUTS` in
+`tests/fakes.py` and confirm the dependency order assertions still hold.
 
 ## 3. Partial-failure path
 

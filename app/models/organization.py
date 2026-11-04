@@ -10,6 +10,14 @@ class Organization(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
     status = db.Column(db.String(32), default="active", nullable=False)
     monthly_workflow_limit = db.Column(db.Integer, default=20, nullable=False)
     kill_switch_enabled = db.Column(db.Boolean, default=False, nullable=False)
+    # Stops the worker from starting any new agent task in this workspace
+    # (distinct from kill_switch_enabled, which blocks external actions).
+    automation_paused = db.Column(db.Boolean, default=False, nullable=False)
+    # Workspace-level execution limits enforced by the engine.
+    default_run_budget_usd = db.Column(db.Float)  # null = platform default
+    max_concurrent_tasks = db.Column(db.Integer, default=2, nullable=False)
+    timezone = db.Column(db.String(64), default="UTC", nullable=False)
+    deletion_scheduled_at = db.Column(db.DateTime(timezone=True))
 
     memberships = db.relationship(
         "Membership", back_populates="organization", cascade="all, delete-orphan"

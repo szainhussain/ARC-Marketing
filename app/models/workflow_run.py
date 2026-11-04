@@ -4,6 +4,7 @@ from app.models.base import TimestampMixin, UUIDPrimaryKeyMixin
 STATUS_CREATED = "created"
 STATUS_QUEUED = "queued"
 STATUS_RUNNING = "running"
+STATUS_PAUSED = "paused"
 STATUS_NEEDS_INPUT = "needs_input"
 STATUS_AWAITING_APPROVAL = "awaiting_approval"
 STATUS_COMPLETED = "completed"
@@ -14,6 +15,7 @@ VALID_RUN_STATUSES = (
     STATUS_CREATED,
     STATUS_QUEUED,
     STATUS_RUNNING,
+    STATUS_PAUSED,
     STATUS_NEEDS_INPUT,
     STATUS_AWAITING_APPROVAL,
     STATUS_COMPLETED,
@@ -21,19 +23,26 @@ VALID_RUN_STATUSES = (
     STATUS_CANCELLED,
 )
 
+ACTIVE_RUN_STATUSES = (STATUS_QUEUED, STATUS_RUNNING)
+TERMINAL_RUN_STATUSES = (STATUS_COMPLETED, STATUS_CANCELLED)
+
 RUN_TRANSITIONS = {
-    STATUS_CREATED: {STATUS_QUEUED, STATUS_CANCELLED},
-    STATUS_QUEUED: {STATUS_RUNNING, STATUS_CANCELLED},
+    STATUS_CREATED: {STATUS_QUEUED, STATUS_NEEDS_INPUT, STATUS_AWAITING_APPROVAL, STATUS_CANCELLED},
+    STATUS_QUEUED: {STATUS_RUNNING, STATUS_PAUSED, STATUS_CANCELLED},
     STATUS_RUNNING: {
+        STATUS_PAUSED,
         STATUS_NEEDS_INPUT,
         STATUS_AWAITING_APPROVAL,
         STATUS_COMPLETED,
         STATUS_FAILED,
         STATUS_CANCELLED,
     },
+    STATUS_PAUSED: {STATUS_QUEUED, STATUS_RUNNING, STATUS_CANCELLED},
     STATUS_NEEDS_INPUT: {STATUS_QUEUED, STATUS_CANCELLED},
-    STATUS_AWAITING_APPROVAL: {STATUS_COMPLETED, STATUS_CANCELLED},
-    STATUS_FAILED: set(),
+    # Used when the workspace policy requires approval before agents start.
+    STATUS_AWAITING_APPROVAL: {STATUS_QUEUED, STATUS_RUNNING, STATUS_COMPLETED, STATUS_CANCELLED},
+    # A failed run re-opens when a person retries one of its failed tasks.
+    STATUS_FAILED: {STATUS_RUNNING, STATUS_CANCELLED},
     STATUS_COMPLETED: set(),
     STATUS_CANCELLED: set(),
 }
@@ -53,11 +62,12 @@ class WorkflowRun(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
     campaign_id = db.Column(db.String(36), db.ForeignKey("campaigns.id"), nullable=False)
     started_by_user_id = db.Column(db.String(36), db.ForeignKey("users.id"), nullable=False)
 
-    workflow_type = db.Column(db.String(64), default="campaign_pack_v1", nullable=False)
-    status = db.Column(db.String(32), default=STATUS_CREATED, nullable=False)
+    workflow_type = db.Column(db.String(64), default="campaign_department_v2", nullable=False)
+    status = db.Column(db.String(32), default=STATUS_CREATED, nullable=False, index=True)
     idempotency_key = db.Column(db.String(255), nullable=False)
     error_summary = db.Column(db.Text)
     estimated_cost_usd = db.Column(db.Float, default=0.0, nullable=False)
+    budget_usd = db.Column(db.Float)
     started_at = db.Column(db.DateTime(timezone=True))
     completed_at = db.Column(db.DateTime(timezone=True))
 
@@ -73,7 +83,9 @@ class WorkflowRun(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
             "status": self.status,
             "error_summary": self.error_summary,
             "estimated_cost_usd": self.estimated_cost_usd,
+            "budget_usd": self.budget_usd,
             "started_at": self.started_at.isoformat() if self.started_at else None,
             "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
             "tasks": [t.to_dict() for t in sorted(self.tasks, key=lambda t: t.sequence_index)],
         }

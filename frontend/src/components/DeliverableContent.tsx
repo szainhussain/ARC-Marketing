@@ -178,12 +178,160 @@ function QAReport({ content }: { content: Json }) {
   )
 }
 
+// ---- Specialist-agent deliverables -------------------------------------
+// Each new type declares which fields to show, in what order, with what
+// label. Lists of objects render as small cards (first field as the title).
+
+type FieldSpec = { key: string; label: string }
+
+function humanKey(key: string) {
+  const text = key.replace(/_/g, ' ')
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}
+
+const TITLE_KEYS = ['name', 'title', 'theme', 'segment', 'situation', 'item', 'target_type', 'page', 'day', 'channel']
+
+function ObjectCard({ item }: { item: Json }) {
+  const entries = Object.entries(item).filter(([, v]) => v !== '' && v !== null && v !== undefined)
+  if (entries.length === 0) return null
+  // Stored content has alphabetically sorted keys, so pick a meaningful
+  // title field rather than whichever key happens to come first.
+  const titleKey = TITLE_KEYS.find((k) => typeof item[k] === 'string' && item[k]) ?? entries[0][0]
+  const title = item[titleKey]
+  const rest = entries.filter(([k]) => k !== titleKey)
+  return (
+    <div className="variant-card">
+      <div className="headline">{String(title)}</div>
+      {rest.map(([k, v]) => {
+        if (typeof v === 'boolean') {
+          return v ? (
+            <span key={k} className="tag-chip warn-chip">
+              {k === 'escalate_to_human' ? 'Needs a person' : humanKey(k)}
+            </span>
+          ) : null
+        }
+        if (Array.isArray(v)) {
+          return v.length ? (
+            <div key={k} className="small">
+              <span className="muted">{humanKey(k)}:</span> {v.map(String).join(' · ')}
+            </div>
+          ) : null
+        }
+        return (
+          <div key={k} className="small">
+            <span className="muted">{humanKey(k)}:</span>{' '}
+            {k === 'share_percent' ? `${v}%` : String(v)}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function FieldValue({ value }: { value: unknown }) {
+  if (typeof value === 'string') return value ? <p className="deliverable-prose">{value}</p> : null
+  if (typeof value === 'boolean') return <p className="deliverable-prose">{value ? 'Yes' : 'No'}</p>
+  if (Array.isArray(value)) {
+    if (value.length === 0) return null
+    if (value.every((v) => typeof v === 'string')) return <BulletList items={value as string[]} />
+    return (
+      <>
+        {value.map((v, i) =>
+          v && typeof v === 'object' ? <ObjectCard key={i} item={v as Json} /> : <p key={i}>{String(v)}</p>,
+        )}
+      </>
+    )
+  }
+  return null
+}
+
+function fieldRenderer(fields: FieldSpec[]) {
+  return function Renderer({ content }: { content: Json }) {
+    return (
+      <>
+        {fields.map(({ key, label }) => {
+          const value = content[key]
+          const empty = value === undefined || value === '' || (Array.isArray(value) && value.length === 0)
+          if (empty) return null
+          return (
+            <Section key={key} label={label}>
+              <FieldValue value={value} />
+            </Section>
+          )
+        })}
+      </>
+    )
+  }
+}
+
+const SocialCalendar = fieldRenderer([
+  { key: 'channels', label: 'Channels' },
+  { key: 'calendar_entries', label: 'Post calendar' },
+  { key: 'community_guidelines', label: 'Community guidelines' },
+  { key: 'escalation_triggers', label: 'Escalate to a person when' },
+  { key: 'assumptions', label: 'Assumptions' },
+])
+
+const OutreachPlan = fieldRenderer([
+  { key: 'target_profiles', label: 'Target profiles (no specific people or contacts)' },
+  { key: 'outreach_drafts', label: 'Outreach drafts — for your review' },
+  { key: 'event_ideas', label: 'Event ideas' },
+  { key: 'assumptions', label: 'Assumptions' },
+])
+
+const PaidMediaPlan = fieldRenderer([
+  { key: 'campaign_structure', label: 'Campaign structure' },
+  { key: 'budget_allocation_recommendation', label: 'Recommended budget split (you decide spend)' },
+  { key: 'bid_strategy', label: 'Bid strategy' },
+  { key: 'experiments', label: 'Experiments' },
+  { key: 'kpi_targets', label: 'KPI targets' },
+  { key: 'assumptions', label: 'Assumptions' },
+])
+
+const SiteOptimizationPlan = fieldRenderer([
+  { key: 'keyword_themes', label: 'Keyword themes' },
+  { key: 'landing_page_recommendations', label: 'Landing page recommendations' },
+  { key: 'metadata_drafts', label: 'Page title & meta drafts' },
+  { key: 'conversion_experiments', label: 'Conversion experiments' },
+  { key: 'assumptions', label: 'Assumptions' },
+])
+
+const CustomerInsights = fieldRenderer([
+  { key: 'data_note', label: 'Data basis' },
+  { key: 'themes', label: 'Customer themes (hypotheses)' },
+  { key: 'likely_objections', label: 'Likely objections' },
+  { key: 'response_templates', label: 'Response templates' },
+  { key: 'assumptions', label: 'Assumptions' },
+])
+
+const AccountPlan = fieldRenderer([
+  { key: 'account_segments', label: 'Account segments' },
+  { key: 'enablement_materials', label: 'Sales enablement materials' },
+  { key: 'co_marketing_ideas', label: 'Co-marketing ideas' },
+  { key: 'assumptions', label: 'Assumptions' },
+])
+
+const CampaignRecord = fieldRenderer([
+  { key: 'summary', label: 'Summary' },
+  { key: 'key_decisions', label: 'Key decisions' },
+  { key: 'action_items', label: 'Action items' },
+  { key: 'knowledge_updates', label: 'Knowledge updates' },
+  { key: 'open_questions', label: 'Open questions' },
+])
+
 const RENDERERS: Record<string, (props: { content: Json }) => JSX.Element> = {
   strategy: Strategy,
   research_notes: ResearchNotes,
   campaign_plan: CampaignPlan,
   content_pack: ContentPack,
   qa_report: QAReport,
+  social_calendar: SocialCalendar,
+  outreach_plan: OutreachPlan,
+  paid_media_plan: PaidMediaPlan,
+  site_optimization_plan: SiteOptimizationPlan,
+  customer_insights: CustomerInsights,
+  account_plan: AccountPlan,
+  campaign_record: CampaignRecord,
 }
 
 export default function DeliverableContent({

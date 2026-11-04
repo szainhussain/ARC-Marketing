@@ -6,7 +6,8 @@ EDITABLE_FIELDS = (
     "business_name", "website", "industry", "regions_served", "business_type",
     "products_services", "target_audience", "customer_problem", "differentiators",
     "primary_goal", "tone_of_voice", "preferred_phrases", "prohibited_phrases",
-    "constraints",
+    "constraints", "business_description", "competitors", "channels", "budget_range",
+    "existing_systems", "reporting_expectations", "timezone", "language", "onboarding_step",
 )
 
 

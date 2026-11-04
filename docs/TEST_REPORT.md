@@ -266,3 +266,102 @@ be a true positive worth checking rather than assuming a screenshot
 artifact. Backend: 24/24 tests passing, including the
 `test_workflow_success_path.py` fixture updated to match the hardened
 timeline schema.
+
+## Stage 1 — 12 agents + durable engine + Operations Center (2026-11-03)
+
+**Backend:** `python -m pytest -q` → **51 passed**. New coverage:
+`tests/unit/test_agent_registry.py` (12 distinct agents, schemas, no
+external-action capability), `tests/unit/test_prompt_hints.py`,
+`tests/integration/test_engine.py` (rate-limit retry without consuming
+attempts, persistent rate limit fails at cap, provider retry-after delays
+and pauses the worker, max attempts, `capability_unavailable` not retried,
+manual retry re-opens a run, independent branches continue, agent /
+workspace / run pause, cancel discards, lease recovery, no double claim,
+run budget, contact-detail evaluation feeding QA, viewer role denied),
+`tests/integration/test_workflow_success_path.py` (enqueue-only request,
+12 deliverables, dependency order, `reads` allowlist enforced),
+`tests/security/test_operations_isolation.py` (every new endpoint denies
+cross-tenant access).
+
+**Frontend:** `npm run build` passes; `npm run lint` 0 errors (2
+pre-existing fast-refresh warnings).
+
+**Real run (Groq `openai/gpt-oss-120b`, free tier, headless Chromium):**
+sign-up → workspace → profile → campaign → "Run the marketing department"
+with `flask worker` running separately. Final: run `completed`, **12/12
+agents succeeded, 12 distinct deliverables**, 52 executions of which 34 were
+rate-limit hits absorbed by the worker, estimated cost $0.27. The QA agent
+returned `passed: false` with 6 specific issues (e.g. an unsupported "30%
+lighter" claim), which is the intended behavior: it reports, it doesn't
+rubber-stamp.
+
+**Real bugs found by the real run, fixed, and covered by tests:**
+1. Rate-limit retries consumed the 5-attempt cap, so parallel agents
+   failed on the free tier although nothing was wrong with them. Now rate
+   limits are refunded and capped separately (15 in a row), and a provider
+   `retry-after` pauses the whole worker.
+2. Raw provider error JSON (including the provider account id) was shown
+   in the UI. Now users see a plain message; raw text goes to the server
+   log only.
+3. The model returned social-post `hashtags` as one string 10 times in a
+   row. The schema-derived prompt hint for nested lists listed field names
+   without types; it now includes each nested field's type.
+4. Retry button gave no immediate feedback; the row now updates at once.
+5. Object cards in new deliverable types picked an alphabetically-first key
+   as their title ("audience" instead of the campaign name).
+
+**Known gap seen in the real run:** the PR agent named one specific
+creator ("MountainMia") despite instructions not to. The code-level check
+catches emails, phone numbers and @handles but not bare names; the QA
+agent surfaced the outreach plan in its issues. Name detection is not
+attempted, since it would be unreliable. Treat PR drafts as needing human
+review, which the approval flow already requires.
+
+## Stage 2 — Full MaaS brief (§1–25) (2026-11-04)
+
+All results below were actually executed on this machine.
+
+**Backend:** `python -m pytest -q` → **77 passed**. Added
+`tests/integration/test_saas.py` (billing test-mode checkout via signed
+webhook, bad signature / replay / duplicate rejection, plan run limit,
+downgrade fit check, password reset revoking sessions, change password,
+sign-out-everywhere, security headers, invitations incl. wrong-email and
+owner protection, locked policies, approve-start policy, notifications +
+knowledge proposal/approval, calendar import, upload validation, webhook
+SSRF refusal + signed delivery, export without secrets + scheduled
+deletion purge, approval context/expiry/revoke, dashboard with business
+metrics unavailable, CSV export, concurrency limit, OpenAPI, contact
+form, kill switch + disabled destination blocking exports) and
+`tests/security/test_saas_isolation.py` (26 new endpoints deny other
+tenants; viewer can't administer).
+
+**Frontend:** `npm run build` ✓ (vendor chunks split; app pages lazy),
+`npm run lint` 0 errors (5 fast-refresh/ref warnings), `npm test` (Vitest)
+**10 passed** — KPI unavailable/estimate states, Tabs keyboard nav,
+ConfirmDialog, ErrorState retry, DataTable empty state, WorkflowGraph
+built from task data, WorkflowDemo labelled local-only, contact and
+signup validation.
+
+**E2E:** `bash scripts/run_e2e.sh` (fixture provider, throwaway DB, real
+browser) → **18/18 steps passed, 0 console errors, 0 server errors**:
+12 public pages; register; workspace; 5-step onboarding wizard; brand
+edit; set "require approval before agents start"; create + run campaign;
+run held at `awaiting_approval`; approve start resumes the same run; 12
+agents complete; 12 deliverables reviewed; approval approved in inbox;
+Command Center shows 12 tasks and "Not connected" business metrics;
+Operations graph node → task drawer; usage + audit records; 17 app pages
+render; billing test checkout → Growth; mobile nav; second user gets 403
+on the first workspace.
+
+**Real-provider check:** the Groq run from Stage 1 renders correctly in
+the new Command Center (throughput chart, cost by agent).
+
+**Real bugs found this stage and fixed:** `login_user(current_user)`
+stored the proxy and recursed (500 after password change / invite
+accept); campaign dates were passed to SQLite as strings; the Docker
+`worker` service would have started a second web server (entrypoint
+ignored its command); E2E policy step raced page load.
+
+**Not executed:** Docker Compose full stack, CI workflow on GitHub (no
+remote), Stripe live/test API, email delivery, any live social/ads API,
+load testing, backup-restore drill.

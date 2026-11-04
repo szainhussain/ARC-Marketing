@@ -1,0 +1,76 @@
+import {
+  Activity,
+  BarChart3,
+  Bell,
+  BookOpen,
+  Bot,
+  CalendarDays,
+  CheckSquare,
+  CreditCard,
+  FileText,
+  Gauge,
+  Image,
+  LayoutDashboard,
+  ListChecks,
+  Megaphone,
+  Palette,
+  Plug,
+  Rocket,
+  ScrollText,
+  Search,
+  Settings,
+  Shield,
+  SlidersHorizontal,
+  Users,
+  type LucideIcon,
+} from 'lucide-react'
+
+export type NavItem = { to: string; label: string; icon: LucideIcon; keywords?: string }
+
+export const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
+  {
+    label: 'Command',
+    items: [
+      { to: '/app/dashboard', label: 'Command Center', icon: LayoutDashboard, keywords: 'overview kpi home' },
+      { to: '/app/operations', label: 'Operations', icon: Gauge, keywords: 'agents queue control room' },
+      { to: '/app/approvals', label: 'Approvals', icon: CheckSquare, keywords: 'inbox decisions' },
+      { to: '/app/notifications', label: 'Notifications', icon: Bell },
+    ],
+  },
+  {
+    label: 'Work',
+    items: [
+      { to: '/app/campaigns', label: 'Campaigns', icon: Megaphone, keywords: 'briefs runs' },
+      { to: '/app/tasks', label: 'Tasks', icon: ListChecks, keywords: 'queue retry' },
+      { to: '/app/agents', label: 'Agents', icon: Bot, keywords: 'team twelve' },
+      { to: '/app/calendar', label: 'Calendar', icon: CalendarDays, keywords: 'schedule posts' },
+      { to: '/app/content', label: 'Content', icon: FileText, keywords: 'deliverables drafts' },
+      { to: '/app/research', label: 'Research', icon: Search, keywords: 'insights audience' },
+    ],
+  },
+  {
+    label: 'Brand & data',
+    items: [
+      { to: '/app/brand', label: 'Brand profile', icon: Palette, keywords: 'business profile tone' },
+      { to: '/app/knowledge', label: 'Knowledge', icon: BookOpen, keywords: 'library learnings faq' },
+      { to: '/app/assets', label: 'Assets', icon: Image, keywords: 'uploads files logo' },
+      { to: '/app/analytics', label: 'Analytics', icon: BarChart3, keywords: 'reports metrics export' },
+      { to: '/app/integrations', label: 'Integrations', icon: Plug, keywords: 'connectors meta google tiktok' },
+    ],
+  },
+  {
+    label: 'Workspace',
+    items: [
+      { to: '/app/team', label: 'Team', icon: Users, keywords: 'members invite roles' },
+      { to: '/app/billing', label: 'Billing', icon: CreditCard, keywords: 'plan subscription' },
+      { to: '/app/settings', label: 'Settings', icon: Settings },
+      { to: '/app/settings/automation', label: 'Automation', icon: SlidersHorizontal, keywords: 'policies budgets concurrency' },
+      { to: '/app/settings/usage', label: 'Usage', icon: Activity, keywords: 'cost tokens limits' },
+      { to: '/app/settings/security', label: 'Security', icon: Shield, keywords: 'password sessions export delete' },
+      { to: '/app/audit-log', label: 'Audit log', icon: ScrollText, keywords: 'history events' },
+      { to: '/app/onboarding', label: 'Onboarding', icon: Rocket, keywords: 'setup wizard' },
+    ],
+  },
+]
+
+export const ALL_NAV: NavItem[] = NAV_GROUPS.flatMap((g) => g.items)

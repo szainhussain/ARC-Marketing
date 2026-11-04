@@ -11,11 +11,17 @@ Flask API (app/api/v1/*) --- Flask-Login session auth, CSRF
    +--> app/services/*            domain logic; every call starts with
    |                              get_membership_or_403(organization_id)
    |
-   +--> app/workflows/campaign_workflow.py   synchronous pipeline orchestrator
-   |       |
-   |       +--> app/agents/{cmo_planner,research_analyst,marketing_manager,
-   |       |                 content_creator,quality_reviewer}.py
-   |       +--> app/ai/provider_adapter.py (AnthropicProvider | NullProvider)
+   +--> app/workflows/engine.py:enqueue_campaign_run   records 12 Tasks + deps
+   |
+   +--> app/integrations/... (see below)
+
+Worker process (flask worker, app/cli.py) --- polls the same database
+   |
+   +--> app/workflows/engine.py   claim (atomic) -> run agent -> persist ->
+   |       |                      unblock dependents; retries + lease recovery
+   |       +--> app/agents/definitions.py (12 AgentSpecs) via registry.py
+   |       +--> app/workflows/evaluation.py (code-level output checks)
+   |       +--> app/ai/provider_adapter.py (Anthropic | Groq | Null)
    |
    +--> app/integrations/manual_handoff.py   the only connector implemented
    |
@@ -77,18 +83,15 @@ Defined as transition dicts next to each model
 `app/workflows/state_machine.py:apply_transition()`, which raises `Conflict`
 (HTTP 409) on an invalid transition rather than silently allowing it.
 
-`WorkflowRun`: `created → queued → running → needs_input | awaiting_approval
-| completed | failed | cancelled`. In the current synchronous
-implementation, `start_campaign_workflow` moves a run from `created`
-straight through `running` to its terminal state within one request (see
-D4 in `docs/DECISIONS.md`).
+`WorkflowRun`: `queued → running → completed | failed`, plus `paused`,
+`needs_input` (profile incomplete, set at enqueue), and `cancelled`. A
+failed run returns to `running` when a person retries a failed task.
 
-`Task`: `pending → ready → running → needs_input | awaiting_approval |
-completed | failed | cancelled`. The campaign workflow currently only uses
-`running → completed` and `running → failed`; `needs_input` at the task
-level and the `ready`/dependency-ordering states are modeled for a future
-multi-branch workflow but not yet exercised (the pipeline is a fixed
-5-stage sequence).
+`Task`: `waiting_for_dependency → ready → running → succeeded`, with
+`running → retrying → running` for transient provider errors, `failed`
+when retries are exhausted or the error is non-retryable, and
+`cancelled`. `waiting_for_approval` and `scheduled` are modeled but not
+yet used. See `docs/OPERATIONS_RUNBOOK.md` and D11 in `docs/DECISIONS.md`.
 
 `ExternalAction`: `prepared → ... → succeeded | failed |
 verification_required`, independent of `publication_status`
@@ -102,11 +105,13 @@ output_schema, context, budget_usd, timeout_seconds, correlation_id)` →
 estimated_cost_usd, warnings)`.
 
 Typed errors (`app/ai/errors.py`): `ProviderUnavailable`, `RateLimited`,
-`InvalidOutput`, `BudgetExceeded`, `AIRequestTimeout`. The workflow
-orchestrator (`campaign_workflow.py:_run_pipeline`) catches all of these,
-marks the current task `failed` with a safe (no stack trace, no key
-material) `error_summary`, and stops — it does not attempt later stages
-with missing upstream context.
+`InvalidOutput`, `BudgetExceeded`, `AIRequestTimeout`. The engine
+(`engine.py:execute_task`) catches all of these and records them on the
+task and its `AgentExecution`: `RateLimited` / `AIRequestTimeout` /
+`InvalidOutput` retry with backoff (honoring provider `retry-after`);
+`ProviderUnavailable` and `BudgetExceeded` fail the task immediately.
+Dependents never run with missing upstream context — they stay
+`waiting_for_dependency`.
 
 `AnthropicProvider` and `GroqProvider` (OpenAI-compatible, added in D8)
 both do one bounded repair retry (2 attempts total) if the model's JSON
@@ -137,7 +142,7 @@ came out of real bugs caught during this build.
 
 ## What would need to change for the full 12-agent vision
 
-See `docs/12_AGENT_EXPANSION_ROADMAP.md`. The short version: the
+See `docs/12_AGENT_ROADMAP.md`. The short version: the
 `AgentStage` base class, provider-neutral `AIProvider` interface, and
 `Connector` contract are already shaped to support more stages/roles and
 more connectors without a rewrite — what's missing for the full vision is

@@ -11,7 +11,10 @@ from app.services.campaign_service import (
     list_campaigns,
     update_campaign,
 )
-from app.workflows.campaign_workflow import start_campaign_workflow
+from app.models.membership import ROLE_VIEWER, VALID_ROLES
+from app.models.workflow_run import WorkflowRun
+from app.services.authorization_service import require_role
+from app.workflows.engine import enqueue_campaign_run
 
 
 @api_v1.route("/organizations/<organization_id>/campaigns", methods=["GET"])
@@ -61,7 +64,8 @@ def archive_campaign_route(organization_id, campaign_id):
 )
 @login_required
 def start_run_route(organization_id, campaign_id):
-    get_membership_or_403(organization_id)
+    membership = get_membership_or_403(organization_id)
+    require_role(membership, tuple(r for r in VALID_ROLES if r != ROLE_VIEWER))
     payload = request.get_json(silent=True) or {}
     idempotency_key = request.headers.get("Idempotency-Key") or payload.get("idempotency_key")
     if not idempotency_key:
@@ -71,8 +75,26 @@ def start_run_route(organization_id, campaign_id):
             "Please correct the highlighted fields.",
             details=[{"field": "idempotency_key", "issue": "Required"}],
         )
-    run = start_campaign_workflow(organization_id, campaign_id, current_user.id, idempotency_key)
+    # Only records the run and its 12 tasks; the worker process executes
+    # them, so 202 Accepted is literally true.
+    run = enqueue_campaign_run(organization_id, campaign_id, current_user.id, idempotency_key)
     return jsonify({"workflow_run": run.to_dict()}), 202
+
+
+@api_v1.route(
+    "/organizations/<organization_id>/campaigns/<campaign_id>/runs", methods=["GET"]
+)
+@login_required
+def list_campaign_runs_route(organization_id, campaign_id):
+    get_membership_or_403(organization_id)
+    get_campaign_or_404(organization_id, campaign_id)
+    runs = (
+        WorkflowRun.query.filter_by(organization_id=organization_id, campaign_id=campaign_id)
+        .order_by(WorkflowRun.created_at.desc())
+        .limit(20)
+        .all()
+    )
+    return jsonify({"workflow_runs": [r.to_dict() for r in runs]}), 200
 
 
 @api_v1.route(

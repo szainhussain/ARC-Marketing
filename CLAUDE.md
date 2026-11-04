@@ -26,9 +26,12 @@ See `docs/DECISIONS.md` for why things are built the way they are.
 - `app/services/` — business logic. Routes call services; services never
   trust `organization_id` from anywhere except
   `authorization_service.get_membership_or_403()`.
-- `app/agents/` — thin stage classes (CMO planner, research analyst,
-  marketing manager, content creator, quality reviewer), not autonomous
-  processes. Each stage has one task_type and one Marshmallow output schema.
+- `app/agents/` — the 12 department agents as versioned `AgentSpec`s in
+  `definitions.py` (validated by `registry.py` at import), not autonomous
+  processes. Each agent has one task_type, one Marshmallow output schema,
+  `depends_on`, and a `reads` allowlist the engine enforces. Changing an
+  agent's instructions/inputs/schema means bumping its `version`. See
+  `docs/AGENT_SYSTEM.md`.
 - `app/ai/` — provider-neutral adapter. Never import `anthropic`, `groq`,
   or any SDK outside `app/ai/provider_adapter.py`. Two providers exist
   (`AnthropicProvider`, `GroqProvider`); a third means one new class
@@ -38,13 +41,16 @@ See `docs/DECISIONS.md` for why things are built the way they are.
   seconds before this app's own bounded retry/timeout ever sees it (this
   actually happened — a real ~41s hang on a Groq rate limit — see
   `docs/DECISIONS.md` D8).
-- `app/workflows/campaign_workflow.py` — the one pipeline that exists today
-  (strategy → research_notes → campaign_plan → content_pack → qa_report),
-  run synchronously in the request. Stops cleanly on the first failed
-  stage; does not roll back already-completed stages.
+- `app/workflows/engine.py` — durable, dependency-aware execution. The
+  API only enqueues a run (12 `Task`s + `TaskDependency`s); a separate
+  `flask worker` process claims tasks atomically, runs agents, retries
+  rate limits/timeouts with backoff, recovers expired leases, and unblocks
+  dependents. DB-backed, no Redis — see `docs/DECISIONS.md` D11 and
+  `docs/OPERATIONS_RUNBOOK.md`. Never call a model from a web request.
+  `app/workflows/evaluation.py` holds code-level output checks.
 - `app/integrations/` — connector contract + `manual_handoff.py` (the only
   implemented connector). A live publishing connector is explicitly
-  deferred — see `docs/12_AGENT_EXPANSION_ROADMAP.md` and `docs/DECISIONS.md`.
+  deferred — see `docs/12_AGENT_ROADMAP.md` and `docs/DECISIONS.md`.
 
 ## Non-negotiable rules (do not relax these for convenience)
 
@@ -94,6 +100,8 @@ export FLASK_APP=wsgi.py && flask db migrate -m "describe the change" && flask d
 cd frontend && npm run dev     # dev server
 cd frontend && npm run build   # typecheck + production build
 cd frontend && npm run lint
+cd frontend && npm test        # Vitest component tests
+bash scripts/run_e2e.sh       # E2E journey (needs `npm run dev` running)
 ```
 
 ## Local dev gotcha: hostname must match between frontend and backend
@@ -105,6 +113,19 @@ browsers treat those two hostnames as different sites even though CORS
 allows the cross-port request. This caused a real bug during this build
 (see `docs/TEST_REPORT.md`); don't reintroduce it.
 
+## SaaS foundation (plans, billing, policies, knowledge)
+
+- Plan limits are data (`plans.entitlements_json`) enforced in services —
+  check `check_entitlement()` before adding any new metered action.
+- Subscription state changes only in `billing_service.process_event()`
+  from a verified webhook. Never set a plan directly from a user request.
+- Locked action policies (`ACTION_POLICY_DEFAULTS` with `locked=True`)
+  are platform boundaries; don't add an API path that loosens them.
+- Agents receive knowledge only via `approved_knowledge_for_agents()`.
+- `AI_PROVIDER=fixture` is for E2E only (D16); keep it gated.
+- New tenant-scoped endpoints must be added to
+  `tests/security/test_saas_isolation.py` (or a sibling).
+
 ## Testing conventions
 
 - `tests/conftest.py` has `register_and_login`, `create_org`,
@@ -113,9 +134,11 @@ allows the cross-port request. This caused a real bug during this build
 - Tests that need a deliverable without a real AI call should call
   `create_deliverable_with_first_version()` directly inside
   `app.app_context()`, the way `tests/integration/test_deliverable_approval_handoff.py`
-  does — or monkeypatch `app.workflows.campaign_workflow.get_provider` with
-  a fake `AIProvider`, the way `tests/integration/test_workflow_success_path.py`
-  does. Don't call the real Anthropic API from a test.
+  does — or use `tests/fakes.py` (`FakeProvider`, `use_provider`) which
+  patches `app.workflows.engine.get_provider`, then call
+  `app.workflows.engine.drain()` to run the worker loop inline, the way
+  `tests/integration/test_engine.py` does. Don't call a real AI API from a
+  test.
 - Any new tenant-scoped resource needs a cross-tenant-denial test in
   `tests/security/`.
 
@@ -135,7 +158,7 @@ allows the cross-port request. This caused a real bug during this build
   (one renderer per `deliverable_type`, e.g. `Strategy`, `CampaignPlan`),
   not a raw `JSON.stringify(...)` dump — that was the actual UI before a
   redesign fixed it. Adding a new deliverable type (per
-  `docs/12_AGENT_EXPANSION_ROADMAP.md`) means adding one renderer function
+  `docs/12_AGENT_ROADMAP.md`) means adding one renderer function
   there, keyed into `RENDERERS`; keep the collapsible "View raw JSON"
   fallback for transparency/debugging.
 - Design tokens live in `index.css`'s `:root` (ARC's dark theme — near-
@@ -167,7 +190,7 @@ deliberately left unconfirmed rather than guessed at "2200" or similar).
 
 - Don't add a live publishing connector (Meta, LinkedIn, etc.) without the
   user first choosing a pilot channel and confirming API access — see
-  `docs/12_AGENT_EXPANSION_ROADMAP.md`.
+  `docs/12_AGENT_ROADMAP.md`.
 - Don't relax `sandbox`/CSRF/session settings to "make dev easier" — fix
   the actual hostname/CORS config instead (see the gotcha above).
 - Don't claim a milestone (M7–M12 in `docs/IMPLEMENTATION_PLAN.md`) is done

@@ -1,48 +1,141 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { lazy, Suspense } from 'react'
+import { Navigate, Route, Routes, useParams } from 'react-router-dom'
+import { PageSkeleton } from './components/ui'
 import AppLayout from './components/AppLayout'
 import ProtectedRoute from './components/ProtectedRoute'
-import CampaignListPage from './pages/CampaignListPage'
-import CampaignWorkspacePage from './pages/CampaignWorkspacePage'
+import PublicLayout from './components/PublicLayout'
+const AgentDetailPage = lazy(() => import('./pages/AgentDetailPage'))
+const ApprovalsPage = lazy(() => import('./pages/ApprovalsPage'))
+const CampaignWorkspacePage = lazy(() => import('./pages/CampaignWorkspacePage'))
 import CreateWorkspacePage from './pages/CreateWorkspacePage'
-import DashboardPage from './pages/DashboardPage'
-import IntegrationsPage from './pages/IntegrationsPage'
-import LandingPage from './pages/LandingPage'
-import NewCampaignPage from './pages/NewCampaignPage'
-import OnboardingPage from './pages/OnboardingPage'
-import ReportsPage from './pages/ReportsPage'
-import SignInPage from './pages/SignInPage'
-import SignUpPage from './pages/SignUpPage'
+const DashboardPage = lazy(() => import('./pages/DashboardPage'))
+const NewCampaignPage = lazy(() => import('./pages/NewCampaignPage'))
+const OnboardingPage = lazy(() => import('./pages/OnboardingPage'))
+const BrandPage = lazy(() => import('./pages/OnboardingPage').then((m) => ({ default: m.BrandPage })))
+const OperationsPage = lazy(() => import('./pages/OperationsPage'))
+const TasksPage = lazy(() => import('./pages/TasksPage'))
+const AnalyticsPage = lazy(() => import('./pages/app/DataPages').then((m) => ({ default: m.AnalyticsPage })))
+const AssetsPage = lazy(() => import('./pages/app/DataPages').then((m) => ({ default: m.AssetsPage })))
+const IntegrationsPage = lazy(() => import('./pages/app/DataPages').then((m) => ({ default: m.IntegrationsPage })))
+const KnowledgePage = lazy(() => import('./pages/app/DataPages').then((m) => ({ default: m.KnowledgePage })))
+const AgentsDirectoryPage = lazy(() => import('./pages/app/WorkPages').then((m) => ({ default: m.AgentsDirectoryPage })))
+const CalendarPage = lazy(() => import('./pages/app/WorkPages').then((m) => ({ default: m.CalendarPage })))
+const CampaignListPage = lazy(() => import('./pages/app/WorkPages').then((m) => ({ default: m.CampaignListPage })))
+const ContentPage = lazy(() => import('./pages/app/WorkPages').then((m) => ({ default: m.ContentPage })))
+const ResearchPage = lazy(() => import('./pages/app/WorkPages').then((m) => ({ default: m.ResearchPage })))
+const AuditLogPage = lazy(() => import('./pages/app/WorkspacePages').then((m) => ({ default: m.AuditLogPage })))
+const AutomationSettingsPage = lazy(() => import('./pages/app/WorkspacePages').then((m) => ({ default: m.AutomationSettingsPage })))
+const BillingPage = lazy(() => import('./pages/app/WorkspacePages').then((m) => ({ default: m.BillingPage })))
+const NotificationsPage = lazy(() => import('./pages/app/WorkspacePages').then((m) => ({ default: m.NotificationsPage })))
+const SecuritySettingsPage = lazy(() => import('./pages/app/WorkspacePages').then((m) => ({ default: m.SecuritySettingsPage })))
+const SettingsPage = lazy(() => import('./pages/app/WorkspacePages').then((m) => ({ default: m.SettingsPage })))
+const TeamPage = lazy(() => import('./pages/app/WorkspacePages').then((m) => ({ default: m.TeamPage })))
+const TestCheckoutPage = lazy(() => import('./pages/app/WorkspacePages').then((m) => ({ default: m.TestCheckoutPage })))
+const UsagePage = lazy(() => import('./pages/app/WorkspacePages').then((m) => ({ default: m.UsagePage })))
+import {
+  AcceptInvitePage,
+  ForgotPasswordPage,
+  LoginPage,
+  ResetPasswordPage,
+  SignupPage,
+  VerifyEmailPage,
+} from './pages/public/AuthPages'
+import HomePage from './pages/public/HomePage'
+import {
+  AboutPage,
+  AgentsPage,
+  ContactPage,
+  DocsPage,
+  HowItWorksPage,
+  IntegrationsPublicPage,
+  PricingPage,
+  PrivacyPage,
+  ProductPage,
+  SecurityPage,
+  TermsPage,
+} from './pages/public/InfoPages'
+
+function AgentAlias() {
+  const { agentId } = useParams()
+  return <Navigate to={`/app/agents/${agentId}`} replace />
+}
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/sign-in" element={<SignInPage />} />
-      <Route path="/sign-up" element={<SignUpPage />} />
-      <Route
-        path="/create-workspace"
-        element={
-          <ProtectedRoute>
-            <CreateWorkspacePage />
-          </ProtectedRoute>
-        }
-      />
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/product" element={<ProductPage />} />
+        <Route path="/agents" element={<AgentsPage />} />
+        <Route path="/how-it-works" element={<HowItWorksPage />} />
+        <Route path="/integrations" element={<IntegrationsPublicPage />} />
+        <Route path="/security" element={<SecurityPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/docs" element={<DocsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/accept-invite" element={<AcceptInvitePage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route
+          path="/create-workspace"
+          element={
+            <ProtectedRoute>
+              <CreateWorkspacePage />
+            </ProtectedRoute>
+          }
+        />
+      </Route>
+      <Route path="/sign-in" element={<Navigate to="/login" replace />} />
+      <Route path="/sign-up" element={<Navigate to="/signup" replace />} />
       <Route
         path="/app"
         element={
           <ProtectedRoute>
-            <AppLayout />
+            <Suspense fallback={<PageSkeleton />}>
+              <AppLayout />
+            </Suspense>
           </ProtectedRoute>
         }
       >
-        <Route index element={<DashboardPage />} />
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<DashboardPage />} />
         <Route path="onboarding" element={<OnboardingPage />} />
-        <Route path="brand" element={<OnboardingPage />} />
+        <Route path="brand" element={<BrandPage />} />
         <Route path="campaigns" element={<CampaignListPage />} />
         <Route path="campaigns/new" element={<NewCampaignPage />} />
-        <Route path="campaigns/:campaignId" element={<CampaignWorkspacePage />} />
-        <Route path="reports" element={<ReportsPage />} />
+        <Route path="campaigns/:campaignId" element={<CampaignWorkspacePage section="overview" />} />
+        <Route path="campaigns/:campaignId/workflow" element={<CampaignWorkspacePage section="workflow" />} />
+        <Route path="campaigns/:campaignId/deliverables" element={<CampaignWorkspacePage section="deliverables" />} />
+        <Route path="agents" element={<AgentsDirectoryPage />} />
+        <Route path="agents/:agentId" element={<AgentDetailPage />} />
+        <Route path="operations" element={<OperationsPage />} />
+        <Route path="operations/agents/:agentId" element={<AgentDetailPage />} />
+        <Route path="tasks" element={<TasksPage />} />
+        <Route path="approvals" element={<ApprovalsPage />} />
+        <Route path="calendar" element={<CalendarPage />} />
+        <Route path="content" element={<ContentPage />} />
+        <Route path="assets" element={<AssetsPage />} />
+        <Route path="analytics" element={<AnalyticsPage />} />
+        <Route path="reports" element={<Navigate to="/app/analytics" replace />} />
+        <Route path="research" element={<ResearchPage />} />
         <Route path="integrations" element={<IntegrationsPage />} />
+        <Route path="knowledge" element={<KnowledgePage />} />
+        <Route path="team" element={<TeamPage />} />
+        <Route path="billing" element={<BillingPage />} />
+        <Route path="billing/test-checkout" element={<TestCheckoutPage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
+        <Route path="settings" element={<SettingsPage />} />
+        <Route path="settings/security" element={<SecuritySettingsPage />} />
+        <Route path="settings/automation" element={<AutomationSettingsPage />} />
+        <Route path="settings/usage" element={<UsagePage />} />
+        <Route path="audit-log" element={<AuditLogPage />} />
+        <Route path="ops/agents/:agentId" element={<AgentAlias />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

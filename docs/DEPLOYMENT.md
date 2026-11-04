@@ -1,102 +1,88 @@
 # Deployment
 
-## Environments
+**Status: runs locally and in Docker Compose. Not deployed anywhere.**
 
-| Environment | Database | AI key | Notes |
-|---|---|---|---|
-| Local dev | SQLite (`instance/dev.db`) | optional | `requirements-dev.txt`, `flask run` |
-| CI (not yet configured) | SQLite (in-memory, `TestingConfig`) | none | `pytest` only; no CI pipeline file exists yet in this repo — see "Not done" below |
-| Docker / staging-like | PostgreSQL (compose service) | optional via env | `docker compose up --build` |
-| Production | Managed PostgreSQL (not provisioned) | required for real AI output | Not deployed anywhere in this session |
+## Processes
 
-## Docker Compose (local "production-like" run)
+| Process | Command | Scale |
+|---|---|---|
+| API | `gunicorn wsgi:app` (Docker entrypoint runs `flask db upgrade` first) | horizontally |
+| Worker | `flask --app wsgi.py worker` | 1+ (claims are atomic) |
+| Scheduler (cron) | `flask purge-deleted-workspaces` daily | 1 |
+| Frontend | static build (`npm run build`) behind nginx/CDN | — |
 
-```bash
-export ANTHROPIC_API_KEY=sk-...   # optional — omit to run in capability_unavailable mode
-export SECRET_KEY=$(python -c "import secrets; print(secrets.token_hex(32))")
-docker compose up --build
-```
+No Redis/Celery: the queue is the database (D11). Set
+`RATELIMIT_STORAGE_URI=redis://…` if you run several API instances so rate
+limits are shared.
 
-- `postgres`: official `postgres:16-alpine`, healthcheck-gated.
-- `backend`: builds from the root `Dockerfile` (pinned `python:3.12-slim`),
-  `docker-entrypoint.sh` runs `flask db upgrade` then `gunicorn` — migrations
-  are not a separate manual step in this path.
-- `frontend`: multi-stage build (`frontend/Dockerfile`), served by nginx
-  with an SPA fallback (`frontend/nginx.conf`).
+## Environment variables
 
-Built and smoke-tested in this session (see `docs/TEST_REPORT.md`); a full
-`docker compose up` end-to-end run (with real Postgres and the frontend
-actually talking to the backend container) was **not** performed — do that
-before trusting this path for a pilot.
+Names only — see `.env.example` for placeholders. Required in production:
+`SECRET_KEY`, `DATABASE_URL` (PostgreSQL), `FRONTEND_ORIGIN`,
+`AI_PROVIDER` + `ANTHROPIC_API_KEY` or `GROQ_API_KEY`. Optional:
+`AI_MODEL`, `AI_TIMEOUT_SECONDS`, `AI_WORKFLOW_BUDGET_USD`,
+`WORKER_RETRY_BASE_SECONDS`, `WORKER_RETRY_MAX_SECONDS`,
+`RATELIMIT_STORAGE_URI`, `BILLING_PROVIDER` (`none` default in
+production), `STRIPE_SECRET_KEY`, `BILLING_WEBHOOK_SECRET`, `TRIAL_DAYS`,
+`APPROVAL_TTL_DAYS`, `INVITATION_TTL_DAYS`, `DELETION_GRACE_DAYS`,
+`UPLOAD_DIR`, `MAX_UPLOAD_MB`, `KILL_SWITCH_ENABLED`. Never set
+`ALLOW_FIXTURE_PROVIDER` or `WEBHOOK_ALLOW_PRIVATE_TARGETS` in production
+(`ProductionConfig` forces the fixture provider off).
 
-## Required environment variables for production
+Frontend build: `VITE_API_BASE_URL=https://api.<domain>/api/v1`.
 
-See `.env.example` for the full list and safe placeholder values. At
-minimum for production:
+## Hosting shape (recommended)
 
-- `SECRET_KEY` — real random value, not the dev placeholder, injected via
-  a secret manager, never committed.
-- `DATABASE_URL` — managed PostgreSQL connection string.
-- `FRONTEND_ORIGIN` — the real deployed frontend origin (for CORS).
-- `SESSION_COOKIE_SECURE=true` (forced on automatically by
-  `ProductionConfig` regardless of this env var, as a safety net).
-- `ANTHROPIC_API_KEY` — only if AI-generated stages should actually run;
-  the app is fully usable without it (clarification/capability-unavailable
-  states instead).
+- Frontend: Vercel/Netlify/static CDN.
+- API + worker: Render, Railway, Fly.io or a container host (two services
+  from the same image; the worker overrides the command).
+- PostgreSQL: managed, with point-in-time recovery.
+- Uploads: replace `LocalStorage` with an S3/GCS implementation
+  (`app/storage.py`) — local disk is not durable on most PaaS hosts.
+- Cookies: API and frontend on the same registrable domain
+  (`app.<domain>` + `api.<domain>`) so `SameSite=Lax` session cookies
+  work; `SESSION_COOKIE_SECURE` is forced on in production; HTTPS only.
 
-## Secret management strategy (design, not yet wired to a real vault)
+## CI
 
-Application code never logs `SECRET_KEY` or `ANTHROPIC_API_KEY`
-(`app/logging_config.py:RedactingFilter`), and no ordinary model field
-stores a plaintext credential (`Integration.encrypted_credential_ref` is a
-pointer field, not a storage field — unused today since no connector needs
-it yet). For a real deployment, inject secrets via your platform's secret
-manager (e.g. AWS Secrets Manager, Doppler, Vault) as environment
-variables at container start — do not bake them into the image or commit
-them to `.env`.
+`.github/workflows/ci.yml`: backend tests, migration check on a fresh
+database, frontend typecheck/build/lint/unit tests, dependency audits, and
+the E2E journey with the fixture provider.
 
-## Database migrations
+## Migrations and rollback
 
-```bash
-export FLASK_APP=wsgi.py
-flask db upgrade          # apply
-flask db migrate -m "..."  # generate a new migration after model changes
-```
+`flask db upgrade` on deploy. Every migration has a `downgrade()`; roll
+back with `flask db downgrade <rev>` **after** restoring application code.
+Take a database snapshot before each production migration.
 
-Never hand-edit the schema in any environment above local dev — always go
-through a migration, including in Docker (handled automatically by
-`docker-entrypoint.sh` on container start).
+## Backup and restore
 
-## Backup/restore
+Daily `pg_dump` (or provider PITR) retained 30 days, plus uploads bucket
+versioning. Restore drill: restore to a scratch database, point a staging
+API at it, run `GET /api/v1/health/ready` and the E2E journey. **Not yet
+performed** — do this before launch.
 
-**Not implemented or tested in this session.** For PostgreSQL, standard
-`pg_dump`/`pg_restore` or your managed provider's point-in-time recovery
-applies; no custom tooling exists in this repo. This is a real gap before
-a paid pilot — see `docs/IMPLEMENTATION_PLAN.md` M10.
+## Monitoring
 
-## Monitoring / health checks
+Health: `/api/v1/health/live`, `/api/v1/health/ready`. Logs are structured
+to stdout with `X-Request-Id` correlation. Alert on: worker not claiming
+(oldest `ready` task age), rising `failed` task count, 5xx rate, billing
+webhook signature failures. Error tracking (e.g. Sentry) not wired.
 
-`GET /api/v1/health/live` (process up) and `GET /api/v1/health/ready`
-(DB reachable) exist and return safe, non-leaking responses. No metrics
-exporter, structured trace collector, or alerting is wired up yet — logs
-are structured (`app/logging_config.py`) but go to stdout only, with no
-shipping/retention configured.
+## Graceful shutdown
 
-## Not done (be explicit about this before calling anything "production-ready")
+The worker finishes its current task on SIGTERM/SIGINT. A killed worker's
+task is recovered automatically when its lease expires.
 
-- No CI pipeline (GitHub Actions or equivalent) runs tests/lint/migration
-  checks automatically on push — the spec's M0.6 task.
-- No staging environment exists.
-- No TLS termination config (expected to be handled by whatever reverse
-  proxy/load balancer fronts the containers in a real deployment — not
-  configured here).
-- No error-tracking service (Sentry or equivalent) wired up.
-- No kill-switch admin UI — flipping `Organization.kill_switch_enabled`
-  today means a direct DB update or a future admin route, not built yet.
+## Release checklist (before any paid launch)
 
-**Overall readiness assessment: local prototype / pilot candidate, not a
-production deployment candidate.** The core workflow, tenant isolation,
-and governance gates are real, tested, and browser-verified; what's
-missing is operational maturity (CI, backup/restore, monitoring/alerting,
-a live AI key actually exercised, and a live publishing channel) rather
-than core product logic.
+- [ ] Security: dependency audit clean; secrets in a manager; `SECRET_KEY` rotated from dev
+- [ ] Backups: restore drill performed and timed
+- [ ] Tenant isolation: full test suite green on the release commit
+- [ ] Load: expected workspaces × runs/day fits provider rate limits and worker count
+- [ ] Costs: plan AI budgets checked against real provider pricing (placeholders today)
+- [ ] Observability: logs shipped, alerts above configured
+- [ ] Incident response: who can engage `KILL_SWITCH_ENABLED`, and how fast
+- [ ] Integrations: none live; any new connector reviewed against `docs/INTEGRATIONS.md`
+- [ ] Legal: Privacy/Terms reviewed by counsel; pricing confirmed
+- [ ] Email delivery configured for resets and invitations

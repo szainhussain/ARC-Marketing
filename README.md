@@ -1,166 +1,84 @@
-# ARC — Strategy. Plan. Execution.
+# ARC — Your marketing department. Always moving.
 
-**ARC** (formerly "Marketing Department Harness" during early build —
-see `docs/DECISIONS.md` D10 for the rename) is a multi-tenant SaaS
-platform that gives SMBs a coordinated AI marketing workflow: business
-profile → campaign brief → strategy/research/plan/content → quality
-review → human approval → manual handoff/export. See
-`marketing_department_harness_complete_specification.md` for the full
-product, UI/UX, architecture, and governance specification this build
-follows (that source document keeps its original name — it's the
-historical brief, not branding), and `docs/IMPLEMENTATION_PLAN.md` for
-what has actually been built versus what remains.
+**ARC** is a multi-tenant SaaS "Marketing Department as a Service": 12
+specialist AI agents (CMO, Marketing Manager, Social, PR & Partnerships,
+Paid Media, Creative, Research, Customer Insights, SEO & Growth, Key
+Accounts, Marketing Ops/QA, Record Keeper) run each campaign through a
+durable dependency graph, with version-bound human approvals on anything
+that leaves the workspace. It never posts, sends or spends on your behalf.
 
-**Status: local prototype / pilot candidate.** Not production-ready — see
-"Known limitations" below and `docs/DECISIONS.md`.
+**Status:** feature-complete against the MaaS brief for local use and
+tested (77 backend, 10 frontend, 18-step E2E). **Not deployed.** Live
+publishing/ads/analytics connectors and email delivery need credentials —
+see `docs/PRODUCT_REQUIREMENTS.md` and `docs/INTEGRATIONS.md`.
 
 ## Stack
 
-- Backend: Python 3.12+ / Flask, SQLAlchemy + Alembic, SQLite (dev) or
-  PostgreSQL (docker-compose / production).
-- Frontend: React 19 + TypeScript, Vite, React Router, `motion` (Framer
-  Motion) for the dark, scroll-reveal/3D-tilt landing design — see
-  `docs/DECISIONS.md` D10.
-- AI: provider-neutral adapter, Anthropic and Groq (OpenAI-compatible,
-  free-tier-friendly) implementations included. Runs in a
-  documented `capability_unavailable` state when no API key is configured —
-  it never fabricates output.
-- Auth: email/password, Flask-Login session cookies, Flask-WTF CSRF.
+- Backend: Flask app factory, SQLAlchemy + Alembic, SQLite (dev) / PostgreSQL,
+  DB-backed task queue + `flask worker`, Flask-Login sessions, CSRF,
+  Flask-Limiter, Marshmallow schemas, OpenAPI at `/api/v1/openapi.json`.
+- AI: provider-neutral adapter (Anthropic, Groq); no provider → honest
+  `capability_unavailable`, never fabricated output.
+- Frontend: React 19 + TypeScript + Vite, React Router, Motion, Recharts,
+  Lucide; design tokens in `frontend/src/index.css` (D13).
 
-## Local setup (no Docker)
-
-Requires Python 3.12+ (3.14 works too, except `psycopg2-binary`, which has
-no prebuilt wheel for very new Python versions yet — local dev uses SQLite
-instead, see below) and Node 20+.
-
-### Backend
+## Run locally
 
 ```bash
-python -m venv .venv
-source .venv/Scripts/activate      # Windows Git Bash; use .venv/bin/activate on macOS/Linux
-pip install -r requirements-dev.txt   # SQLite-only deps; use requirements.txt (+ psycopg2) for Postgres
-cp .env.example .env                  # already present in this checkout with a generated dev SECRET_KEY
+python -m venv .venv && source .venv/Scripts/activate   # macOS/Linux: .venv/bin/activate
+pip install -r requirements-dev.txt
+cp .env.example .env            # then set GROQ_API_KEY or ANTHROPIC_API_KEY
 export FLASK_APP=wsgi.py
-flask db upgrade                      # creates instance/dev.db
-flask run
+flask db upgrade && flask seed-plans
+flask run                       # terminal 1: API on :5000
+flask worker                    # terminal 2: agent worker (runs stay "Queued" without it)
+cd frontend && npm install && cp .env.example .env.local && npm run dev   # terminal 3
 ```
 
-To enable real AI generation, set in `.env`: either `AI_PROVIDER=anthropic`
-+ `ANTHROPIC_API_KEY=sk-ant-...`, or `AI_PROVIDER=groq` +
-`GROQ_API_KEY=gsk_...` (Groq has a free tier — get a key at
-console.groq.com). `AI_MODEL` defaults per-provider
-(`app/config.py:_AI_MODEL_DEFAULTS`) if left unset. Restart the backend
-after changing `.env`. With neither key set, the app runs correctly in a
-documented `capability_unavailable` state instead of fabricating output.
+Keep the hostname consistent: `VITE_API_BASE_URL` (frontend) and
+`FRONTEND_ORIGIN` (backend) must both use `localhost` (session cookie is
+`SameSite=Lax`).
 
-Backend serves on `http://127.0.0.1:5000` (equivalently `http://localhost:5000`).
+Open the site, click **Build your marketing team**, complete onboarding,
+create a campaign and choose **Save and run the department**. Watch it in
+**Operations**. Billing runs in a clearly labelled TEST MODE locally.
 
-### Frontend
+## Tests
 
 ```bash
-cd frontend
-npm install
-cp .env.example .env.local
-npm run dev
+python -m pytest -q                       # backend
+cd frontend && npm run build && npm run lint && npm test
+bash scripts/run_e2e.sh                   # E2E journey (needs `npm run dev`), fixture AI, throwaway DB
 ```
 
-Frontend serves on `http://localhost:5173` (Vite auto-increments the port,
-e.g. to 5174, if 5173 is already in use by something else on your machine —
-watch the terminal output).
-
-**Important:** `frontend/.env.local`'s `VITE_API_BASE_URL` and the backend's
-`FRONTEND_ORIGIN` (in `.env`) must use the *same hostname* — both
-`localhost` or both `127.0.0.1`, not one of each. The backend's session
-cookie is `SameSite=Lax`; browsers treat `localhost` and `127.0.0.1` as
-different sites, which silently drops the cookie on cross-site fetches even
-though CORS allows the request. If you change the frontend port, update
-`FRONTEND_ORIGIN` in `.env` to match and restart the backend.
-
-### Tests
-
-```bash
-source .venv/Scripts/activate
-python -m pytest -q
-```
-
-22 tests covering auth, tenant isolation, campaign CRUD + idempotency,
-workflow state (needs_input / capability_unavailable / full success path),
-deliverable versioning, approval lifecycle, and manual handoff — all
-passing as of this build. See `docs/TEST_REPORT.md` for the full run log
-and what is *not* covered yet.
+Results and what was *not* executed: `docs/TEST_REPORT.md`.
 
 ## Docker
 
-```bash
-docker compose up --build
-```
+`docker compose up --build` starts Postgres, the API (migrations + plan
+seed on start), the worker and the nginx-served frontend. Not yet run end
+to end against Postgres in this environment.
 
-Starts Postgres, the Flask backend (migrations run automatically on
-container start via `docker-entrypoint.sh`, then `gunicorn`), and the
-built frontend served by nginx. Set `ANTHROPIC_API_KEY` in your shell
-environment before running compose if you want AI-generated stages to
-actually run; otherwise the workflow correctly reports
-`capability_unavailable`.
+## Documentation
 
-The Dockerfile and compose file were built and smoke-tested in this
-session (image builds, `psycopg2-binary` installs cleanly against the
-pinned Python 3.12 base image, and the Flask app factory imports
-successfully inside the container). A full `docker compose up` against a
-live Postgres container was **not** run end-to-end in this session — do
-that before relying on it for a pilot.
+`docs/PRODUCT_REQUIREMENTS.md` (status matrix) · `ARCHITECTURE.md` ·
+`AGENT_SYSTEM.md` · `AGENT_WORKFLOWS.md` · `DATA_MODEL.md` · `API.md` ·
+`SECURITY_AND_GOVERNANCE.md` · `INTEGRATIONS.md` · `BILLING_AND_PLANS.md` ·
+`DEPLOYMENT.md` (incl. release checklist) · `OPERATIONS_RUNBOOK.md` ·
+`DECISIONS.md` · `TEST_REPORT.md` · `IMPLEMENTATION_PLAN.md` ·
+`TOOLS_AND_SKILLS.md` · `12_AGENT_ROADMAP.md`.
 
-## Project layout
+## Known limitations
 
-```
-app/              Flask application (api/, models/, services/, agents/, ai/, workflows/, integrations/)
-migrations/       Alembic migrations
-tests/            unit/, integration/, security/
-frontend/         React + TypeScript app (Vite)
-docs/             Architecture, API, security, test report, decisions, deployment,
-                  12-agent roadmap + full operating model (docs/AGENT_OPERATING_MODEL.md),
-                  tools/dependency evaluation (docs/TOOLS_AND_DEPENDENCIES.md)
-.claude/          Project-specific Claude Code agents and skills for continuing this build,
-                  plus the ui-ux-pro-max design-guidance skill (pruned install — see
-                  docs/TOOLS_AND_DEPENDENCIES.md for what was kept vs. removed)
-```
-
-## Known limitations (read before pitching this as "done")
-
-- **Live AI generation verified against Groq, not against Anthropic.** A
-  real Groq key was used this session (free tier) — see `docs/DECISIONS.md`
-  D8 and `docs/TEST_REPORT.md` for what broke (a stale model ID, a schema-
-  validation gap, an SDK-internal-retry hang) and was fixed. The Anthropic
-  path is still only unit-tested with a fake provider, never exercised
-  against a real `ANTHROPIC_API_KEY`. Groq's free tier is rate-limited
-  (8,000 tokens/minute as observed) — the full 5-stage pipeline hasn't yet
-  been seen completing in one run without hitting it.
-- **Only manual handoff/export** is implemented for external actions — no
-  live publishing connector (that's M11 in the backlog, deliberately
-  deferred until a pilot channel is chosen). The manual export *is* now
-  platform-aware: selecting Meta/Instagram, Google Ads, or TikTok Ads when
-  exporting a `content_pack` formats the content to that platform's real
-  composer limits (sourced from each platform's own docs — see
-  `docs/DECISIONS.md` D9) to speed up copy-pasting into Meta Business
-  Suite / Google Ads Editor / TikTok Ads Manager. **This still never posts
-  or spends anything automatically** — it's formatting, not a connector.
-- **Milestones M0–M6 are the solid core** (foundation, auth/tenant
-  isolation, business profile, campaign CRUD, workflow persistence, AI
-  adapter, full 5-stage pipeline) plus the essentials of M7–M9 (versioning,
-  approvals, manual handoff). M10 (alerting/backup-restore drills), M11
-  (live connector), and M12 (paid pilot instrumentation) are **not**
-  implemented — see `docs/IMPLEMENTATION_PLAN.md`.
-- Only 6 of the 16 UI/UX spec screens are built (landing, sign-up/in,
-  workspace creation, onboarding, dashboard, campaign list/brief/workspace,
-  reports, integrations). Team/permissions management, billing, and the
-  platform-admin surface are not built.
-- Role-based approval permissions exist and are enforced server-side, but
-  there is no UI yet to invite teammates or change a member's role — role
-  changes currently require direct DB access (tested that way in
-  `tests/security/test_tenant_isolation.py`).
-- No rate limiting, background job queue, or backup/restore drill yet —
-  the workflow runs synchronously in the request, which is acceptable for
-  this milestone's single-AI-call-chain but should move to a queue (Celery/
-  RQ + Redis) before a real pilot with concurrent users.
+- No live social/ads/analytics/CRM connectors (manual export only); no
+  business metrics (spend, conversions, revenue) until one is connected.
+- No email delivery: password-reset and verification links are logged
+  server-side in dev; invitation links are shown to the admin to share.
+- Stripe adapter implemented but not exercised; prices are provisional.
+- AI costs are estimates from placeholder per-token prices.
+- MFA, SSO, recurring/scheduled campaign programs, OpenAI adapter: not built.
+- Groq free tier (8k tokens/min) makes a full run take several minutes;
+  the worker retries automatically.
 
 ## Troubleshooting
 

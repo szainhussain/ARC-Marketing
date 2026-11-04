@@ -33,10 +33,32 @@ class BaseConfig:
     AI_TIMEOUT_SECONDS = int(os.environ.get("AI_TIMEOUT_SECONDS", "60"))
     AI_WORKFLOW_BUDGET_USD = float(os.environ.get("AI_WORKFLOW_BUDGET_USD", "1.00"))
 
+    # Worker retry backoff (exponential with jitter; a provider retry-after wins if longer).
+    WORKER_RETRY_BASE_SECONDS = float(os.environ.get("WORKER_RETRY_BASE_SECONDS", "5"))
+    WORKER_RETRY_MAX_SECONDS = float(os.environ.get("WORKER_RETRY_MAX_SECONDS", "120"))
+
     ORG_DEFAULT_MONTHLY_WORKFLOW_LIMIT = int(
         os.environ.get("ORG_DEFAULT_MONTHLY_WORKFLOW_LIMIT", "20")
     )
     KILL_SWITCH_ENABLED = _bool_env("KILL_SWITCH_ENABLED", False)
+
+    RATELIMIT_STORAGE_URI = os.environ.get("RATELIMIT_STORAGE_URI", "memory://")
+    RATELIMIT_HEADERS_ENABLED = True
+    PASSWORD_RESET_TTL_MINUTES = int(os.environ.get("PASSWORD_RESET_TTL_MINUTES", "60"))
+    INVITATION_TTL_DAYS = int(os.environ.get("INVITATION_TTL_DAYS", "7"))
+    APPROVAL_TTL_DAYS = int(os.environ.get("APPROVAL_TTL_DAYS", "14"))
+    DELETION_GRACE_DAYS = int(os.environ.get("DELETION_GRACE_DAYS", "30"))
+    TRIAL_DAYS = int(os.environ.get("TRIAL_DAYS", "14"))
+
+    # Billing: "test" (local test mode, default), "stripe", or "none".
+    BILLING_PROVIDER = os.environ.get("BILLING_PROVIDER", "test")
+    BILLING_WEBHOOK_SECRET = os.environ.get("BILLING_WEBHOOK_SECRET", "whsec_dev_only_change_me")
+    STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
+    # Outbound webhooks may target private/http URLs only in dev/test.
+    WEBHOOK_ALLOW_PRIVATE_TARGETS = _bool_env("WEBHOOK_ALLOW_PRIVATE_TARGETS", False)
+    # AI_PROVIDER=fixture is honoured only when this is set and never in production.
+    ALLOW_FIXTURE_PROVIDER = _bool_env("ALLOW_FIXTURE_PROVIDER", False)
+    IS_PRODUCTION = False
 
     UPLOAD_DIR = os.environ.get("UPLOAD_DIR", "storage/uploads")
     MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", "10"))
@@ -51,11 +73,16 @@ class TestingConfig(BaseConfig):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     WTF_CSRF_ENABLED = False
+    WORKER_RETRY_BASE_SECONDS = 0.0
+    RATELIMIT_ENABLED = False
     SESSION_COOKIE_SECURE = False
 
 
 class ProductionConfig(BaseConfig):
     DEBUG = False
+    IS_PRODUCTION = True
+    ALLOW_FIXTURE_PROVIDER = False
+    BILLING_PROVIDER = os.environ.get("BILLING_PROVIDER", "none")
     SESSION_COOKIE_SECURE = True
 
 

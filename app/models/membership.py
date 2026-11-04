@@ -6,17 +6,33 @@ ROLE_ADMIN = "admin"
 ROLE_MARKETING_LEAD = "marketing_lead"
 ROLE_CONTRIBUTOR = "contributor"
 ROLE_VIEWER = "viewer"
+ROLE_APPROVER = "approver"
+ROLE_ANALYST = "analyst"
 
 VALID_ROLES = (
     ROLE_OWNER,
     ROLE_ADMIN,
     ROLE_MARKETING_LEAD,
+    ROLE_APPROVER,
     ROLE_CONTRIBUTOR,
+    ROLE_ANALYST,
     ROLE_VIEWER,
 )
 
 # Roles permitted to approve Level 2 external actions by default.
-APPROVAL_CAPABLE_ROLES = (ROLE_OWNER, ROLE_ADMIN, ROLE_MARKETING_LEAD)
+APPROVAL_CAPABLE_ROLES = (ROLE_OWNER, ROLE_ADMIN, ROLE_MARKETING_LEAD, ROLE_APPROVER)
+# Roles that can run/steer agent work (start runs, pause/retry, edit drafts).
+OPERATOR_ROLES = (ROLE_OWNER, ROLE_ADMIN, ROLE_MARKETING_LEAD)
+WORKSPACE_ADMIN_ROLES = (ROLE_OWNER, ROLE_ADMIN)
+ROLE_LABELS = {
+    ROLE_OWNER: "Workspace Owner",
+    ROLE_ADMIN: "Administrator",
+    ROLE_MARKETING_LEAD: "Marketing Manager",
+    ROLE_APPROVER: "Approver",
+    ROLE_CONTRIBUTOR: "Contributor",
+    ROLE_ANALYST: "Analyst",
+    ROLE_VIEWER: "Viewer",
+}
 
 
 class Membership(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):

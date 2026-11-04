@@ -7,8 +7,29 @@ from app.services.errors import Conflict, NotFound, ValidationError
 REQUIRED_FIELDS = ("name", "objective")
 
 
+def _parse_date(value):
+    from datetime import date
+
+    if value in (None, ""):
+        return None
+    if isinstance(value, date):
+        return value
+    return date.fromisoformat(str(value))
+
+
 def validate_campaign_payload(payload: dict) -> list[dict]:
     errors = []
+    parsed = {}
+    for field in ("start_date", "end_date"):
+        try:
+            parsed[field] = _parse_date(payload.get(field))
+        except ValueError:
+            errors.append({"field": field, "issue": "Use YYYY-MM-DD"})
+    if parsed.get("start_date") and parsed.get("end_date") and parsed["end_date"] < parsed["start_date"]:
+        errors.append({"field": "end_date", "issue": "Must be on or after the start date"})
+    for field, limit in (("name", 255), ("geography", 255), ("channels", 500), ("budget_guidance", 255)):
+        if payload.get(field) and len(str(payload[field])) > limit:
+            errors.append({"field": field, "issue": f"Must be {limit} characters or fewer"})
     for field in REQUIRED_FIELDS:
         if not (payload.get(field) or "").strip():
             errors.append({"field": field, "issue": "Required"})
@@ -40,8 +61,8 @@ def create_campaign(organization_id: str, user_id: str, payload: dict) -> Campai
         offer=payload.get("offer"),
         geography=payload.get("geography"),
         channels=payload.get("channels"),
-        start_date=payload.get("start_date"),
-        end_date=payload.get("end_date"),
+        start_date=_parse_date(payload.get("start_date")),
+        end_date=_parse_date(payload.get("end_date")),
         budget_guidance=payload.get("budget_guidance"),
         constraints=payload.get("constraints"),
         success_metrics=payload.get("success_metrics"),
@@ -86,7 +107,8 @@ def update_campaign(organization_id: str, campaign_id: str, user_id: str, payloa
         "start_date", "end_date", "budget_guidance", "constraints", "success_metrics",
     ):
         if field in payload:
-            setattr(campaign, field, payload[field])
+            value = payload[field]
+            setattr(campaign, field, _parse_date(value) if field.endswith("_date") else value)
 
     db.session.flush()
     record_audit_event(
