@@ -22,7 +22,7 @@ export function useResource<T>(path: string | null, { pollMs }: { pollMs?: numbe
       setError(null)
     } catch (err) {
       if (mine !== generation.current) return
-      setError(err instanceof ApiError ? err.message : 'Something went wrong loading this page.')
+      setError(err instanceof ApiError ? err.message : 'Could not reach the ARC service. Check your connection and try again.')
     } finally {
       if (mine === generation.current) setLoading(false)
     }

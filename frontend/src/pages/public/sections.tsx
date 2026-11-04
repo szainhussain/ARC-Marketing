@@ -5,7 +5,7 @@ import { useResource } from '../../hooks/useResource'
 import { AGENT_META, type PublicAgent } from '../../lib/agentMeta'
 import AgentDetailDialog from '../../components/marketing/AgentDetailDialog'
 import Reveal from '../../components/motion/Reveal'
-import { Skeleton } from '../../components/ui'
+import { ErrorState, Skeleton } from '../../components/ui'
 import { INTEGRATION_STATUS_LABEL } from '../../lib/marketing'
 
 export type CatalogItem = {
@@ -30,10 +30,13 @@ export type Plan = {
 }
 
 
+const UNREACHABLE = "We couldn't reach the ARC service just now. It may be waking up — try again in a minute."
+
 export function AgentGrid({ limit }: { limit?: number }) {
-  const { data } = useResource<{ agents: PublicAgent[] }>('/public/agents')
+  const { data, error, reload } = useResource<{ agents: PublicAgent[] }>('/public/agents')
   const [selected, setSelected] = useState<PublicAgent | null>(null)
   const agents = data?.agents || []
+  if (error && !data) return <ErrorState message={UNREACHABLE} onRetry={reload} />
   if (!data) return <Skeleton height={140} count={2} />
   return (
     <>
@@ -62,7 +65,8 @@ export function AgentGrid({ limit }: { limit?: number }) {
 }
 
 export function IntegrationList({ compact }: { compact?: boolean }) {
-  const { data } = useResource<{ integrations: CatalogItem[] }>('/public/integrations')
+  const { data, error, reload } = useResource<{ integrations: CatalogItem[] }>('/public/integrations')
+  if (error && !data) return <ErrorState message={UNREACHABLE} onRetry={reload} />
   if (!data) return <Skeleton height={60} count={3} />
   const items = compact ? data.integrations.slice(0, 8) : data.integrations
   return (
@@ -100,7 +104,8 @@ export function IntegrationList({ compact }: { compact?: boolean }) {
 }
 
 export function PricingTable() {
-  const { data } = useResource<{ plans: Plan[]; pricing_note: string }>('/public/plans')
+  const { data, error, reload } = useResource<{ plans: Plan[]; pricing_note: string }>('/public/plans')
+  if (error && !data) return <ErrorState message={UNREACHABLE} onRetry={reload} />
   if (!data) return <Skeleton height={300} />
   return (
     <>
