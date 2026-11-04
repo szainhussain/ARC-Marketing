@@ -6,7 +6,7 @@ services:
     name: arc-api
     runtime: python
     plan: free
-    region: oregon
+    region: virginia      # same area as the Neon database (AWS us-east-1)
     buildCommand: pip install -r requirements.txt
     startCommand: >-
       flask db upgrade && flask seed-plans &&
