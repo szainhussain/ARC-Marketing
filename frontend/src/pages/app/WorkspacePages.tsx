@@ -21,7 +21,7 @@ import { useWorkspace } from '../../context/WorkspaceContext'
 import { useAction, useResource } from '../../hooks/useResource'
 import { humanize, money, relativeTime } from '../../lib/labels'
 
-const API = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:5000/api/v1'
+import { API_BASE_URL as API } from '../../lib/apiBase'
 
 type Workspace = {
   id: string; name: string; timezone: string; max_concurrent_tasks: number; default_run_budget_usd: number | null

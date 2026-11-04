@@ -23,7 +23,7 @@ import { useAction, useResource } from '../../hooks/useResource'
 import { INTEGRATION_STATUS_LABEL } from '../../lib/marketing'
 import { humanize, money, relativeTime } from '../../lib/labels'
 
-const API = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:5000/api/v1'
+import { API_BASE_URL as API } from '../../lib/apiBase'
 const TOOLTIP = { contentStyle: { background: '#16181d', border: '1px solid #33373e', borderRadius: 8, fontSize: 12 } }
 const AXIS = { stroke: '#6b6f74', fontSize: 11, tickLine: false, axisLine: false }
 

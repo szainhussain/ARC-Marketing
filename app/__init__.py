@@ -10,6 +10,12 @@ def create_app(config_name: str | None = None) -> Flask:
     app = Flask(__name__)
     app.config.from_object(get_config(config_name))
 
+    hops = app.config.get("TRUSTED_PROXY_HOPS", 0)
+    if hops:
+        from werkzeug.middleware.proxy_fix import ProxyFix
+
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=hops, x_proto=1, x_host=0)
+
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)

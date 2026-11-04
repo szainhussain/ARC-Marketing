@@ -6,7 +6,7 @@ import { Field } from '../../components/ui'
 import { CAPABILITIES } from '../../lib/marketing'
 import { AgentGrid, IntegrationList, PricingTable, SectionHead } from './sections'
 
-const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1'
+import { API_BASE_URL as API } from '../../lib/apiBase'
 
 export function ProductPage() {
   return (

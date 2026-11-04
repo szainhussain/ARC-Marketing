@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import Logo from './Logo'
+import { API_BASE_URL } from '../lib/apiBase'
 
 const LINKS = [
   { to: '/product', label: 'Product' },
@@ -112,8 +113,8 @@ export default function PublicLayout() {
           <div>
             <h4>Resources</h4>
             <Link to="/docs">Documentation</Link>
-            <a href={`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1'}/openapi.json`}>API reference</a>
-            <a href={`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1'}/health/ready`}>System status</a>
+            <a href={`${API_BASE_URL}/openapi.json`}>API reference</a>
+            <a href={`${API_BASE_URL}/health/ready`}>System status</a>
           </div>
           <div>
             <h4>Company</h4>

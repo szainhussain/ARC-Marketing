@@ -89,6 +89,7 @@ class BaseConfig:
     # AI_PROVIDER=fixture is honoured only when this is set and never in production.
     ALLOW_FIXTURE_PROVIDER = _bool_env("ALLOW_FIXTURE_PROVIDER", False)
     IS_PRODUCTION = False
+    TRUSTED_PROXY_HOPS = int(os.environ.get("TRUSTED_PROXY_HOPS", "0"))
 
     UPLOAD_DIR = os.environ.get("UPLOAD_DIR", "storage/uploads")
     MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", "10"))
@@ -110,6 +111,10 @@ class TestingConfig(BaseConfig):
 
 class ProductionConfig(BaseConfig):
     DEBUG = False
+    # Proxies in front of the app that append to X-Forwarded-For. Default 2:
+    # Vercel (frontend rewrite of /api/*) then Render's load balancer. Used so
+    # rate limits key on the visitor's IP, not the proxy's.
+    TRUSTED_PROXY_HOPS = int(os.environ.get("TRUSTED_PROXY_HOPS", "2"))
     IS_PRODUCTION = True
     ALLOW_FIXTURE_PROVIDER = False
     BILLING_PROVIDER = os.environ.get("BILLING_PROVIDER", "none")
