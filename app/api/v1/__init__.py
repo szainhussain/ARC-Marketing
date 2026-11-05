@@ -8,6 +8,7 @@ from app.api.v1 import (  # noqa: E402,F401
     auth,
     business_profile,
     campaigns,
+    collaboration,
     deliverables,
     external_actions,
     health,

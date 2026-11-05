@@ -45,6 +45,9 @@ class Approval(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
 
     requested_by_user_id = db.Column(db.String(36), db.ForeignKey("users.id"), nullable=False)
     decided_by_user_id = db.Column(db.String(36), db.ForeignKey("users.id"))
+    # Set instead of decided_by_user_id when a client decided through a review link.
+    decided_by_external_name = db.Column(db.String(120))
+    decided_by_external_email = db.Column(db.String(255))
     decision = db.Column(db.String(32), default=DECISION_PENDING, nullable=False)
     decision_comment = db.Column(db.Text)
     decided_at = db.Column(db.DateTime(timezone=True))
@@ -66,6 +69,8 @@ class Approval(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
             "decision_comment": self.decision_comment,
             "decided_at": self.decided_at.isoformat() if self.decided_at else None,
             "decided_by_user_id": self.decided_by_user_id,
+            "decided_by_external": ({"name": self.decided_by_external_name, "email": self.decided_by_external_email}
+                                    if self.decided_by_external_name else None),
             "requested_by_user_id": self.requested_by_user_id,
             "requesting_agent_id": self.requesting_agent_id,
             "expected_outcome": self.expected_outcome,

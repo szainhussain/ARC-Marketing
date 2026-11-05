@@ -31,6 +31,7 @@ const SecuritySettingsPage = lazy(() => import('./pages/app/WorkspacePages').the
 const SettingsPage = lazy(() => import('./pages/app/WorkspacePages').then((m) => ({ default: m.SettingsPage })))
 const TeamPage = lazy(() => import('./pages/app/WorkspacePages').then((m) => ({ default: m.TeamPage })))
 const TestCheckoutPage = lazy(() => import('./pages/app/WorkspacePages').then((m) => ({ default: m.TestCheckoutPage })))
+const ReviewPage = lazy(() => import('./pages/public/ReviewPage'))
 const AdminPage = lazy(() => import('./pages/app/AdminPage'))
 const UsagePage = lazy(() => import('./pages/app/WorkspacePages').then((m) => ({ default: m.UsagePage })))
 import {
@@ -78,6 +79,7 @@ export default function App() {
         <Route path="/solutions" element={<SolutionsPage />} />
         <Route path="/solutions/:slug" element={<SolutionPage />} />
         <Route path="/demo" element={<DemoPage />} />
+        <Route path="/review/:token" element={<ReviewPage />} />
         <Route path="/marketing-scorecard" element={<ScorecardPage />} />
         <Route path="/compare/agency" element={<AgencyComparePage />} />
         <Route path="/agents" element={<AgentsPage />} />

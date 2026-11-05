@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { apiRequest, ApiError } from '../api/client'
 import DeliverableContent from '../components/DeliverableContent'
+import { CollabToolbar, CommentsPanel, DeliverableEditor, ShareForReview } from '../components/DeliverableCollab'
 import PlatformExportView from '../components/PlatformExportView'
 import WorkflowGraphPanel from '../components/WorkflowGraphPanel'
 import { PageHeader, PageSkeleton, Tabs } from '../components/ui'
@@ -34,6 +35,8 @@ export default function CampaignWorkspacePage({ section = 'overview' }: { sectio
   const [approvalsByDeliverable, setApprovalsByDeliverable] = useState<Record<string, Approval>>({})
   const [actionsByApproval, setActionsByApproval] = useState<Record<string, ExternalAction>>({})
   const [platformByDeliverable, setPlatformByDeliverable] = useState<Record<string, string>>({})
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [commentsOpen, setCommentsOpen] = useState<Record<string, boolean>>({})
   const [error, setError] = useState<string | null>(null)
   const [starting, setStarting] = useState(false)
   const [runBusy, setRunBusy] = useState(false)
@@ -318,7 +321,34 @@ export default function CampaignWorkspacePage({ section = 'overview' }: { sectio
                 Version {d.current_version?.version_number} · review:{' '}
                 <span className={`status-pill ${d.review_status}`}>{d.review_status}</span>
               </p>
-              <DeliverableContent deliverableType={d.deliverable_type} content={d.current_version?.content} />
+              {orgId && (
+                <CollabToolbar
+                  editing={editingId === d.id}
+                  onEdit={() => setEditingId(d.id)}
+                  commentsOpen={!!commentsOpen[d.id]}
+                  onToggleComments={() => setCommentsOpen((prev) => ({ ...prev, [d.id]: !prev[d.id] }))}
+                />
+              )}
+              {editingId === d.id && orgId && d.current_version?.content ? (
+                <DeliverableEditor
+                  orgId={orgId}
+                  deliverableId={d.id}
+                  content={d.current_version.content as Record<string, unknown>}
+                  onCancel={() => setEditingId(null)}
+                  onSaved={() => {
+                    setEditingId(null)
+                    setApprovalsByDeliverable((prev) => {
+                      const next = { ...prev }
+                      delete next[d.id]
+                      return next
+                    })
+                    loadAll()
+                  }}
+                />
+              ) : (
+                <DeliverableContent deliverableType={d.deliverable_type} content={d.current_version?.content} />
+              )}
+              {commentsOpen[d.id] && orgId && <CommentsPanel orgId={orgId} deliverableId={d.id} />}
               {d.deliverable_type === 'social_calendar' && orgId && <CalendarImport orgId={orgId} deliverableId={d.id} />}
 
               {!approval && (
@@ -338,6 +368,11 @@ export default function CampaignWorkspacePage({ section = 'overview' }: { sectio
                       <button className="danger" onClick={() => decide(d.id, approval.id, 'rejected')}>
                         Reject
                       </button>
+                      {orgId && (
+                        <div style={{ marginTop: 10 }}>
+                          <ShareForReview orgId={orgId} approvalId={approval.id} />
+                        </div>
+                      )}
                     </>
                   )}
                   {approval.decision === 'approved' && !action && (

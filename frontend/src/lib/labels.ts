@@ -40,7 +40,10 @@ export function relativeTime(iso: string | null | undefined): string {
   if (seconds < 0) {
     const s = -seconds
     if (s < 60) return `in ${s}s`
-    return `in ${Math.round(s / 60)}m`
+    if (s < 3600) return `in ${Math.round(s / 60)}m`
+    if (s < 86400) return `in ${Math.round(s / 3600)}h`
+    const days = Math.round(s / 86400)
+    return `in ${days} day${days === 1 ? '' : 's'}`
   }
   if (seconds < 60) return `${seconds}s ago`
   if (seconds < 3600) return `${Math.round(seconds / 60)}m ago`
