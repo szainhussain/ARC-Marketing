@@ -37,7 +37,12 @@ Secondary claim: the coordination of an agency at a fraction of the cost (the si
 - Platform metrics (tasks, approvals, AI cost estimates) are kept separate from business metrics (spend, conversions, revenue); business metrics show as "not connected" until a data source exists.
 - If no AI provider is configured, a stage fails honestly as unavailable; it never shows invented output.
 - Prices are provisional during early access.
-- **In progress (other session, not yet shipped):** Brand Kit, Excel/PPT/PDF exports, image generation, an in-app chatbot, ads that launch after approval with a spend cap, batch-approved outreach, and a WordPress.com publishing pilot. Describe these only once they ship.
+- **Brand Kit:** persona, colours, fonts, visual rules and a logo on the business profile. Every agent receives it.
+- **Branded exports:** any deliverable, and the monthly report, downloads as Excel, PowerPoint or PDF in the client's colours with their logo.
+- **Image generation:** on-brand images for posts, content variants and ads (needs a Gemini key; without one it fails honestly, with a monthly cap per workspace).
+- **Web research:** the research agent reads up to 5 public pages listed on the brief and cites each one it used. Without pages, it says no web research is connected.
+- **Ask ARC:** a private assistant per member that answers only from this workspace (approved knowledge, deliverables, results, Brand Kit), shows its sources and links to next steps. Monthly cap.
+- **Not yet shipped:** ads that launch after approval with a spend cap, batch-approved outreach, and a WordPress.com publishing pilot. Describe these only once they ship.
 - Terminology: "approve", "request approval", "export for publishing", "mark as published". Avoid "handoff" and internal jargon in the UI.
 
 ## Brand Commitments
