@@ -4,6 +4,7 @@ import { Check, Globe } from 'lucide-react'
 import { apiRequest, ApiError } from '../api/client'
 import { ErrorState, Field, PageHeader, PageSkeleton, useToast } from '../components/ui'
 import { useWorkspace } from '../context/WorkspaceContext'
+import { useResource } from '../hooks/useResource'
 
 type Profile = Record<string, string | number | boolean | null | string[]>
 type ImportResult = {
@@ -143,13 +144,17 @@ const SECTIONS: { title: string; description: string; fields: FieldDef[] }[] = [
     ],
   },
   {
-    title: 'Brand voice',
-    description: 'How you sound — and what you never say.',
+    title: 'Brand kit',
+    description: 'How you look and sound. Every agent, generated image and export follows this.',
     fields: [
+      { key: 'brand_persona', label: 'Brand persona', type: 'textarea', hint: 'Who the brand sounds like, e.g. “a calm, expert trail guide who never oversells”.' },
       { key: 'tone_of_voice', label: 'Tone of voice', type: 'textarea' },
       { key: 'preferred_phrases', label: 'Preferred phrases / messaging guidelines', type: 'textarea' },
       { key: 'prohibited_phrases', label: 'Prohibited phrases', type: 'textarea', hint: 'Comma or line separated. Every agent output is checked against these in code.' },
       { key: 'constraints', label: 'Legal / compliance constraints', type: 'textarea' },
+      { key: 'brand_colors', label: 'Brand colours', hint: 'Hex codes, primary first, e.g. #0A2540, #635BFF. Used for exports and generated images.' },
+      { key: 'brand_fonts', label: 'Brand fonts', hint: 'e.g. Inter for body text, Fraunces for headings.' },
+      { key: 'visual_guidelines', label: 'Visual guidelines', type: 'textarea', hint: 'Photo style, logo use, colours or imagery to avoid.' },
     ],
   },
   {
@@ -242,6 +247,24 @@ export function ProfileForm({ mode }: { mode: 'wizard' | 'edit' }) {
         setProfile((p) => ({ ...(p as Profile), [f.key]: e.target.value })),
     }
     if (f.type === 'textarea') return <textarea rows={3} {...common} />
+    if (f.key === 'brand_colors') {
+      const swatches = String(profile[f.key] ?? '')
+        .split(/[\s,]+/)
+        .map((c) => (c && !c.startsWith('#') ? `#${c}` : c))
+        .filter((c) => /^#[0-9a-fA-F]{6}$/.test(c))
+      return (
+        <>
+          <input type="text" {...common} placeholder="#0A2540, #635BFF" />
+          {swatches.length > 0 && (
+            <span className="swatches" aria-hidden="true">
+              {swatches.map((c, i) => (
+                <span key={`${c}-${i}`} className="swatch" style={{ background: c }} title={c} />
+              ))}
+            </span>
+          )}
+        </>
+      )
+    }
     if (f.type === 'select')
       return (
         <select {...common}>
@@ -326,11 +349,53 @@ export default function OnboardingPage() {
   )
 }
 
+function LogoPicker() {
+  const { activeOrganizationId: orgId } = useWorkspace()
+  const toast = useToast()
+  const docs = useResource<{ documents: { id: string; original_filename: string; content_type: string }[] }>(orgId ? `/organizations/${orgId}/documents` : null)
+  const profile = useResource<{ business_profile: Profile }>(orgId ? `/organizations/${orgId}/business-profile` : null)
+  const images = (docs.data?.documents || []).filter((d) => d.content_type.startsWith('image/'))
+  const current = String(profile.data?.business_profile.logo_document_id || '')
+
+  async function choose(id: string) {
+    try {
+      await apiRequest(`/organizations/${orgId}/business-profile`, { method: 'PATCH', body: { logo_document_id: id || null } })
+      profile.reload()
+      toast({ tone: 'success', title: id ? 'Logo set. It appears on every export.' : 'Logo removed from exports' })
+    } catch (err) {
+      toast({ tone: 'error', title: err instanceof ApiError ? err.message : 'Could not set the logo' })
+    }
+  }
+
+  return (
+    <div className="card">
+      <h2>Logo</h2>
+      {images.length === 0 ? (
+        <p className="muted small" style={{ margin: 0 }}>
+          Upload your logo (PNG or JPG) in <Link to="/app/assets">Assets</Link>, then choose it here.
+        </p>
+      ) : (
+        <Field id="bp-logo" label="Logo used on exports and cover slides">
+          <select id="bp-logo" value={current} onChange={(e) => choose(e.target.value)}>
+            <option value="">No logo</option>
+            {images.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.original_filename}
+              </option>
+            ))}
+          </select>
+        </Field>
+      )}
+    </div>
+  )
+}
+
 export function BrandPage() {
   return (
     <div className="page">
       <PageHeader title="Brand profile" description="Every agent reads this. Prohibited phrases are enforced in code on every output."
         actions={<Link to="/app/knowledge" className="btn secondary">Knowledge library</Link>} />
+      <LogoPicker />
       <ProfileForm mode="edit" />
     </div>
   )

@@ -7,6 +7,7 @@ import { ConfirmDialog, DataTable, Dialog, EmptyState, ErrorState, Field, PageHe
 import { useWorkspace } from '../../context/WorkspaceContext'
 import { useResource } from '../../hooks/useResource'
 import { humanize } from '../../lib/labels'
+import { API_BASE_URL } from '../../lib/apiBase'
 
 type Metrics = {
   spend: number | null
@@ -350,8 +351,18 @@ export function MonthlyReportPage() {
           <span className="no-print" style={{ display: 'flex', gap: 10 }}>
             <label htmlFor="rep-month" className="sr-only">Month</label>
             <input id="rep-month" type="month" className="select-inline" value={month} onChange={(e) => e.target.value && setParams({ month: e.target.value })} />
-            <button onClick={() => window.print()}>
-              <Printer size={15} aria-hidden="true" /> Print or save as PDF
+            {orgId && (
+              <>
+                <a className="btn secondary" href={`${API_BASE_URL}/organizations/${orgId}/reports/monthly/export?month=${month}&format=pptx`}>
+                  PowerPoint
+                </a>
+                <a className="btn secondary" href={`${API_BASE_URL}/organizations/${orgId}/reports/monthly/export?month=${month}&format=pdf`}>
+                  PDF
+                </a>
+              </>
+            )}
+            <button className="secondary" onClick={() => window.print()}>
+              <Printer size={15} aria-hidden="true" /> Print
             </button>
           </span>
         }

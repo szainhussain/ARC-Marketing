@@ -12,6 +12,7 @@ import { useWorkspace } from '../context/WorkspaceContext'
 import { usePolling } from '../hooks/usePolling'
 import { humanize, money, relativeTime, statusLabel } from '../lib/labels'
 import { ACTIVE_RUN_STATUSES } from '../api/types'
+import { API_BASE_URL } from '../lib/apiBase'
 import type { Approval, Campaign, Deliverable, ExternalAction, WorkflowRun } from '../api/types'
 
 function uuid() {
@@ -349,6 +350,19 @@ export default function CampaignWorkspacePage({ section = 'overview' }: { sectio
                 />
               ) : (
                 <DeliverableContent deliverableType={d.deliverable_type} content={d.current_version?.content} />
+              )}
+              {orgId && (
+                <p className="export-links small">
+                  Download:{' '}
+                  {(['xlsx', 'pptx', 'pdf'] as const).map((f, i) => (
+                    <span key={f}>
+                      {i > 0 && ' · '}
+                      <a href={`${API_BASE_URL}/organizations/${orgId}/deliverables/${d.id}/export?format=${f}`}>
+                        {f === 'xlsx' ? 'Excel' : f === 'pptx' ? 'PowerPoint' : 'PDF'}
+                      </a>
+                    </span>
+                  ))}
+                </p>
               )}
               {commentsOpen[d.id] && orgId && <CommentsPanel orgId={orgId} deliverableId={d.id} />}
               {d.deliverable_type === 'social_calendar' && orgId && <CalendarImport orgId={orgId} deliverableId={d.id} />}

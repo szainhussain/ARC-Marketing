@@ -90,6 +90,8 @@ def purge_workspace(org_id: str) -> None:
     task_ids = [t.id for t in Task.query.filter_by(organization_id=org_id)]
     deliverable_ids = [d.id for d in Deliverable.query.filter_by(organization_id=org_id)]
     storage = get_storage()
+    # The Brand Kit logo points at a document; clear it before documents go.
+    BusinessProfile.query.filter_by(organization_id=org_id).update({"logo_document_id": None}, synchronize_session=False)
     for doc in Document.query.filter_by(organization_id=org_id):
         storage.delete(doc.storage_key)
     if task_ids:

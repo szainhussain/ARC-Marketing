@@ -169,7 +169,7 @@ AGENTS: tuple[AgentSpec, ...] = (
         agent_id="cmo",
         number=1,
         name="Chief Marketing Officer",
-        version="1.1.0",  # 1.1: receives approved knowledge-library entries
+        version="1.2.0",  # 1.1: approved knowledge-library entries; 1.2: Brand Kit in the profile
         role="Strategic owner: objectives, positioning, KPIs, budget envelope.",
         responsibilities=(
             "Translate company goals into marketing objectives",
@@ -193,7 +193,7 @@ AGENTS: tuple[AgentSpec, ...] = (
         agent_id="research_analyst",
         number=7,
         name="Market Intelligence & Research Analyst",
-        version="1.0.0",
+        version="1.1.0",  # 1.1: Brand Kit (persona, colours, fonts, visual rules) in the profile
         role="Evidence: audience, competitors, trends — facts separated from inference.",
         responsibilities=(
             "Synthesize audience and competitor hypotheses",
@@ -215,7 +215,7 @@ AGENTS: tuple[AgentSpec, ...] = (
         agent_id="marketing_manager",
         number=2,
         name="Marketing Manager",
-        version="1.1.0",  # 1.1: receives approved knowledge-library entries
+        version="1.2.0",  # 1.1: approved knowledge-library entries; 1.2: Brand Kit in the profile
         role="Execution orchestrator: converts strategy into a phased, owned plan.",
         responsibilities=(
             "Build a dependency-aware campaign plan and timeline",
@@ -236,7 +236,7 @@ AGENTS: tuple[AgentSpec, ...] = (
         agent_id="creative_studio",
         number=6,
         name="Brand, Creative & Content Studio",
-        version="1.0.0",
+        version="1.1.0",  # 1.1: Brand Kit (persona, colours, fonts, visual rules) in the profile
         role="Single source of creative assets: copy, briefs, channel variants.",
         responsibilities=(
             "Write the creative brief and channel copy variants",
@@ -257,7 +257,7 @@ AGENTS: tuple[AgentSpec, ...] = (
         agent_id="social_media",
         number=3,
         name="Social Media & Community Manager",
-        version="1.0.0",
+        version="1.1.0",  # 1.1: Brand Kit (persona, colours, fonts, visual rules) in the profile
         role="Organic channel calendars, post variants, community guidance.",
         responsibilities=(
             "Turn creative variants into a dated social calendar",
@@ -282,7 +282,7 @@ AGENTS: tuple[AgentSpec, ...] = (
         agent_id="paid_media",
         number=5,
         name="Performance Marketing Manager",
-        version="1.0.0",
+        version="1.1.0",  # 1.1: Brand Kit (persona, colours, fonts, visual rules) in the profile
         role="Paid search/social structure and budget recommendations — never spend.",
         responsibilities=(
             "Propose campaign structure, audiences, and experiments",
@@ -311,7 +311,7 @@ AGENTS: tuple[AgentSpec, ...] = (
         agent_id="seo_growth",
         number=9,
         name="Website, SEO & E-commerce Growth Manager",
-        version="1.0.0",
+        version="1.1.0",  # 1.1: Brand Kit (persona, colours, fonts, visual rules) in the profile
         role="Keyword themes, landing-page and metadata drafts, CRO ideas.",
         responsibilities=(
             "Plan keyword themes by search intent",
@@ -335,7 +335,7 @@ AGENTS: tuple[AgentSpec, ...] = (
         agent_id="pr_partnerships",
         number=4,
         name="PR, Influencer, Partnerships & Events Manager",
-        version="1.0.0",
+        version="1.1.0",  # 1.1: Brand Kit (persona, colours, fonts, visual rules) in the profile
         role="Target profiles, outreach drafts, event ideas — never commitments.",
         responsibilities=(
             "Define creator/media/partner target profiles",
@@ -359,7 +359,7 @@ AGENTS: tuple[AgentSpec, ...] = (
         agent_id="customer_insights",
         number=8,
         name="Customer Services & Voice-of-Customer Analyst",
-        version="1.0.0",
+        version="1.1.0",  # 1.1: Brand Kit (persona, colours, fonts, visual rules) in the profile
         role="Customer themes, likely objections, response templates with escalation.",
         responsibilities=(
             "Hypothesize recurring customer themes and objections",
@@ -380,7 +380,7 @@ AGENTS: tuple[AgentSpec, ...] = (
         agent_id="key_accounts",
         number=10,
         name="Key Accounts, Sales Enablement & Channel Marketing Manager",
-        version="1.0.0",
+        version="1.1.0",  # 1.1: Brand Kit (persona, colours, fonts, visual rules) in the profile
         role="Account segments, enablement materials, co-marketing ideas.",
         responsibilities=(
             "Identify account/channel segments and opportunities",
@@ -401,7 +401,7 @@ AGENTS: tuple[AgentSpec, ...] = (
         agent_id="marketing_ops",
         number=11,
         name="Marketing Operations, Analytics & Governance Manager",
-        version="1.0.0",
+        version="1.1.0",  # 1.1: Brand Kit (persona, colours, fonts, visual rules) in the profile
         role="Quality gate: completeness, brand compliance, unsupported claims.",
         responsibilities=(
             "Review every specialist draft against brand and objectives",
@@ -436,7 +436,7 @@ AGENTS: tuple[AgentSpec, ...] = (
         agent_id="record_keeper",
         number=12,
         name="Record Keeper, Knowledge & Scheduling Manager",
-        version="1.0.0",
+        version="1.1.0",  # 1.1: Brand Kit (persona, colours, fonts, visual rules) in the profile
         role="Campaign record: decisions, action items, knowledge updates.",
         responsibilities=(
             "Summarize the run and record key decisions",

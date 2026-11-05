@@ -10,6 +10,7 @@ from app.api.v1 import (  # noqa: E402,F401
     campaigns,
     collaboration,
     deliverables,
+    exports,
     external_actions,
     health,
     integrations,

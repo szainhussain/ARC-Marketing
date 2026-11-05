@@ -47,6 +47,12 @@ class BusinessProfile(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
     reporting_expectations = db.Column(db.Text)
     timezone = db.Column(db.String(64))
     language = db.Column(db.String(64))
+    # Brand Kit: what every agent and every export stays consistent with.
+    brand_persona = db.Column(db.Text)
+    brand_colors = db.Column(db.String(200))  # comma-separated hex, primary first
+    brand_fonts = db.Column(db.String(255))
+    visual_guidelines = db.Column(db.Text)
+    logo_document_id = db.Column(db.String(36), db.ForeignKey("documents.id"))
     onboarding_step = db.Column(db.Integer, default=0, nullable=False)
 
     onboarding_completed = db.Column(db.Boolean, default=False, nullable=False)
@@ -94,6 +100,11 @@ class BusinessProfile(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
             "reporting_expectations": self.reporting_expectations,
             "timezone": self.timezone,
             "language": self.language,
+            "brand_persona": self.brand_persona,
+            "brand_colors": self.brand_colors,
+            "brand_fonts": self.brand_fonts,
+            "visual_guidelines": self.visual_guidelines,
+            "logo_document_id": self.logo_document_id,
             "onboarding_step": self.onboarding_step,
             "completeness_warnings": self.completeness_warnings(),
             "onboarding_completed": self.onboarding_completed,

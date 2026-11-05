@@ -471,3 +471,8 @@ kbd { font-family: var(--font-mono); font-size: 0.75rem; padding: 1px 6px; borde
 
 /* Public pages: in-section headings sit clearly between body text and display headings */
 .section h2:not(.display-h) { font-size: 1.4rem; line-height: 1.25; }
+
+/* Brand kit swatches and export links */
+.swatches { display: flex; gap: 6px; margin-top: 8px; }
+.swatch { width: 22px; height: 22px; border-radius: 6px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18); }
+.export-links { margin: 12px 0 0; color: var(--color-muted-fg); }
