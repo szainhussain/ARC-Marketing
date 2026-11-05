@@ -380,8 +380,9 @@ all markup; another workspace is denied every endpoint and cannot reuse a
 state. Frontend build, lint (0 errors) and Vitest pass. Browser check on the
 local stack: article renders on the SEO deliverable, publish section and
 Integrations card show the correct "not set up / not connected" states, 0
-console errors. **Not executed:** a real WordPress.com OAuth round trip and
-post (needs the WordPress.com app credentials on Render).
+console errors. **Live verification (2026-11-06, by the owner on
+usearc.vercel.app):** real WordPress.com OAuth connection, then an approved
+SEO article published with *Publish now* and confirmed live on the site.
 
 
 ## Phase 2, part 2 — Outreach email (2026-11-06)
