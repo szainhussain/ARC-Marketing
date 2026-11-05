@@ -354,6 +354,13 @@ export function IntegrationsPage() {
             <h3>{i.name}</h3>
             <p>{i.detail}</p>
             {i.prerequisite && <p className="small" style={{ marginTop: 8 }}><span className="muted">Needs: </span>{i.prerequisite}</p>}
+            {(i.key === 'wordpress_com' || i.key === 'outreach:email' || i.key === 'ads:launch') && (
+              <Link className="small-btn btn" style={{ marginTop: 12, display: 'inline-flex' }}
+                to={i.key === 'wordpress_com' ? '#wordpress' : i.key === 'outreach:email' ? '/app/outreach' : '/app/ads'}
+                onClick={(e) => { if (i.key === 'wordpress_com') { e.preventDefault(); document.getElementById('wordpress')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) } }}>
+                {i.key === 'wordpress_com' ? 'Connect WordPress.com' : i.key === 'outreach:email' ? 'Open Outreach' : 'Open Ads'}
+              </Link>
+            )}
             {i.enabled != null && (
               <button className={`small-btn ${i.enabled ? 'secondary' : ''}`} style={{ marginTop: 12 }} onClick={() => toggle(i)}>
                 {i.enabled ? 'Disable for this workspace' : 'Enable'}

@@ -62,7 +62,7 @@ export function WordPressCard({ orgId }: { orgId: string }) {
   }
 
   return (
-    <div className="card automation-card" style={{ marginTop: 24 }}>
+    <div id="wordpress" className="card automation-card" style={{ marginTop: 24, scrollMarginTop: 80 }}>
       <div className="card-head">
         <h2>
           <Globe size={18} aria-hidden="true" /> Publish blog articles to WordPress.com
