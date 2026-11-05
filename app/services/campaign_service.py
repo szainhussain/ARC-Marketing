@@ -17,6 +17,29 @@ def _parse_date(value):
     return date.fromisoformat(str(value))
 
 
+MAX_RESEARCH_URLS = 5
+
+
+def normalise_research_urls(raw) -> str | None:
+    """Accepts a list or newline/space-separated text; returns newline-joined https URLs."""
+
+    from app.services.website_import import ImportFailed, normalise_url
+
+    if raw in (None, "", []):
+        return None
+    items = raw if isinstance(raw, list) else str(raw).replace(",", "\n").split()
+    items = [str(i).strip() for i in items if str(i).strip()]
+    if len(items) > MAX_RESEARCH_URLS:
+        raise ValueError(f"Add up to {MAX_RESEARCH_URLS} pages")
+    out = []
+    for i in items:
+        try:
+            out.append(normalise_url(i))
+        except ImportFailed:
+            raise ValueError(f"Not a web address: {i[:60]}")
+    return "\n".join(dict.fromkeys(out)) or None
+
+
 def validate_campaign_payload(payload: dict) -> list[dict]:
     errors = []
     parsed = {}
@@ -33,6 +56,11 @@ def validate_campaign_payload(payload: dict) -> list[dict]:
     for field in REQUIRED_FIELDS:
         if not (payload.get(field) or "").strip():
             errors.append({"field": field, "issue": "Required"})
+    if "research_urls" in payload:
+        try:
+            normalise_research_urls(payload.get("research_urls"))
+        except ValueError as exc:
+            errors.append({"field": "research_urls", "issue": str(exc)})
     status = payload.get("status")
     if status is not None and status not in VALID_STATUSES:
         errors.append({"field": "status", "issue": "Invalid status"})
@@ -66,6 +94,7 @@ def create_campaign(organization_id: str, user_id: str, payload: dict) -> Campai
         budget_guidance=payload.get("budget_guidance"),
         constraints=payload.get("constraints"),
         success_metrics=payload.get("success_metrics"),
+        research_urls=normalise_research_urls(payload.get("research_urls")),
         idempotency_key=idempotency_key,
     )
     db.session.add(campaign)
@@ -109,6 +138,8 @@ def update_campaign(organization_id: str, campaign_id: str, user_id: str, payloa
         if field in payload:
             value = payload[field]
             setattr(campaign, field, _parse_date(value) if field.endswith("_date") else value)
+    if "research_urls" in payload:
+        campaign.research_urls = normalise_research_urls(payload["research_urls"])
 
     db.session.flush()
     record_audit_event(

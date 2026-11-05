@@ -467,6 +467,7 @@ function CampaignBrief({ campaign }: { campaign: Campaign }) {
     ['Budget guidance', campaign.budget_guidance],
     ['Success metrics', campaign.success_metrics],
     ['Constraints', campaign.constraints],
+    ['Pages to research', campaign.research_urls?.length ? campaign.research_urls.join(', ') : null],
   ]
   const filled = rows.filter(([, v]) => v)
   if (filled.length === 0) return null

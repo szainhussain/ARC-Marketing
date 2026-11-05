@@ -19,6 +19,8 @@ class StageContext:
     evaluation_flags: list[dict] = field(default_factory=list)
     # Approved knowledge-library entries (untrusted data, small slice).
     knowledge: list[dict] = field(default_factory=list)
+    # Public pages fetched for the research agent (untrusted page text).
+    web_sources: list[dict] = field(default_factory=list)
 
 
 @dataclass(frozen=True)

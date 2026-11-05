@@ -27,6 +27,8 @@ class Campaign(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
     budget_guidance = db.Column(db.String(255))
     constraints = db.Column(db.Text)
     success_metrics = db.Column(db.Text)
+    # Public pages the research agent may read (newline-separated, max 5).
+    research_urls = db.Column(db.Text)
 
     status = db.Column(db.String(32), default=STATUS_DRAFT, nullable=False)
     idempotency_key = db.Column(db.String(255), index=True)
@@ -65,6 +67,7 @@ class Campaign(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
             "budget_guidance": self.budget_guidance,
             "constraints": self.constraints,
             "success_metrics": self.success_metrics,
+            "research_urls": [u for u in (self.research_urls or "").split("\n") if u],
             "status": self.status,
             "recurrence": self.recurrence or "none",
             "recurrence_day": self.recurrence_day,

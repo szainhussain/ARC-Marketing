@@ -383,6 +383,15 @@ def drain(max_iterations: int = 200) -> int:
     return processed
 
 
+def _research_sources(campaign) -> list[dict]:
+    """Fetch the brief's public research pages (worker only, never a web request)."""
+
+    from app.services.website_import import fetch_page_text
+
+    urls = [u for u in (getattr(campaign, "research_urls", None) or "").split("\n") if u]
+    return [fetch_page_text(u) for u in urls[:5]]
+
+
 def execute_task(task: Task) -> None:
     agent = get_agent(task.agent_id)
     run = task.workflow_run
@@ -422,6 +431,7 @@ def execute_task(task: Task) -> None:
         evaluation_flags=_evaluation_flags(run) if agent.agent_id == "marketing_ops" else [],
         knowledge=approved_knowledge_for_agents(task.organization_id)
         if agent.agent_id in ("cmo", "marketing_manager") else [],
+        web_sources=_research_sources(campaign) if agent.agent_id == "research_analyst" else [],
     )
 
     provider = get_provider(current_app.config)

@@ -44,7 +44,7 @@ def normalise_url(raw: str) -> str:
         _fail("Web addresses with a username or password aren't supported")
     if parsed.port not in (None, 80, 443):
         _fail("Only standard web ports are supported")
-    return urllib.parse.urlunparse(parsed._replace(fragment=""))
+    return urllib.parse.urlunparse(parsed._replace(fragment="", path=parsed.path or "/"))
 
 
 def _public_ip(host: str, port: int) -> str:
@@ -82,6 +82,11 @@ class _PinnedHTTPConnection(http.client.HTTPConnection):
 def fetch_html(url: str) -> tuple[str, str]:
     """Returns (final_url, html)."""
 
+    return _fetch(url, ("html",), "text/html,application/xhtml+xml")
+
+
+def _fetch(url: str, kinds: tuple[str, ...], accept: str, user_agent: str = USER_AGENT) -> tuple[str, str]:
+
     for _ in range(MAX_REDIRECTS + 1):
         parsed = urllib.parse.urlparse(url)
         port = parsed.port or (443 if parsed.scheme == "https" else 80)
@@ -94,7 +99,7 @@ def fetch_html(url: str) -> tuple[str, str]:
         if parsed.query:
             path += "?" + parsed.query
         try:
-            conn.request("GET", path, headers={"User-Agent": USER_AGENT, "Accept": "text/html,application/xhtml+xml",
+            conn.request("GET", path, headers={"User-Agent": user_agent, "Accept": accept,
                                                "Accept-Language": "en;q=0.9,*;q=0.5"})
             resp = conn.getresponse()
             if resp.status in (301, 302, 303, 307, 308):
@@ -106,7 +111,7 @@ def fetch_html(url: str) -> tuple[str, str]:
             if resp.status >= 400:
                 _fail(f"The website answered with an error ({resp.status})")
             ctype = (resp.getheader("Content-Type") or "").lower()
-            if "html" not in ctype:
+            if not any(k in ctype for k in kinds):
                 _fail("That address doesn't return a web page")
             body = resp.read(MAX_BYTES + 1)[:MAX_BYTES]
             charset = "utf-8"
@@ -135,6 +140,7 @@ class _Extractor(HTMLParser):
         self._stack: list[str] = []
         self._buf: list[str] = []
         self._skip = 0
+        self.max_paragraphs = 3
 
     def handle_starttag(self, tag, attrs):
         a = {k: (v or "") for k, v in attrs}
@@ -160,7 +166,7 @@ class _Extractor(HTMLParser):
                 self.title = text
             elif tag in ("h1", "h2") and text and len(self.headings) < 8 and text not in self.headings:
                 self.headings.append(text[:160])
-            elif tag == "p" and len(text) >= 60 and len(self.paragraphs) < 3:
+            elif tag == "p" and len(text) >= 60 and len(self.paragraphs) < self.max_paragraphs:
                 self.paragraphs.append(text[:400])
 
     def handle_data(self, data):
@@ -198,3 +204,46 @@ def extract_profile(html: str, final_url: str) -> dict:
 def import_from_website(raw_url: str) -> dict:
     final_url, html = fetch_html(normalise_url(raw_url))
     return extract_profile(html, final_url)
+
+
+# ---- Research: readable text from public pages, respecting robots.txt -------
+
+RESEARCH_AGENT = "ARC-Research/1.0 (+https://usearc.vercel.app)"
+RESEARCH_TEXT_LIMIT = 4000
+
+
+def robots_allows(url: str) -> bool:
+    """False only when the site's robots.txt disallows our agent for this path."""
+
+    import urllib.robotparser
+
+    parsed = urllib.parse.urlparse(url)
+    robots_url = f"{parsed.scheme}://{parsed.netloc}/robots.txt"
+    try:
+        _, text = _fetch(robots_url, ("text", "octet-stream"), "text/plain", RESEARCH_AGENT)
+    except ImportFailed:
+        return True  # no robots.txt (or unreachable): nothing forbids it
+    rp = urllib.robotparser.RobotFileParser()
+    rp.parse(text.splitlines())
+    return rp.can_fetch(RESEARCH_AGENT, url)
+
+
+def fetch_page_text(raw_url: str) -> dict:
+    """{url, title, text} for one public page, or {url, error}. Never raises."""
+
+    try:
+        url = normalise_url(raw_url)
+        if not robots_allows(url):
+            return {"url": url, "error": "The site's robots.txt asks automated tools not to read this page."}
+        final_url, html = _fetch(url, ("html",), "text/html,application/xhtml+xml", RESEARCH_AGENT)
+    except ImportFailed as exc:
+        return {"url": raw_url, "error": exc.details[0]["issue"] if exc.details else str(exc)}
+    p = _Extractor()
+    p.max_paragraphs = 25
+    try:
+        p.feed(html)
+    except Exception:  # noqa: BLE001
+        pass
+    parts = [p.meta.get("description") or ""] + p.headings + p.paragraphs
+    text = re.sub(r"\s+", " ", " \n".join(x for x in parts if x)).strip()[:RESEARCH_TEXT_LIMIT]
+    return {"url": final_url, "title": p.meta.get("og:title") or p.title or None, "text": text}

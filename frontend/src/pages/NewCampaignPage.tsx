@@ -17,6 +17,7 @@ const FIELDS: { key: string; label: string; area?: boolean; type?: string; hint?
   { key: 'budget_guidance', label: 'Budget guidance', hint: 'A range is fine. Agents recommend splits; you decide spend.' },
   { key: 'success_metrics', label: 'How you’ll judge success', area: true },
   { key: 'constraints', label: 'Constraints', area: true, hint: 'Claims to avoid, legal notes, dates to avoid…' },
+  { key: 'research_urls', label: 'Pages to research (optional)', area: true, hint: 'Up to 5 public links, one per line — competitor sites, review pages, market reports. Your research agent reads them (sites that block automated reading are skipped) and cites them.' },
 ]
 
 // Starting points; every field stays editable and nothing is sent until saved.
