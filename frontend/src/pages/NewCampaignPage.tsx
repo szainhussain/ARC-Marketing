@@ -19,6 +19,15 @@ const FIELDS: { key: string; label: string; area?: boolean; type?: string; hint?
   { key: 'constraints', label: 'Constraints', area: true, hint: 'Claims to avoid, legal notes, dates to avoid…' },
 ]
 
+// Starting points; every field stays editable and nothing is sent until saved.
+const TEMPLATES: { id: string; label: string; values: Record<string, string> }[] = [
+  { id: 'launch', label: 'Product launch', values: { name: 'Product launch', objective: 'Launch [product] and reach [number] sign-ups or sales in the first [weeks] weeks.', offer: 'Launch offer or early-access price', channels: 'Instagram, LinkedIn, email, Google Ads', success_metrics: 'Sign-ups or sales, cost per acquisition, launch-week reach' } },
+  { id: 'monthly', label: 'Monthly always-on', values: { name: 'Monthly marketing — [month]', objective: 'Keep a steady flow of enquiries this month with consistent posting and one featured offer.', channels: 'Instagram, Facebook, Google Business Profile', success_metrics: 'Enquiries or bookings, posting consistency, engagement rate' } },
+  { id: 'promo', label: 'Seasonal promotion', values: { name: 'Seasonal promotion', objective: 'Drive [revenue/orders] during [season or event] with a time-limited offer.', offer: '[Discount or bundle] until [end date]', channels: 'Instagram, email, Meta ads', success_metrics: 'Orders, revenue, return on ad spend', constraints: 'State the end date clearly; no misleading urgency.' } },
+  { id: 'leads', label: 'B2B lead generation', values: { name: 'Lead generation', objective: 'Generate [number] qualified leads from [segment] this quarter.', offer: 'Free consultation, demo or guide', channels: 'LinkedIn, email, website', success_metrics: 'Qualified leads, cost per lead, meetings booked' } },
+  { id: 'event', label: 'Event or webinar', values: { name: 'Event promotion', objective: 'Get [number] registrations for [event] on [date].', channels: 'LinkedIn, email, Instagram', success_metrics: 'Registrations, attendance rate, follow-up meetings' } },
+]
+
 export default function NewCampaignPage() {
   const { activeOrganizationId: orgId } = useWorkspace()
   const navigate = useNavigate()
@@ -70,6 +79,19 @@ export default function NewCampaignPage() {
         description="Describe what you want. Your CMO agent turns it into strategy, and the rest of the department builds from there."
       />
       {error && <ErrorState message={error} />}
+      <div className="template-row" role="group" aria-label="Start from a template">
+        <span className="muted small">Start from a template:</span>
+        {TEMPLATES.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            className="chip"
+            onClick={() => setForm((f) => ({ ...t.values, ...Object.fromEntries(Object.entries(f).filter(([, v]) => v.trim())) }))}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
       <form className="card" onSubmit={(e) => submit(e, false)} noValidate>
         <div className="form-grid">
           {FIELDS.map((f) => (

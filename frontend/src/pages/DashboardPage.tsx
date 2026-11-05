@@ -18,6 +18,7 @@ import { useWorkspace } from '../context/WorkspaceContext'
 import { useResource } from '../hooks/useResource'
 import { humanize, money, relativeTime } from '../lib/labels'
 import { EmptyState, ErrorState, KpiCard, PageHeader, PageSkeleton, StatusPill } from '../components/ui'
+import GettingStarted from '../components/GettingStarted'
 
 type Kpi = {
   key: string
@@ -114,6 +115,7 @@ export default function DashboardPage() {
         }
       />
       {error && <ErrorState message={error} onRetry={reload} />}
+      <GettingStarted orgId={orgId} />
       {data && (
         <>
           <div className="kpi-grid">

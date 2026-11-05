@@ -1,11 +1,121 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Check } from 'lucide-react'
+import { Check, Globe } from 'lucide-react'
 import { apiRequest, ApiError } from '../api/client'
 import { ErrorState, Field, PageHeader, PageSkeleton, useToast } from '../components/ui'
 import { useWorkspace } from '../context/WorkspaceContext'
 
 type Profile = Record<string, string | number | boolean | null | string[]>
+type ImportResult = {
+  suggested: Record<string, string | null>
+  found: { title: string | null; headings: string[]; paragraphs: string[] }
+  source_url: string
+}
+
+const FIELD_LABELS: Record<string, string> = {
+  business_name: 'Business name',
+  website: 'Website',
+  business_description: 'What the business does',
+  language: 'Content language',
+}
+
+function WebsiteImport({ orgId, profile, onApply }: { orgId: string; profile: Profile; onApply: (patch: Profile) => void }) {
+  const [url, setUrl] = useState(String(profile.website || ''))
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [result, setResult] = useState<{ filled: string[]; found: ImportResult['found'] } | null>(null)
+
+  async function run(e: React.FormEvent) {
+    e.preventDefault()
+    setBusy(true)
+    setError(null)
+    try {
+      const r = await apiRequest<ImportResult>(`/organizations/${orgId}/business-profile/import-website`, { method: 'POST', body: { url } })
+      const patch: Profile = {}
+      const filled: string[] = []
+      for (const [k, v] of Object.entries(r.suggested)) {
+        if (v && !String(profile[k] ?? '').trim()) {
+          patch[k] = v
+          filled.push(FIELD_LABELS[k] || k)
+        }
+      }
+      onApply(patch)
+      setResult({ filled, found: r.found })
+    } catch (err) {
+      setError(err instanceof ApiError ? err.details[0]?.issue || err.message : 'Could not read that website.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  function append(key: string, text: string) {
+    const current = String(profile[key] ?? '').trim()
+    if (current.includes(text)) return
+    onApply({ [key]: current ? `${current}
+${text}` : text })
+  }
+
+  return (
+    <div className="card import-card">
+      <form onSubmit={run} className="import-row">
+        <Globe size={18} aria-hidden="true" className="import-icon" />
+        <div style={{ flex: 1, minWidth: 220 }}>
+          <label htmlFor="import-url" className="import-label">
+            Import from your website
+          </label>
+          <input id="import-url" type="text" inputMode="url" placeholder="yourbusiness.com" value={url} onChange={(e) => setUrl(e.target.value)} />
+        </div>
+        <button type="submit" disabled={busy || !url.trim()}>
+          {busy ? 'Reading…' : 'Import'}
+        </button>
+      </form>
+      <p className="muted small" style={{ margin: '8px 0 0' }}>
+        ARC reads your public homepage once and fills in empty fields. Nothing is saved until you click Save.
+      </p>
+      {error && (
+        <div className="banner error" role="alert" style={{ marginTop: 12, marginBottom: 0 }}>
+          {error}
+        </div>
+      )}
+      {result && (
+        <div className="import-result" aria-live="polite">
+          <p className="small" style={{ margin: '12px 0 8px' }}>
+            {result.filled.length ? (
+              <>
+                <Check size={14} aria-hidden="true" style={{ color: 'var(--color-success)' }} /> Filled in: {result.filled.join(', ')}.
+              </>
+            ) : (
+              'Your fields were already filled in, so nothing was changed.'
+            )}
+          </p>
+          {(result.found.headings.length > 0 || result.found.paragraphs.length > 0) && (
+            <>
+              <p className="muted small" style={{ margin: '0 0 6px' }}>
+                Also found on your site — add anything useful:
+              </p>
+              <ul className="import-found">
+                {[...result.found.headings, ...result.found.paragraphs].map((t) => (
+                  <li key={t}>
+                    <span>{t}</span>
+                    <span className="import-actions">
+                      <button type="button" className="link-btn small" onClick={() => append('products_services', t)}>
+                        + Products
+                      </button>
+                      <button type="button" className="link-btn small" onClick={() => append('differentiators', t)}>
+                        + Differentiators
+                      </button>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 type FieldDef = { key: string; label: string; type?: 'text' | 'textarea' | 'select' | 'url'; options?: [string, string][]; hint?: string; required?: boolean }
 
 const SECTIONS: { title: string; description: string; fields: FieldDef[] }[] = [
@@ -16,7 +126,7 @@ const SECTIONS: { title: string; description: string; fields: FieldDef[] }[] = [
       { key: 'business_name', label: 'Business name', required: true },
       { key: 'business_description', label: 'What the business does', type: 'textarea' },
       { key: 'industry', label: 'Industry', required: true },
-      { key: 'website', label: 'Website', type: 'url', hint: 'Used as context only; ARC never crawls it.' },
+      { key: 'website', label: 'Website', type: 'url', hint: 'Used as context. ARC only reads it when you click Import.' },
       { key: 'business_type', label: 'Business model', type: 'select', options: [['b2c', 'B2C'], ['b2b', 'B2B'], ['both', 'Both'], ['nonprofit', 'Nonprofit'], ['other', 'Other']] },
       { key: 'regions_served', label: 'Countries and markets' },
     ],
@@ -153,6 +263,9 @@ export function ProfileForm({ mode }: { mode: 'wizard' | 'edit' }) {
         </div>
       )}
       {error && <ErrorState message={error} />}
+      {orgId && (mode === 'edit' || step === 0) && (
+        <WebsiteImport orgId={orgId} profile={profile} onApply={(patch) => setProfile((p) => ({ ...(p as Profile), ...patch }))} />
+      )}
       {sections.map((s) => (
         <div key={s.title} className="card">
           <h2>{s.title}</h2>

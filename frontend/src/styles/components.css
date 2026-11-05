@@ -391,3 +391,25 @@ kbd { font-family: var(--font-mono); font-size: 0.72rem; padding: 1px 6px; borde
 .plan-compare { min-width: 640px; }
 .addon-card { display: flex; gap: 24px; align-items: center; justify-content: space-between; }
 @media (max-width: 720px) { .addon-card { flex-direction: column; align-items: flex-start; } .compare-result { position: static; } }
+
+/* Website import on onboarding */
+.import-card { border-color: rgba(159, 216, 255, 0.3); background: linear-gradient(180deg, rgba(159, 216, 255, 0.05), var(--color-surface)); }
+.import-row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+.import-icon { color: var(--color-accent); margin-bottom: 10px; }
+.import-label { display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 6px; color: var(--color-fg); }
+.import-found { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 260px; overflow-y: auto; }
+.import-found li { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; font-size: 0.85rem; padding: 8px 10px; border: 1px solid var(--color-border); border-radius: 8px; color: var(--color-muted-fg); }
+.import-actions { display: inline-flex; gap: 10px; flex-shrink: 0; }
+@media (max-width: 560px) { .import-found li { flex-direction: column; } }
+
+/* Getting-started checklist */
+.getting-started { border-color: rgba(159, 216, 255, 0.3); }
+.gs-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
+.gs-list { list-style: none; margin: 14px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 18px; }
+.gs-list li { display: flex; gap: 8px; align-items: center; font-size: 0.88rem; }
+.gs-list li svg { flex-shrink: 0; color: var(--color-subtle-fg); }
+.gs-list li.done { color: var(--color-muted-fg); text-decoration: line-through; text-decoration-color: var(--color-subtle-fg); }
+.gs-list li.done svg { color: var(--color-success); }
+@media (max-width: 900px) { .gs-list { grid-template-columns: 1fr; } }
+
+.template-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
