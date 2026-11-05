@@ -503,3 +503,7 @@ kbd { font-family: var(--font-mono); font-size: 0.75rem; padding: 1px 6px; borde
 .assistant-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.02em; color: var(--color-muted-fg); margin: 0 0 4px; }
 .assistant-advice { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--color-border); }
 .assistant-advice .assistant-label { color: var(--color-accent); }
+
+.assistant-msg .rich p { margin: 0 0 6px; }
+.assistant-msg .rich ul { margin: 0 0 6px; padding-left: 18px; }
+.assistant-msg .rich li { margin: 2px 0; }

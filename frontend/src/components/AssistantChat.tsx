@@ -14,6 +14,35 @@ type Msg = {
   retrieval_mode: 'semantic' | 'keyword' | null
 }
 
+/** Plain text with light formatting: **bold**, '- ' / '* ' bullets, '#' headings (no HTML is ever injected). */
+function Rich({ text }: { text: string }) {
+  const lines = text.replace(/\r/g, '').split('\n')
+  const inline = (s: string) =>
+    s.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
+      part.startsWith('**') && part.endsWith('**') ? <strong key={i}>{part.slice(2, -2)}</strong> : part,
+    )
+  const out: React.ReactNode[] = []
+  let bullets: string[] = []
+  const flush = () => {
+    if (bullets.length) out.push(<ul key={`u${out.length}`}>{bullets.map((b, i) => <li key={i}>{inline(b)}</li>)}</ul>)
+    bullets = []
+  }
+  for (const raw of lines) {
+    const line = raw.trim()
+    const bullet = line.match(/^(?:[-*•]|\d+[.)])\s+(.*)$/)
+    if (bullet) {
+      bullets.push(bullet[1])
+      continue
+    }
+    flush()
+    if (!line) continue
+    const heading = line.match(/^#{1,4}\s+(.*)$/)
+    out.push(heading ? <p key={out.length}><strong>{inline(heading[1])}</strong></p> : <p key={out.length}>{inline(line)}</p>)
+  }
+  flush()
+  return <div className="rich">{out}</div>
+}
+
 const STARTERS = [
   'What did my marketing team deliver this month?',
   'How are my results trending, and what should I change?',
@@ -79,7 +108,7 @@ export default function AssistantChat({ orgId, onNavigate }: { orgId: string; on
               m.content && (
                 <>
                   {m.role === 'assistant' && m.expert_advice && <div className="assistant-label">From your workspace</div>}
-                  <p>{m.content}</p>
+                  <Rich text={m.content} />
                 </>
               )
             )}
@@ -99,7 +128,7 @@ export default function AssistantChat({ orgId, onNavigate }: { orgId: string; on
             {m.expert_advice && (
               <div className="assistant-advice">
                 <div className="assistant-label">Consultant advice · general expertise, not from your data</div>
-                <p>{m.expert_advice}</p>
+                <Rich text={m.expert_advice} />
               </div>
             )}
             {m.action && (
