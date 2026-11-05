@@ -35,6 +35,12 @@ CATALOG = [
      "detail": "Sends an approved email to a contact list you uploaded, from your own Brevo or Resend account, "
                "with a daily limit, one-click unsubscribe and a suppression list. Nothing is sent before approval.",
      "prerequisite": "A Brevo or Resend account with a verified sender, and a contact list you're allowed to email."},
+    {"key": "ads:launch", "name": "Ad launching with a daily cap", "category": "Paid media",
+     "status": AVAILABLE, "agents": ["paid_media"],
+     "detail": "Launch an ad from an approved paid media plan after a typed-budget approval. ARC pauses every ad "
+               "if you hit your daily cap or turn on the kill switch. Runs on ARC's test platform (no real money) "
+               "until Meta or Google Ads API access is connected.",
+     "prerequisite": "A daily spend cap set by an owner or admin. Real spend needs Meta Marketing API or Google Ads API access."},
     {"key": "automation:zapier", "name": "Zapier — publish approved content", "category": "Automation",
      "status": AVAILABLE, "agents": ["social_media", "creative_studio", "paid_media"],
      "detail": "Approved content is sent to your Zap via a signed webhook (content.approved_for_publishing); "

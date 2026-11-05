@@ -1,5 +1,6 @@
 import {
   Activity,
+  BadgeDollarSign,
   BarChart3,
   Bell,
   BookOpen,
@@ -49,6 +50,7 @@ export const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { to: '/app/agents', label: 'Agents', icon: Bot, keywords: 'team twelve' },
       { to: '/app/calendar', label: 'Calendar', icon: CalendarDays, keywords: 'schedule posts' },
       { to: '/app/outreach', label: 'Outreach', icon: Mail, keywords: 'email contacts lists unsubscribe brevo resend' },
+      { to: '/app/ads', label: 'Ads', icon: BadgeDollarSign, keywords: 'launch spend budget cap meta google kill switch' },
       { to: '/app/content', label: 'Content', icon: FileText, keywords: 'deliverables drafts' },
       { to: '/app/research', label: 'Research', icon: Search, keywords: 'insights audience' },
     ],

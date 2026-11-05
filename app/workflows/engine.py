@@ -358,10 +358,11 @@ def work_once() -> bool:
     deliver_due()
     from app.services.assistant_service import process_next_question
     from app.services.media_service import process_next_image_job
+    from app.services.ads_service import process_ads
     from app.services.outreach_service import process_next_outreach
     from app.services.publishing_service import process_next_publication
 
-    for job in (process_next_question, process_next_image_job, process_next_publication, process_next_outreach):
+    for job in (process_ads, process_next_question, process_next_image_job, process_next_publication, process_next_outreach):
         try:
             if job():
                 return True

@@ -118,6 +118,10 @@ class BaseConfig:
     # Outreach email: workspace-wide daily cap and pacing between emails.
     OUTREACH_DAILY_CAP = int(os.environ.get("OUTREACH_DAILY_CAP", "200"))
     OUTREACH_SECONDS_BETWEEN = float(os.environ.get("OUTREACH_SECONDS_BETWEEN", "4"))
+    # Ad launching: the highest daily cap a workspace may set, and the test
+    # platform's clock speed (1.0 = real time).
+    ADS_MAX_DAILY_CAP = float(os.environ.get("ADS_MAX_DAILY_CAP", "1000"))
+    ADS_SANDBOX_SPEED = float(os.environ.get("ADS_SANDBOX_SPEED", "1.0"))
     # Fernet key for third-party tokens at rest (see app/crypto.py).
     INTEGRATION_ENCRYPTION_KEY = os.environ.get("INTEGRATION_ENCRYPTION_KEY", "").strip()
     UPLOAD_DIR = os.environ.get("UPLOAD_DIR", "storage/uploads")

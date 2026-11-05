@@ -501,6 +501,10 @@ kbd { font-family: var(--font-mono); font-size: 0.75rem; padding: 1px 6px; borde
 .checkbox-field label { display: flex; gap: 10px; align-items: flex-start; font-weight: 400; line-height: 1.5; }
 .checkbox-field input[type="checkbox"] { margin-top: 4px; flex: none; }
 
+/* Ads */
+.kpi-row { display: flex; flex-wrap: wrap; gap: 32px; }
+.kpi-row strong { font-size: 1.35rem; font-variant-numeric: tabular-nums; }
+
 /* Ask ARC assistant */
 .ask-arc { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; }
 .assistant { display: flex; flex-direction: column; height: 100%; min-height: 60vh; gap: 12px; }

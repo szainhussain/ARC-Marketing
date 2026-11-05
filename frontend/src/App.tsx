@@ -36,6 +36,7 @@ const MonthlyReportPage = lazy(() => import('./pages/app/ResultsPages').then((m)
 const ReviewPage = lazy(() => import('./pages/public/ReviewPage'))
 const UnsubscribePage = lazy(() => import('./pages/public/UnsubscribePage'))
 const OutreachPage = lazy(() => import('./pages/app/OutreachPage'))
+const AdsPage = lazy(() => import('./pages/app/AdsPage'))
 const AdminPage = lazy(() => import('./pages/app/AdminPage'))
 const UsagePage = lazy(() => import('./pages/app/WorkspacePages').then((m) => ({ default: m.UsagePage })))
 import {
@@ -153,6 +154,7 @@ export default function App() {
         <Route path="reports" element={<Navigate to="/app/analytics" replace />} />
         <Route path="results" element={<ResultsPage />} />
         <Route path="outreach" element={<OutreachPage />} />
+        <Route path="ads" element={<AdsPage />} />
         <Route path="reports/monthly" element={<MonthlyReportPage />} />
         <Route path="research" element={<ResearchPage />} />
         <Route path="integrations" element={<IntegrationsPage />} />

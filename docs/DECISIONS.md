@@ -411,3 +411,25 @@ from the client's own domain and reputation.
   CSRF-exempt one-click endpoint. Unsubscribes go on a workspace-wide
   suppression list that the API never removes from.
 - Locked policy `outreach_email` (require_approval).
+
+## D19 — Ad launching: people launch, agents never spend, hard daily cap
+
+The user chose "launch after approval + daily cap" and has no Meta/Google
+API access yet, so the full flow runs against ARC's built-in **test ad
+platform** (`app/integrations/ads_platforms.py`): no outside calls, no real
+money, spend accrues on a clock so every guardrail can be exercised.
+
+- `spend_change` stays **blocked** for agents (no code path). New locked
+  policy `ad_launch` (require_approval) covers human launches.
+- Launching is off until an owner/admin sets a workspace daily cap
+  (`ADS_MAX_DAILY_CAP` bounds it, default 1000). Requests must fit under the
+  cap minus every pending/approved/running budget.
+- A launch comes from one ad in a paid-media plan whose *current* version is
+  approved, with a daily budget and an end date (max 90 days). An approver
+  must re-type the budget. The approval is a hash of exactly what launches.
+- The worker (every iteration) re-checks hash, cap and plan approval before
+  launching (idempotent create), then enforces on everything live: kill
+  switch -> pause; end date -> stop; a person's pause/stop/Stop all; and if
+  today's spend across the workspace exceeds the cap -> pause every ad.
+- Meta Marketing API / Google Ads API connectors implement the same four
+  methods (create, pause, resume, archive + status) once the user has access.

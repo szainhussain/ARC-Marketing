@@ -399,3 +399,21 @@ or upload. Browser check on the local stack: list upload (invalid row
 skipped), batch creation, personalised preview with footer, and the real
 Brevo API rejecting a fake key with a clear message. **Not executed:** a
 real send through a connected Brevo/Resend account.
+
+
+## Phase 2, part 3 — Ad launching with a daily cap (2026-11-06)
+
+`pytest`: 176 passed (11 new: `tests/integration/test_ads.py`,
+`tests/security/test_ads_isolation.py`). Against the test ad platform:
+launching off until a cap is set; only an approved, current plan can
+launch; budgets must fit under the cap across all ads; approval needs the
+re-typed budget and nothing runs before it; launch is idempotent; kill
+switch pauses live ads and blocks resume; Stop all pauses everything; a
+cap breach pauses all ads; end date stops the ad; a plan edit before launch
+blocks it; other workspaces get 403 everywhere; viewers can't approve,
+request or raise the cap. Browser check (local stack + `flask worker
+--once` between steps): cap set, launch requested, typed-budget approval,
+ad Active, Stop all -> Paused, 0 console errors. One unrelated flaky test
+seen once under a slow run (`test_mfa_enrolment_login_replay_recovery_and_disable`,
+a 30-second TOTP window edge); passes on re-run. **Not executed:** real Meta
+or Google Ads spend (no API access yet).

@@ -67,6 +67,21 @@ Source of truth: `app/integrations/catalog.py`, served at
   `/outreach/batches/<id>/{request-approval,approve,reject,start,pause,cancel}`,
   public `POST /api/v1/outreach/unsubscribe/<token>`.
 
+## Ad launching (test platform now; Meta/Google when approved)
+
+- **Guardrail:** Ads → *Set a cap* (owner/admin). 0 = launching off.
+- **Flow:** approve a paid media plan → Ads → *Launch an ad* (pick an ad,
+  daily budget, end date) → approver types the budget → the worker launches
+  it on the test platform. Pause, resume, stop or *Stop all ads* any time;
+  the kill switch pauses everything. See D19.
+- **Going live:** Meta needs a Business-verified app with Marketing API
+  `ads_management` (app review); Google needs a Google Ads manager account
+  and an approved developer token. Each becomes a class in
+  `ads_platforms.py` with the same methods; nothing else changes.
+- **Endpoints:** `/organizations/<id>/ads`, `/ads/guardrail`, `/ads/launches`,
+  `/ads/launches/<id>/decision`, `/ads/launches/<id>/{pause,resume,stop}`,
+  `/ads/stop-all`.
+
 ## Live connectors — prerequisites (not built)
 
 | Connector | You need to provide |
