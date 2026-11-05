@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Check } from 'lucide-react'
 import { useResource } from '../../hooks/useResource'
-import { AGENT_META, type PublicAgent } from '../../lib/agentMeta'
+import { AGENT_META, agentVideo, type PublicAgent } from '../../lib/agentMeta'
 import AgentDetailDialog from '../../components/marketing/AgentDetailDialog'
 import Reveal from '../../components/motion/Reveal'
 import { ErrorState, Skeleton } from '../../components/ui'
@@ -52,8 +52,11 @@ export function AgentGrid({ limit }: { limit?: number }) {
               </div>
               <span className="name">{a.name}</span>
               <span className="role">{a.role}</span>
-              <span className="small" style={{ color: 'var(--color-accent)' }}>
-                See how it works →
+              <span className="agent-card-foot">
+                <span className="small" style={{ color: 'var(--color-accent)' }}>
+                  See how it works →
+                </span>
+                {agentVideo(a.agent_id) && <span className="agent-video-badge">▶ 30s video</span>}
               </span>
             </button>
           )
