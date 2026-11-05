@@ -25,10 +25,14 @@ class AssistantMessage(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
     sources_json = db.Column(db.Text)  # [{"kind", "title", "link"}]
     action_json = db.Column(db.Text)  # {"type", "label", "link"} suggested next step
     error_summary = db.Column(db.Text)
+    expert_advice = db.Column(db.Text)
+    retrieval_mode = db.Column(db.String(16))  # semantic | keyword
 
     def to_dict(self) -> dict:
         return {"id": self.id, "role": self.role, "content": self.content, "status": self.status,
                 "sources": json.loads(self.sources_json) if self.sources_json else [],
                 "action": json.loads(self.action_json) if self.action_json else None,
                 "error_summary": self.error_summary,
+                "expert_advice": self.expert_advice or None,
+                "retrieval_mode": self.retrieval_mode,
                 "created_at": self.created_at.isoformat() if self.created_at else None}

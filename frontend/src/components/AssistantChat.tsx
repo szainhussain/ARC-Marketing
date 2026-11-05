@@ -10,9 +10,16 @@ type Msg = {
   status: 'pending' | 'running' | 'answered' | 'failed'
   sources: { kind: string; title: string; link: string }[]
   action: { type: string; label: string; link: string } | null
+  expert_advice: string | null
+  retrieval_mode: 'semantic' | 'keyword' | null
 }
 
-const STARTERS = ['What did my marketing team deliver this month?', 'What is waiting for my approval?', 'How are my results trending?']
+const STARTERS = [
+  'What did my marketing team deliver this month?',
+  'How are my results trending, and what should I change?',
+  'How should I position and price against my competitors?',
+  'Build me a 90-day growth plan for my business.',
+]
 
 /** Ask ARC: answers from this workspace's approved knowledge, deliverables and results. */
 export default function AssistantChat({ orgId, onNavigate }: { orgId: string; onNavigate: () => void }) {
@@ -54,7 +61,8 @@ export default function AssistantChat({ orgId, onNavigate }: { orgId: string; on
         {messages.length === 0 && (
           <div className="assistant-empty">
             <p className="muted small" style={{ marginTop: 0 }}>
-              Ask about your campaigns, deliverables, results or brand. Answers come only from this workspace, with sources.
+              Ask about your campaigns, results and brand, or get senior marketing and business advice. Facts from your
+              workspace are cited; general advice is labelled separately.
             </p>
             {STARTERS.map((s) => (
               <button key={s} type="button" className="chip" onClick={() => send(s)} disabled={sending}>
@@ -68,7 +76,12 @@ export default function AssistantChat({ orgId, onNavigate }: { orgId: string; on
             {m.role === 'assistant' && (m.status === 'pending' || m.status === 'running') ? (
               <span className="muted small">Thinking…</span>
             ) : (
-              <p>{m.content}</p>
+              m.content && (
+                <>
+                  {m.role === 'assistant' && m.expert_advice && <div className="assistant-label">From your workspace</div>}
+                  <p>{m.content}</p>
+                </>
+              )
             )}
             {m.sources.length > 0 && (
               <div className="assistant-sources small">
@@ -81,6 +94,12 @@ export default function AssistantChat({ orgId, onNavigate }: { orgId: string; on
                     </Link>
                   </span>
                 ))}
+              </div>
+            )}
+            {m.expert_advice && (
+              <div className="assistant-advice">
+                <div className="assistant-label">Consultant advice · general expertise, not from your data</div>
+                <p>{m.expert_advice}</p>
               </div>
             )}
             {m.action && (

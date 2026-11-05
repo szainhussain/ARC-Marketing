@@ -107,6 +107,9 @@ class BaseConfig:
     IMAGE_TIMEOUT_SECONDS = int(os.environ.get("IMAGE_TIMEOUT_SECONDS", "90"))
     IMAGE_MONTHLY_LIMIT = int(os.environ.get("IMAGE_MONTHLY_LIMIT", "50"))
     ASSISTANT_MONTHLY_LIMIT = int(os.environ.get("ASSISTANT_MONTHLY_LIMIT", "300"))
+    # Semantic search for Ask ARC (Gemini embeddings; same GEMINI_API_KEY). Keyword search without it.
+    EMBEDDING_MODEL = os.environ.get("EMBEDDING_MODEL", "gemini-embedding-001")
+    EMBEDDING_DIMS = int(os.environ.get("EMBEDDING_DIMS", "768"))
     UPLOAD_DIR = os.environ.get("UPLOAD_DIR", "storage/uploads")
     MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", "10"))
     MAX_CONTENT_LENGTH = int(os.environ.get("MAX_UPLOAD_MB", "10")) * 1024 * 1024

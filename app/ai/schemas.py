@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields, validate, pre_load
+from marshmallow import Schema, ValidationError, fields, pre_load, validate, validates_schema
 
 
 class StrategySchema(Schema):
@@ -205,7 +205,10 @@ class AssistantActionSchema(Schema):
 
 
 class AssistantAnswerSchema(Schema):
-    answer = fields.String(required=True)
+    # What the workspace data says (may be empty for a purely general question).
+    answer = fields.String(load_default="")
+    # General senior-consultant advice; never presented as the client's facts.
+    expert_advice = fields.String(load_default="")
     source_ids = fields.List(fields.String(), load_default=list)
     suggested_action = fields.Nested(AssistantActionSchema, load_default=lambda: {"type": "none", "label": ""})
 
@@ -224,9 +227,17 @@ class AssistantAnswerSchema(Schema):
             data["suggested_action"] = {"type": action if action in ASSISTANT_ACTIONS else "none", "label": ""}
         elif isinstance(action, dict) and action.get("type") not in ASSISTANT_ACTIONS:
             data["suggested_action"] = {"type": "none", "label": str(action.get("label") or "")}
+        for text_field in ("answer", "expert_advice"):
+            if data.get(text_field) is None:
+                data.pop(text_field, None)
         ids = data.get("source_ids")
         if isinstance(ids, (str, int)):
             ids = [ids]
         if isinstance(ids, list):
             data["source_ids"] = [str(i) for i in ids if isinstance(i, (str, int))]
         return data
+
+    @validates_schema
+    def _needs_some_content(self, data, **kwargs):
+        if not (data.get("answer") or "").strip() and not (data.get("expert_advice") or "").strip():
+            raise ValidationError("answer or expert_advice is required", field_name="answer")
