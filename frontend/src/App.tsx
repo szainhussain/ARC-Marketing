@@ -31,6 +31,8 @@ const SecuritySettingsPage = lazy(() => import('./pages/app/WorkspacePages').the
 const SettingsPage = lazy(() => import('./pages/app/WorkspacePages').then((m) => ({ default: m.SettingsPage })))
 const TeamPage = lazy(() => import('./pages/app/WorkspacePages').then((m) => ({ default: m.TeamPage })))
 const TestCheckoutPage = lazy(() => import('./pages/app/WorkspacePages').then((m) => ({ default: m.TestCheckoutPage })))
+const ResultsPage = lazy(() => import('./pages/app/ResultsPages').then((m) => ({ default: m.ResultsPage })))
+const MonthlyReportPage = lazy(() => import('./pages/app/ResultsPages').then((m) => ({ default: m.MonthlyReportPage })))
 const ReviewPage = lazy(() => import('./pages/public/ReviewPage'))
 const AdminPage = lazy(() => import('./pages/app/AdminPage'))
 const UsagePage = lazy(() => import('./pages/app/WorkspacePages').then((m) => ({ default: m.UsagePage })))
@@ -146,6 +148,8 @@ export default function App() {
         <Route path="assets" element={<AssetsPage />} />
         <Route path="analytics" element={<AnalyticsPage />} />
         <Route path="reports" element={<Navigate to="/app/analytics" replace />} />
+        <Route path="results" element={<ResultsPage />} />
+        <Route path="reports/monthly" element={<MonthlyReportPage />} />
         <Route path="research" element={<ResearchPage />} />
         <Route path="integrations" element={<IntegrationsPage />} />
         <Route path="knowledge" element={<KnowledgePage />} />

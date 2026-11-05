@@ -8,6 +8,7 @@ from app.models.campaign import Campaign
 from app.models.external_action import ExternalAction
 from app.models.membership import Membership
 from app.models.platform import Invitation, KnowledgeEntry
+from app.models.results import CampaignResult
 from app.models.workflow_run import WorkflowRun
 
 
@@ -33,6 +34,8 @@ def onboarding_checklist(organization_id: str) -> dict:
                                        Approval.decision != "pending").count() > 0},
         {"key": "publish", "title": "Export or send approved work", "to": "/app/content",
          "done": count(ExternalAction) > 0},
+        {"key": "results", "title": "Record your first results", "to": "/app/results",
+         "done": count(CampaignResult) > 0},
         {"key": "connect", "title": "Connect Zapier, Make or a webhook", "to": "/app/integrations",
          "done": count(WebhookEndpoint) > 0},
         {"key": "team", "title": "Invite a teammate or approver", "to": "/app/team",

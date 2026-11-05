@@ -438,3 +438,15 @@ kbd { font-family: var(--font-mono); font-size: 0.72rem; padding: 1px 6px; borde
 .automation-card { border-color: rgba(110, 231, 168, 0.35); }
 .automation-steps { margin: 0 0 14px; padding-left: 20px; color: var(--color-muted-fg); line-height: 1.7; font-size: 0.9rem; }
 .automation-steps strong { color: var(--color-fg); }
+
+/* Results and monthly report */
+.metric-available { border-color: rgba(110, 231, 168, 0.35) !important; }
+.metric-value { font-size: 1.3rem; font-weight: 800; margin: 4px 0 2px; font-variant-numeric: tabular-nums; }
+.report-h { margin-top: 28px; font-size: 1.15rem; }
+@media print {
+  .sidebar, .topbar, .no-print, .toast-stack, .skip-link, .crumbs { display: none !important; }
+  .shell, .main-col { display: block !important; margin: 0 !important; padding: 0 !important; }
+  body { background: #fff !important; color: #111 !important; }
+  .report-page, .report-page * { color: #111 !important; background: #fff !important; box-shadow: none !important; }
+  .report-page .card, .report-page .kpi-tile { border: 1px solid #ccc !important; break-inside: avoid; }
+}

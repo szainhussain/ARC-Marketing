@@ -16,6 +16,7 @@ from app.models.billing import BillingEvent, WebhookDelivery, WebhookEndpoint
 from app.models.business_profile import BusinessProfile
 from app.models.campaign import Campaign
 from app.models.collaboration import DeliverableComment, ReviewLink
+from app.models.results import CampaignResult
 from app.models.deliverable import Deliverable, DeliverableVersion
 from app.models.document import Document
 from app.models.external_action import ExternalAction
@@ -72,6 +73,7 @@ def export_workspace(org_id: str) -> dict:
             DeliverableVersion.deliverable_id.in_(deliverable_ids))] if deliverable_ids else [],
         "approvals": _rows(Approval, org_id),
         "comments": _rows(DeliverableComment, org_id),
+        "results": _rows(CampaignResult, org_id),
         "review_links": _rows(ReviewLink, org_id),
         "external_actions": _rows(ExternalAction, org_id),
         "knowledge": _rows(KnowledgeEntry, org_id),
@@ -92,7 +94,7 @@ def purge_workspace(org_id: str) -> None:
         storage.delete(doc.storage_key)
     if task_ids:
         TaskDependency.query.filter(TaskDependency.task_id.in_(task_ids)).delete(synchronize_session=False)
-    for model in (DeliverableComment, ReviewLink, WebhookDelivery, WebhookEndpoint, Notification, Invitation, ActionPolicy, CalendarEntry,
+    for model in (DeliverableComment, ReviewLink, CampaignResult, WebhookDelivery, WebhookEndpoint, Notification, Invitation, ActionPolicy, CalendarEntry,
                   KnowledgeEntry, ExternalAction, Approval, AgentExecution, UsageRecord, AgentSetting,
                   Integration, Document):
         model.query.filter_by(organization_id=org_id).delete(synchronize_session=False)

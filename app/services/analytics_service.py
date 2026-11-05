@@ -41,6 +41,32 @@ BUSINESS_METRICS = [
 ]
 
 
+# Business metric key -> (field in the manual results summary, unit).
+_MANUAL_METRIC = {"marketing_spend": ("spend", "usd"), "leads": ("leads", None), "conversions": ("conversions", None),
+                  "conversion_rate": ("conversion_rate_pct", "%"), "cpa": ("cost_per_acquisition", "usd"),
+                  "revenue_attributed": ("revenue", "usd"), "roas": ("roas", "x")}
+
+
+def _business_metrics(organization_id, start, end, campaign_id):
+    """Business numbers come only from results the team entered (labelled
+    "manual") until a data source is connected — never estimated."""
+
+    from app.services.results_service import summarize
+
+    totals = summarize(organization_id, start.date(), end.date(), campaign_id)["totals"]
+    out = []
+    for k, label, source in BUSINESS_METRICS:
+        field, unit = _MANUAL_METRIC.get(k, (None, None))
+        value = totals.get(field) if field else None
+        if value is not None:
+            out.append({"key": k, "label": label, "available": True, "value": value, "unit": unit,
+                        "status": "manual", "requires": source, "link": "/app/results"})
+        else:
+            out.append({"key": k, "label": label, "available": False, "value": None, "status": "not_connected",
+                        "requires": source, "link": "/app/results" if field else "/app/integrations"})
+    return out
+
+
 def _window(days: int):
     end = datetime.now(timezone.utc)
     start = end - timedelta(days=days)
@@ -124,8 +150,7 @@ def dashboard(organization_id: str, days: int = 30, campaign_id: str | None = No
         _kpi("agent_cost", "Agent execution cost", c, cp, "Estimated from token usage; not an invoice.",
              "/app/settings/usage", unit="usd", basis="estimate"),
     ]
-    business = [{"key": k, "label": label, "available": False, "value": None, "status": "not_connected",
-                 "requires": source, "link": "/app/integrations"} for k, label, source in BUSINESS_METRICS]
+    business = _business_metrics(organization_id, start, end, campaign_id)
 
     return {
         "range": {"days": days, "start": start.isoformat(), "end": end.isoformat()},

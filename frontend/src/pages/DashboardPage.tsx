@@ -51,7 +51,7 @@ type CampaignCard = {
 type Dashboard = {
   range: { days: number }
   kpis: Kpi[]
-  business_metrics: { key: string; label: string; requires: string; link: string }[]
+  business_metrics: { key: string; label: string; requires: string; link: string; available?: boolean; value?: number | null; unit?: string | null; status?: string }[]
   series: { date: string; tasks_succeeded: number; tasks_failed: number; cost_usd: number; retries: number }[]
   cost_by_agent: { agent_id: string; agent_name: string; number: number; executions: number; cost_usd: number }[]
   campaigns: CampaignCard[]
@@ -241,17 +241,28 @@ export default function DashboardPage() {
           <div className="card" style={{ marginTop: 18 }}>
             <div className="card-head">
               <h2>Business results</h2>
-              <Link to="/app/integrations" className="small">Connect a data source →</Link>
+              <Link to="/app/results" className="small">Record results →</Link>
             </div>
             <p className="muted small">
-              These need a connected source. ARC shows them as unavailable rather than estimating them.
+              Numbers come only from results your team records (or a connected source). ARC never estimates them.
             </p>
             <div className="unavailable-grid">
               {data.business_metrics.map((m) => (
-                <div key={m.key}>
+                <div key={m.key} className={m.available ? 'metric-available' : undefined}>
                   <div className="small" style={{ fontWeight: 600 }}>{m.label}</div>
-                  <div className="muted small">Not connected</div>
-                  <div className="muted small mono" style={{ marginTop: 4 }}>Needs: {m.requires}</div>
+                  {m.available && m.value != null ? (
+                    <>
+                      <div className="metric-value">
+                        {m.unit === 'usd' ? money(m.value) : m.unit === '%' ? `${m.value.toFixed(2)}%` : m.unit === 'x' ? `${m.value.toFixed(2)}x` : m.value.toLocaleString()}
+                      </div>
+                      <div className="muted small">Entered manually</div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="muted small">Not connected</div>
+                      <div className="muted small mono" style={{ marginTop: 4 }}>Needs: {m.requires}</div>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
