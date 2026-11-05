@@ -18,6 +18,17 @@ from app.ai.errors import (
 _PLACEHOLDER_USD_PER_1K_INPUT_TOKENS = 0.003
 _PLACEHOLDER_USD_PER_1K_OUTPUT_TOKENS = 0.015
 
+# Room for the longest structured outputs (a social calendar, a content
+# pack). 2000 was too small: reasoning models such as gpt-oss spend part of
+# the budget thinking, and replies were cut off mid-JSON (seen live: the
+# social media agent failed 5 times with "Unterminated string").
+_MAX_OUTPUT_TOKENS = 8000
+_TRUNCATED = (
+    "Your previous reply was cut off before the JSON ended because it was too long. "
+    "Return complete, valid JSON that is shorter: keep every required field, but use "
+    "fewer and shorter list items."
+)
+
 
 class NullProvider(AIProvider):
     """Used when no provider is configured. Always raises
@@ -76,7 +87,7 @@ class AnthropicProvider(AIProvider):
             try:
                 response = client.messages.create(
                     model=self.model,
-                    max_tokens=2000,
+                    max_tokens=_MAX_OUTPUT_TOKENS,
                     timeout=timeout_seconds,
                     messages=[
                         {
@@ -108,7 +119,8 @@ class AnthropicProvider(AIProvider):
                 parsed = json.loads(raw_text)
                 validated = schema.load(parsed)
             except (json.JSONDecodeError, SchemaValidationError) as exc:
-                last_error_text = str(exc)
+                truncated = getattr(response, "stop_reason", None) == "max_tokens"
+                last_error_text = _TRUNCATED if truncated else str(exc)
                 continue
 
             return AIResult(
@@ -266,7 +278,7 @@ class GroqProvider(AIProvider):
             try:
                 response = client.chat.completions.create(
                     model=self.model,
-                    max_tokens=2000,
+                    max_tokens=_MAX_OUTPUT_TOKENS,
                     timeout=timeout_seconds,
                     messages=[
                         {
@@ -297,7 +309,8 @@ class GroqProvider(AIProvider):
                 parsed = _extract_json(raw_text)
                 validated = schema.load(parsed)
             except (json.JSONDecodeError, SchemaValidationError, ValueError) as exc:
-                last_error_text = str(exc)
+                truncated = getattr(response.choices[0], "finish_reason", None) == "length"
+                last_error_text = _TRUNCATED if truncated else str(exc)
                 continue
 
             return AIResult(
