@@ -356,6 +356,14 @@ def work_once() -> bool:
     from app.services.webhook_service import deliver_due
 
     deliver_due()
+    from app.services.media_service import process_next_image_job
+
+    try:
+        if process_next_image_job():
+            return True
+    except Exception:  # noqa: BLE001 - an image job must never stop agent work
+        log.exception("Image job failed unexpectedly")
+        db.session.rollback()
     if _provider_cooldown_until and utcnow() < _provider_cooldown_until:
         return False
     task = claim_next_task()

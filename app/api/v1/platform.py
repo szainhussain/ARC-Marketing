@@ -180,6 +180,10 @@ def _doc_or_404(organization_id, document_id):
 def download_document_route(organization_id, document_id):
     get_membership_or_403(organization_id)
     doc = _doc_or_404(organization_id, document_id)
+    if request.args.get("inline") == "1" and doc.content_type in ("image/png", "image/jpeg", "image/webp", "image/gif"):
+        return Response(get_storage().get(doc.storage_key), mimetype=doc.content_type,
+                        headers={"Content-Disposition": "inline", "X-Content-Type-Options": "nosniff",
+                                 "Content-Security-Policy": "default-src 'none'", "Cache-Control": "private, max-age=3600"})
     return Response(get_storage().get(doc.storage_key), mimetype="application/octet-stream",
                     headers={"Content-Disposition": f'attachment; filename="{doc.original_filename}"',
                              "X-Content-Type-Options": "nosniff"})

@@ -101,6 +101,11 @@ class BaseConfig:
     SUPABASE_SECRET_KEY = (os.environ.get("SUPABASE_SECRET_KEY")
                            or os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or "").strip()
     SUPABASE_STORAGE_BUCKET = os.environ.get("SUPABASE_STORAGE_BUCKET", "arc-uploads").strip()
+    # Image generation (Gemini REST). Without a key, image jobs fail as capability_unavailable.
+    GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+    IMAGE_MODEL = os.environ.get("IMAGE_MODEL", "gemini-2.5-flash-image")
+    IMAGE_TIMEOUT_SECONDS = int(os.environ.get("IMAGE_TIMEOUT_SECONDS", "90"))
+    IMAGE_MONTHLY_LIMIT = int(os.environ.get("IMAGE_MONTHLY_LIMIT", "50"))
     UPLOAD_DIR = os.environ.get("UPLOAD_DIR", "storage/uploads")
     MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", "10"))
     MAX_CONTENT_LENGTH = int(os.environ.get("MAX_UPLOAD_MB", "10")) * 1024 * 1024

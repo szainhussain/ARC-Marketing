@@ -29,3 +29,4 @@ from app.models.audit_event import AuditEvent  # noqa: F401
 from app.models.billing import BillingEvent, WebhookDelivery, WebhookEndpoint  # noqa: F401
 from app.models.collaboration import DeliverableComment, ReviewLink  # noqa: F401
 from app.models.results import CampaignResult  # noqa: F401
+from app.models.media import GeneratedImage  # noqa: F401

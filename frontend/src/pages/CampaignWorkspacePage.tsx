@@ -6,6 +6,8 @@ import { CollabToolbar, CommentsPanel, DeliverableEditor, ShareForReview } from 
 import PlatformExportView from '../components/PlatformExportView'
 import WorkflowGraphPanel from '../components/WorkflowGraphPanel'
 import AlwaysOnCard from '../components/AlwaysOnCard'
+import DeliverableImages from '../components/DeliverableImages'
+import { supportsImages } from '../lib/imageItems'
 import { PageHeader, PageSkeleton, Tabs } from '../components/ui'
 import { useNavigate } from 'react-router-dom'
 import { useWorkspace } from '../context/WorkspaceContext'
@@ -350,6 +352,9 @@ export default function CampaignWorkspacePage({ section = 'overview' }: { sectio
                 />
               ) : (
                 <DeliverableContent deliverableType={d.deliverable_type} content={d.current_version?.content} />
+              )}
+              {orgId && editingId !== d.id && supportsImages(d.deliverable_type) && d.current_version?.content && (
+                <DeliverableImages orgId={orgId} deliverableId={d.id} type={d.deliverable_type} content={d.current_version.content as Record<string, unknown>} />
               )}
               {orgId && (
                 <p className="export-links small">
