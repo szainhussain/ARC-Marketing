@@ -121,11 +121,21 @@ class MetadataDraftSchema(Schema):
     meta_description = fields.String(required=True)
 
 
+class BlogArticleSchema(Schema):
+    title = fields.String(required=True)
+    target_keyword = fields.String(required=True)
+    excerpt = fields.String(required=True)
+    # Markdown subset: "## " headings, paragraphs, "- " bullets, **bold**.
+    body_markdown = fields.String(required=True)
+    tags = fields.List(fields.String(), load_default=list)
+
+
 class SiteOptimizationSchema(Schema):
     keyword_themes = fields.List(fields.Nested(KeywordThemeSchema), required=True)
     landing_page_recommendations = fields.List(fields.String(), load_default=list)
     metadata_drafts = fields.List(fields.Nested(MetadataDraftSchema), load_default=list)
     conversion_experiments = fields.List(fields.String(), load_default=list)
+    blog_articles = fields.List(fields.Nested(BlogArticleSchema), load_default=list)
     assumptions = fields.List(fields.String(), load_default=list)
 
 

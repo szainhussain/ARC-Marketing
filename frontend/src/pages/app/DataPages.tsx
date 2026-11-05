@@ -21,6 +21,7 @@ import {
 import { useWorkspace } from '../../context/WorkspaceContext'
 import { useAction, useResource } from '../../hooks/useResource'
 import { INTEGRATION_STATUS_LABEL } from '../../lib/marketing'
+import { WordPressCard } from '../../components/WordPressPublish'
 import { humanize, money, relativeTime } from '../../lib/labels'
 
 import { API_BASE_URL as API } from '../../lib/apiBase'
@@ -361,6 +362,8 @@ export function IntegrationsPage() {
           </div>
         ))}
       </div>
+
+      {orgId && <WordPressCard orgId={orgId} />}
 
       <div className="card automation-card" style={{ marginTop: 24 }}>
         <h2>Publish approved content with Zapier or Make</h2>

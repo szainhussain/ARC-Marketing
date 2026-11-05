@@ -17,6 +17,7 @@ from app.agents.base import AgentSpec, StageContext
 PLANNED = "planned"
 NOT_CONNECTED = "not_connected"
 EXPORT_ONLY = "manual_export_available"
+AVAILABLE = "available_after_approval"
 
 
 def _pick(data: dict | None, *keys: str) -> dict:
@@ -325,22 +326,30 @@ AGENTS: tuple[AgentSpec, ...] = (
         agent_id="seo_growth",
         number=9,
         name="Website, SEO & E-commerce Growth Manager",
-        version="1.1.0",  # 1.1: Brand Kit (persona, colours, fonts, visual rules) in the profile
-        role="Keyword themes, landing-page and metadata drafts, CRO ideas.",
+        version="1.2.0",  # 1.2: writes one publish-ready blog article (for WordPress publishing)
+        role="Keyword themes, landing-page and metadata drafts, CRO ideas, and a blog article.",
         responsibilities=(
             "Plan keyword themes by search intent",
             "Draft page titles/meta descriptions and conversion experiments",
+            "Write one publish-ready blog article for the top keyword theme",
         ),
         task_type="site_optimization_plan",
-        instructions="Drafts only; no live site changes. Never claim search volumes without data.",
+        instructions=(
+            "Drafts only; no live site changes. Never claim search volumes without data. "
+            "Also write blog_articles: exactly one complete, publish-ready article of 500-800 words for the "
+            "highest-priority keyword theme, in the brand's tone of voice. body_markdown uses '## ' section "
+            "headings, plain paragraphs and '- ' bullets only. Use only facts from the inputs: no invented "
+            "statistics, prices, awards, quotes or customer stories. Excerpt is one or two sentences."
+        ),
         depends_on=("marketing_manager",),
         reads=("marketing_manager",),
         build_input=_seo_input,
-        outputs=("Keyword themes", "Metadata drafts", "CRO experiments"),
+        outputs=("Keyword themes", "Metadata drafts", "CRO experiments", "Blog article"),
         kpis=("Recommendations state data basis",),
         escalates=("Requires new creative assets",),
         allowed_integrations=(
             {"name": "GA4", "status": PLANNED},
+            {"name": "WordPress.com", "status": AVAILABLE},
             {"name": "CMS / e-commerce", "status": PLANNED},
         ),
         priority=70,

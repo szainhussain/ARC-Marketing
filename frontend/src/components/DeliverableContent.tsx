@@ -288,13 +288,67 @@ const PaidMediaPlan = fieldRenderer([
   { key: 'assumptions', label: 'Assumptions' },
 ])
 
-const SiteOptimizationPlan = fieldRenderer([
+const SiteOptimizationFields = fieldRenderer([
   { key: 'keyword_themes', label: 'Keyword themes' },
   { key: 'landing_page_recommendations', label: 'Landing page recommendations' },
   { key: 'metadata_drafts', label: 'Page title & meta drafts' },
   { key: 'conversion_experiments', label: 'Conversion experiments' },
   { key: 'assumptions', label: 'Assumptions' },
 ])
+
+/** The agent's markdown subset ('## ' headings, paragraphs, '- ' bullets, **bold**), rendered as React text only. */
+export function ArticleBody({ markdown }: { markdown: string }) {
+  const bold = (s: string) =>
+    s.split(/(\*\*[^*]+\*\*)/g).map((p, i) => (p.startsWith('**') && p.endsWith('**') ? <strong key={i}>{p.slice(2, -2)}</strong> : p))
+  const out: ReactNode[] = []
+  let bullets: string[] = []
+  let para: string[] = []
+  const flush = () => {
+    if (para.length) out.push(<p key={`p${out.length}`}>{bold(para.join(' '))}</p>)
+    if (bullets.length) out.push(<ul key={`u${out.length}`}>{bullets.map((b, i) => <li key={i}>{bold(b)}</li>)}</ul>)
+    para = []
+    bullets = []
+  }
+  for (const raw of markdown.replace(/\r/g, '').split('\n')) {
+    const line = raw.trim()
+    const head = line.match(/^#{1,4}\s+(.*)$/)
+    const item = line.match(/^(?:[-*•]|\d+[.)])\s+(.*)$/)
+    if (!line) flush()
+    else if (head) {
+      flush()
+      out.push(<h4 key={`h${out.length}`}>{bold(head[1])}</h4>)
+    } else if (item) {
+      if (para.length) flush()
+      bullets.push(item[1])
+    } else {
+      if (bullets.length) flush()
+      para.push(line)
+    }
+  }
+  flush()
+  return <div className="article-body">{out}</div>
+}
+
+function SiteOptimizationPlan({ content }: { content: Json }) {
+  const articles = Array.isArray(content.blog_articles) ? (content.blog_articles as Json[]) : []
+  return (
+    <>
+      <SiteOptimizationFields content={content} />
+      {articles.map((a, i) => (
+        <Section key={i} label={articles.length > 1 ? `Blog article ${i + 1}` : 'Blog article'}>
+          <article className="blog-article">
+            <h3>{String(a.title || '')}</h3>
+            {a.excerpt ? <p className="muted">{String(a.excerpt)}</p> : null}
+            <ArticleBody markdown={String(a.body_markdown || '')} />
+            {Array.isArray(a.tags) && a.tags.length > 0 && (
+              <p className="small muted">Tags: {(a.tags as unknown[]).map(String).join(', ')}{a.target_keyword ? ` · Keyword: ${String(a.target_keyword)}` : ''}</p>
+            )}
+          </article>
+        </Section>
+      ))}
+    </>
+  )
+}
 
 const CustomerInsights = fieldRenderer([
   { key: 'data_note', label: 'Data basis' },

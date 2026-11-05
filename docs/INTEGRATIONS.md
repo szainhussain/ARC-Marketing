@@ -32,6 +32,25 @@ Source of truth: `app/integrations/catalog.py`, served at
 - **Payment webhooks** (`POST /api/v1/billing/webhook`): Stripe-format
   signature, same 5-minute tolerance, idempotent on event id.
 
+## Live connector: WordPress.com (blog publishing)
+
+- **Setup (once, by the ARC operator):** create an app at
+  https://developer.wordpress.com/apps with redirect URL
+  `https://usearc.vercel.app/api/v1/integrations/wordpress/callback`, then set
+  `WORDPRESS_CLIENT_ID`, `WORDPRESS_CLIENT_SECRET` and
+  `INTEGRATION_ENCRYPTION_KEY` on Render (never Vercel).
+- **Per workspace:** an owner/admin clicks *Connect WordPress.com* under
+  Integrations and picks a site. The token is encrypted at rest.
+- **Publishing:** on an approved SEO deliverable, *Publish now* or *Save as
+  draft* queues the post. The worker re-checks kill switch, approval and
+  exact version, posts once (deterministic slug), reads it back, and only
+  then shows *Live on your site* with the URL. See docs/DECISIONS.md D17.
+- **Endpoints:** `POST /organizations/<id>/integrations/wordpress/connect`,
+  `GET /integrations/wordpress/callback`,
+  `DELETE /organizations/<id>/integrations/wordpress`,
+  `POST /organizations/<id>/approvals/<id>/publish/wordpress`,
+  `GET /organizations/<id>/deliverables/<id>/publications`.
+
 ## Live connectors — prerequisites (not built)
 
 | Connector | You need to provide |

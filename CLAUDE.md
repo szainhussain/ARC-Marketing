@@ -48,9 +48,11 @@ See `docs/DECISIONS.md` for why things are built the way they are.
   dependents. DB-backed, no Redis — see `docs/DECISIONS.md` D11 and
   `docs/OPERATIONS_RUNBOOK.md`. Never call a model from a web request.
   `app/workflows/evaluation.py` holds code-level output checks.
-- `app/integrations/` — connector contract + `manual_handoff.py` (the only
-  implemented connector). A live publishing connector is explicitly
-  deferred — see `docs/12_AGENT_ROADMAP.md` and `docs/DECISIONS.md`.
+- `app/integrations/` — connector contract, `manual_handoff.py`, and the
+  first live connector `wordpress_com.py` (pilot channel chosen by the user,
+  D17). Tokens are Fernet-encrypted at rest (`app/crypto.py`) and never
+  returned by the API. Other live connectors still need the user to pick
+  the channel and confirm API access first.
 
 ## Non-negotiable rules (do not relax these for convenience)
 
@@ -63,9 +65,14 @@ See `docs/DECISIONS.md` for why things are built the way they are.
 3. An `Approval` is tied to an exact `deliverable_version_id` +
    `action_payload_hash`. Re-check both immediately before executing
    anything in `external_action_service.py` — don't trust an earlier check.
-4. Never mark an `ExternalAction` as published. `publication_status` only
-   becomes `manually_confirmed_published` via the user's own explicit
-   confirmation call. Exporting/handing off content is not publishing it.
+4. Never mark an `ExternalAction` as published from a request, a webhook
+   or an agent. `publication_status` becomes `manually_confirmed_published`
+   only via the user's own explicit confirmation call, or
+   `platform_verified_published` only inside a live connector's worker step
+   after it reads the item back from the platform itself (WordPress.com,
+   `publishing_service.py`; docs/DECISIONS.md D17). Exporting/handing off
+   content is not publishing it. Live connectors re-check kill switch,
+   approval and exact version in the worker immediately before acting.
 5. If `ANTHROPIC_API_KEY` is unset (or any provider call fails in a way
    that isn't a real model/schema problem), raise `ProviderUnavailable` and
    let the workflow fail that stage with a `capability_unavailable:` prefix

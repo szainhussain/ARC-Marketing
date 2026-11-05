@@ -25,6 +25,11 @@ CATALOG = [
     {"key": "manual_export:tiktok_ads", "name": "TikTok Ads — manual export", "category": "Paid media",
      "status": AVAILABLE, "agents": ["paid_media", "social_media"],
      "detail": "Formats ad text for manual entry. Never posts or spends.", "prerequisite": None},
+    {"key": "wordpress_com", "name": "WordPress.com — publish blog articles", "category": "Social & publishing",
+     "status": AVAILABLE, "agents": ["seo_growth"],
+     "detail": "Publishes an approved blog article to your WordPress.com site (or saves it as a draft), "
+               "then reads it back from WordPress to confirm it is live. Nothing is posted before approval.",
+     "prerequisite": "A WordPress.com site you can publish to. Connect it under Integrations."},
     {"key": "automation:zapier", "name": "Zapier — publish approved content", "category": "Automation",
      "status": AVAILABLE, "agents": ["social_media", "creative_studio", "paid_media"],
      "detail": "Approved content is sent to your Zap via a signed webhook (content.approved_for_publishing); "

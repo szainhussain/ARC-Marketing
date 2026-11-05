@@ -48,6 +48,11 @@ FIXTURE_OUTPUTS = {
     },
     "site_optimization_plan": {
         "keyword_themes": [{"theme": "hiking backpacks", "search_intent": "commercial", "priority": "high"}],
+        "blog_articles": [{"title": f"{MARK} How to choose a hiking backpack", "target_keyword": "hiking backpacks",
+                           "excerpt": "A short guide to fit, volume and weight.",
+                           "body_markdown": ("## Start with fit\n\nMeasure your torso first, then choose a pack "
+                                             "that matches it.\n\n- Volume\n- Weight"),
+                           "tags": ["hiking", "guides"]}],
     },
     "customer_insights": {
         "data_note": f"{MARK} No customer data connected; hypotheses only.",

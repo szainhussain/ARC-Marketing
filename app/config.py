@@ -110,6 +110,13 @@ class BaseConfig:
     # Semantic search for Ask ARC (Gemini embeddings; same GEMINI_API_KEY). Keyword search without it.
     EMBEDDING_MODEL = os.environ.get("EMBEDDING_MODEL", "gemini-embedding-001")
     EMBEDDING_DIMS = int(os.environ.get("EMBEDDING_DIMS", "768"))
+    # Live publishing to WordPress.com (OAuth app from developer.wordpress.com/apps).
+    # Without both values the WordPress connection shows as "not set up".
+    WORDPRESS_CLIENT_ID = os.environ.get("WORDPRESS_CLIENT_ID", "").strip()
+    WORDPRESS_CLIENT_SECRET = os.environ.get("WORDPRESS_CLIENT_SECRET", "").strip()
+    WORDPRESS_REDIRECT_URI = os.environ.get("WORDPRESS_REDIRECT_URI", "").strip()
+    # Fernet key for third-party tokens at rest (see app/crypto.py).
+    INTEGRATION_ENCRYPTION_KEY = os.environ.get("INTEGRATION_ENCRYPTION_KEY", "").strip()
     UPLOAD_DIR = os.environ.get("UPLOAD_DIR", "storage/uploads")
     MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", "10"))
     MAX_CONTENT_LENGTH = int(os.environ.get("MAX_UPLOAD_MB", "10")) * 1024 * 1024

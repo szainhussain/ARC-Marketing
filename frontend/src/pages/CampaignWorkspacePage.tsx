@@ -7,6 +7,7 @@ import PlatformExportView from '../components/PlatformExportView'
 import WorkflowGraphPanel from '../components/WorkflowGraphPanel'
 import AlwaysOnCard from '../components/AlwaysOnCard'
 import DeliverableImages from '../components/DeliverableImages'
+import { WordPressPublish } from '../components/WordPressPublish'
 import { supportsImages } from '../lib/imageItems'
 import { PageHeader, PageSkeleton, Tabs } from '../components/ui'
 import { useNavigate } from 'react-router-dom'
@@ -437,6 +438,14 @@ export default function CampaignWorkspacePage({ section = 'overview' }: { sectio
                       </div>
                       {action.platform_export && <PlatformExportView export={action.platform_export} />}
                     </div>
+                  )}
+                  {approval.decision === 'approved' && d.deliverable_type === 'site_optimization_plan' && orgId && (
+                    <WordPressPublish
+                      orgId={orgId}
+                      deliverableId={d.id}
+                      approvalId={approval.id}
+                      articles={(((d.current_version?.content as Record<string, unknown> | undefined)?.blog_articles as { title?: unknown }[]) || [])}
+                    />
                   )}
                 </div>
               )}

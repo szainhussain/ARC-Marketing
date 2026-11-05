@@ -17,6 +17,13 @@ STATUS_CANCELLED = "cancelled"
 PUBLICATION_NOT_APPLICABLE = "not_applicable"
 PUBLICATION_UNVERIFIED = "unverified"
 PUBLICATION_MANUALLY_CONFIRMED = "manually_confirmed_published"
+# Set only by a live connector after it reads the item back from the
+# platform itself (e.g. WordPress.com reports the post as published at a
+# URL). Never set from a request, a webhook or an agent (docs/DECISIONS.md D17).
+PUBLICATION_PLATFORM_VERIFIED = "platform_verified_published"
+PUBLICATION_DRAFT_CREATED = "draft_created"
+
+STATUS_QUEUED = "queued"
 
 
 class ExternalAction(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
@@ -39,6 +46,15 @@ class ExternalAction(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
     # platform's composer. Null for a generic (platform-agnostic) export.
     target_platform = db.Column(db.String(32))
     response_metadata_json = db.Column(db.Text)
+    # Live connectors (queued -> executing -> succeeded/failed, run by the worker)
+    item_index = db.Column(db.Integer)
+    attempts = db.Column(db.Integer, default=0, nullable=False, server_default="0")
+    next_attempt_at = db.Column(db.DateTime(timezone=True))
+    last_error = db.Column(db.String(500))
+    external_reference = db.Column(db.String(128))
+    external_url = db.Column(db.String(1000))
+    publish_mode = db.Column(db.String(16))  # "publish" | "draft"
+    requested_by_user_id = db.Column(db.String(36), db.ForeignKey("users.id", name="fk_external_actions_requested_by"))
 
     publication_status = db.Column(
         db.String(32), default=PUBLICATION_NOT_APPLICABLE, nullable=False
@@ -64,5 +80,10 @@ class ExternalAction(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
                 if self.publication_confirmed_at
                 else None
             ),
+            "item_index": self.item_index,
+            "external_url": self.external_url,
+            "publish_mode": self.publish_mode,
+            "last_error": self.last_error,
+            "attempts": self.attempts,
             "created_at": self.created_at.isoformat(),
         }

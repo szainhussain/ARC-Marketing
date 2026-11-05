@@ -356,3 +356,29 @@ never under `ProductionConfig`; its outputs are marked "[E2E fixture]".
 This satisfies the brief's "deterministic fake providers for CI" without
 weakening CLAUDE.md rule 5: an unconfigured provider still yields
 `capability_unavailable`, never fabricated content.
+
+## D17 — WordPress.com is the first live publishing connector
+
+The user chose WordPress.com as the pilot channel (Phase 2) and chose
+"verified by WordPress" for how publication is recorded. So:
+
+- A workspace owner/admin connects a site with WordPress.com OAuth2. The
+  state is signed (itsdangerous, 10-minute expiry), tied to the user and a
+  single-use session nonce. The token is Fernet-encrypted at rest
+  (`INTEGRATION_ENCRYPTION_KEY`, else derived from `SECRET_KEY`) and never
+  returned by any endpoint.
+- The SEO agent (v1.2.0) now writes one publish-ready blog article. An
+  approver can publish it (or save it as a draft) only from an approved,
+  current version. The request just queues an `ExternalAction`; the worker
+  re-checks kill switch, approval decision and exact version immediately
+  before posting (CLAUDE.md rule 3), posts once with a deterministic slug
+  (retries look the slug up first, so they never duplicate), then reads
+  the post back. Only that read-back sets `platform_verified_published`
+  (CLAUDE.md rule 4, amended). Drafts are `draft_created`, never
+  "published".
+- Article markdown is converted to HTML after escaping everything, so model
+  output cannot inject markup. A revoked token marks the connection
+  `reauth_required` and fails the action with a reconnect message.
+- New locked policy `live_publish` (require_approval). Spend stays blocked:
+  ad launching (Phase 2, part 3) will add its own cap + kill-switch path
+  and is built against a fake ad platform until the user has API access.

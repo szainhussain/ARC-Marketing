@@ -365,3 +365,20 @@ ignored its command); E2E policy step raced page load.
 **Not executed:** Docker Compose full stack, CI workflow on GitHub (no
 remote), Stripe live/test API, email delivery, any live social/ads API,
 load testing, backup-restore drill.
+
+
+## Phase 2, part 1 — WordPress.com live publishing (2026-11-06)
+
+`pytest`: 154 passed (11 new: `tests/integration/test_wordpress_publishing.py`,
+`tests/security/test_publishing_isolation.py`). Against a fake
+public-api.wordpress.com: encrypted token never returned; forged/replayed
+OAuth state refused; publish once and verified by read-back; retry after a
+timeout never duplicates; draft is not "published"; an edit after queueing
+blocks the post; kill switch holds it; unapproved/unconnected refused; a
+revoked token flips the connection to reconnect; markdown converter escapes
+all markup; another workspace is denied every endpoint and cannot reuse a
+state. Frontend build, lint (0 errors) and Vitest pass. Browser check on the
+local stack: article renders on the SEO deliverable, publish section and
+Integrations card show the correct "not set up / not connected" states, 0
+console errors. **Not executed:** a real WordPress.com OAuth round trip and
+post (needs the WordPress.com app credentials on Render).

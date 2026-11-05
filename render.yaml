@@ -49,6 +49,12 @@ services:
         value: "false"       # same reason; CSRF token + CORS still enforced
       - key: GEMINI_API_KEY
         sync: false          # free key from aistudio.google.com: turns on on-brand image generation
+      - key: WORDPRESS_CLIENT_ID
+        sync: false          # from developer.wordpress.com/apps (your WordPress.com app)
+      - key: WORDPRESS_CLIENT_SECRET
+        sync: false          # same app; secret, Render only
+      - key: INTEGRATION_ENCRYPTION_KEY
+        generateValue: true  # any long random value; encrypts connected-site tokens at rest
       - key: PLATFORM_ADMIN_EMAILS
         sync: false          # your email(s), comma-separated: opens the in-app Admin inbox
       - key: BILLING_PROVIDER

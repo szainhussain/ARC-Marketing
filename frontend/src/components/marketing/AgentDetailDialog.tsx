@@ -4,6 +4,7 @@ import { Dialog } from '../ui'
 
 const STATUS_LABEL: Record<string, string> = {
   manual_export_available: 'Available — manual export',
+  available_after_approval: 'Available — publishes after your approval',
   planned: 'Planned — not built yet',
   not_connected: 'Not connected',
 }

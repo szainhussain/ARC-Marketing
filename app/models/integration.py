@@ -9,12 +9,12 @@ STATE_REAUTH_REQUIRED = "reauth_required"
 
 
 class Integration(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
-    """Integration connection metadata. Never store plaintext secrets here.
+    """A workspace's connection to an outside provider.
 
-    No live connectors are implemented yet (see docs/DECISIONS.md — M11 is
-    deferred until a pilot channel is selected and API access verified).
-    This table exists so the API can report an honest, empty integrations
-    list rather than omitting the capability's shape entirely.
+    Credentials are stored only as ciphertext (app/crypto.py) in
+    credential_ciphertext and are never included in to_dict(). Live
+    connectors exist only for providers the user chose as a pilot
+    (WordPress.com first; see docs/DECISIONS.md D17).
     """
 
     __tablename__ = "integrations"
@@ -26,13 +26,20 @@ class Integration(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
     account_label = db.Column(db.String(255))
     state = db.Column(db.String(32), default=STATE_DISCONNECTED, nullable=False)
     scopes = db.Column(db.String(500))
-    encrypted_credential_ref = db.Column(db.String(255))  # pointer into a secret manager
+    encrypted_credential_ref = db.Column(db.String(255))  # legacy: pointer into a secret manager
+    credential_ciphertext = db.Column(db.Text)
+    external_account_id = db.Column(db.String(128))
+    account_url = db.Column(db.String(500))
+    connected_by_user_id = db.Column(db.String(36), db.ForeignKey("users.id", name="fk_integrations_connected_by"))
+    connected_at = db.Column(db.DateTime(timezone=True))
 
     def to_dict(self) -> dict:
         return {
             "id": self.id,
             "provider": self.provider,
             "account_label": self.account_label,
+            "account_url": self.account_url,
             "state": self.state,
             "scopes": self.scopes,
+            "connected_at": self.connected_at.isoformat() if self.connected_at else None,
         }
