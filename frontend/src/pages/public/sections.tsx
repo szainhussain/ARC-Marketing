@@ -221,10 +221,9 @@ function fmt(v: number | null | undefined) {
   return v == null ? 'Unlimited' : String(v)
 }
 
-export function SectionHead({ eyebrow, title, lede }: { eyebrow: string; title: string; lede?: string }) {
+export function SectionHead({ title, lede }: { title: string; lede?: string }) {
   return (
     <Reveal>
-      <div className="section-eyebrow">{eyebrow}</div>
       <h2 className="display-h">{title}</h2>
       {lede && <p className="lede">{lede}</p>}
     </Reveal>

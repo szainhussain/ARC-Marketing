@@ -1,12 +1,11 @@
 import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'motion/react'
-import { Lock, Repeat } from 'lucide-react'
+import { Repeat } from 'lucide-react'
 import ProductPreview from '../../components/marketing/ProductPreview'
 import WorkflowDemo from '../../components/marketing/WorkflowDemo'
 import Reveal from '../../components/motion/Reveal'
 import { AgentGrid, IntegrationList, PricingTable, SectionHead } from './sections'
 import { CtaPair, FaqList, LoopDiagram } from './GrowthPages'
-import { CAPABILITIES } from '../../lib/marketing'
 import { HOME_FAQS, SOLUTIONS } from '../../lib/growth'
 import { usePageMeta } from '../../lib/seo'
 
@@ -52,15 +51,13 @@ export default function HomePage() {
 
       <section className="section">
         <SectionHead
-          eyebrow="The problem"
           title="Marketing shouldn't be a full-time job in coordination."
           lede="Most teams don't lack ideas. They lose them between tools, handoffs and status meetings."
         />
         <Reveal>
           <div className="problem-grid">
-            {PROBLEMS.map((p, i) => (
+            {PROBLEMS.map((p) => (
               <div key={p}>
-                <div className="n">{String(i + 1).padStart(2, '0')}</div>
                 <div className="t">{p}</div>
               </div>
             ))}
@@ -72,7 +69,6 @@ export default function HomePage() {
 
       <section className="section">
         <SectionHead
-          eyebrow="How it works"
           title="Strategy to results, every month. You stay in control."
           lede="Your CMO agent sets direction, the Marketing Manager plans it, ten specialists build it, Operations checks it — and nothing leaves the workspace until you approve it."
         />
@@ -85,7 +81,7 @@ export default function HomePage() {
       </section>
 
       <section className="section">
-        <SectionHead eyebrow="Solutions" title="Built around what you need to get done." />
+        <SectionHead title="Built around what you need to get done." />
         <div className="cap-grid">
           {SOLUTIONS.map((s) => (
             <Link key={s.slug} to={`/solutions/${s.slug}`} className="cap solution-card">
@@ -102,7 +98,6 @@ export default function HomePage() {
 
       <section className="section">
         <SectionHead
-          eyebrow="The team"
           title="Meet the twelve agents."
           lede="Each one has its own job, its own output format, its own permissions and its own quality checks. Open any card to see exactly what it can and can't do."
         />
@@ -112,25 +107,7 @@ export default function HomePage() {
       <div className="rule" />
 
       <section className="section">
-        <SectionHead eyebrow="Capabilities" title="Everything a marketing department does. Coordinated." />
-        <div className="cap-grid">
-          {CAPABILITIES.map((c, i) => (
-            <Reveal key={c.title} delay={(i % 3) * 0.05}>
-              <div className="cap" style={{ height: '100%' }}>
-                <span className="agent-glyph">
-                  <c.icon size={18} aria-hidden="true" />
-                </span>
-                <h3>{c.title}</h3>
-                <p>{c.body}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      <section className="section">
         <SectionHead
-          eyebrow="Integrations"
           title="Honest about what's connected."
           lede="We label every integration by what's actually built. Today ARC exports approved work in each platform's format; live connectors arrive as they're verified."
         />
@@ -144,11 +121,10 @@ export default function HomePage() {
 
       <section className="section">
         <SectionHead
-          eyebrow="Security and trust"
           title="Autonomy with guardrails you control."
           lede="Every workspace is isolated. Every consequential action needs a person. Every decision is recorded."
         />
-        <div className="cap-grid">
+        <dl className="trust-list">
           {[
             ['Tenant isolation', 'Every query is scoped to your workspace on the server, and tested on every release.'],
             ['Scoped agent permissions', 'Agents only see the outputs they need, and have no tools beyond structured drafting.'],
@@ -157,22 +133,19 @@ export default function HomePage() {
             ['Audit trail', 'Append-only log of who did what, when — exportable with all your data.'],
             ['Stop everything', 'Pause all agents or engage the kill switch instantly; the backend enforces it.'],
           ].map(([t, b]) => (
-            <div key={t} className="cap">
-              <span className="agent-glyph">
-                <Lock size={17} aria-hidden="true" />
-              </span>
-              <h3>{t}</h3>
-              <p>{b}</p>
+            <div key={t}>
+              <dt>{t}</dt>
+              <dd>{b}</dd>
             </div>
           ))}
-        </div>
+        </dl>
         <p className="muted small" style={{ marginTop: 16 }}>
           ARC has not yet obtained SOC 2, ISO 27001 or other certifications. <Link to="/security">Read our security approach.</Link>
         </p>
       </section>
 
       <section className="section">
-        <SectionHead eyebrow="Pricing" title="Plans that grow with your workload." />
+        <SectionHead title="Plans that grow with your workload." />
         <PricingTable />
         <p style={{ marginTop: 18 }}>
           <Link to="/compare/agency">Compare ARC with what you spend on an agency today →</Link>
@@ -180,7 +153,7 @@ export default function HomePage() {
       </section>
 
       <section className="section">
-        <SectionHead eyebrow="FAQ" title="Questions, answered." />
+        <SectionHead title="Questions, answered." />
         <FaqList id="home-faq" faqs={HOME_FAQS} />
       </section>
 

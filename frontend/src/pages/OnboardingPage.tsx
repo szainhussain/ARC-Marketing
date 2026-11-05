@@ -320,7 +320,7 @@ export function ProfileForm({ mode }: { mode: 'wizard' | 'edit' }) {
 export default function OnboardingPage() {
   return (
     <div className="page">
-      <PageHeader eyebrow="Setup" title="Set up your marketing department" description="Tell your agents about the business. You can change any of this later in Brand profile." />
+      <PageHeader title="Set up your marketing department" description="Tell your agents about the business. You can change any of this later in Brand profile." />
       <ProfileForm mode="wizard" />
     </div>
   )

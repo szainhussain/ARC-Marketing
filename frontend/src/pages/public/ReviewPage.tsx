@@ -68,12 +68,11 @@ export default function ReviewPage() {
 
   return (
     <section className="section review-page">
-      <div className="section-eyebrow">Shared by {data.workspace_name || 'your marketing team'}</div>
       <h1 className="display-page" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}>
         {humanize(data.deliverable_type)}
       </h1>
       <p className="muted">
-        Version {data.version_number} · link expires {relativeTime(data.expires_at)}
+        Shared by {data.workspace_name || 'your marketing team'} · Version {data.version_number} · link expires {relativeTime(data.expires_at)}
       </p>
 
       {message && (

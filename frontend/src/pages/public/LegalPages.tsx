@@ -13,7 +13,7 @@ function LegalDoc({ title, summary, sections, children }: { title: string; summa
   usePageMeta(title, summary)
   return (
     <section className="section legal">
-      <SectionHead eyebrow="Legal" title={title} />
+      <SectionHead title={title} />
       <p className="muted small legal-meta">
         Effective {LEGAL.effectiveDate} · Version {LEGAL.version} · <Link to="/legal">All legal documents</Link>
       </p>
@@ -85,7 +85,6 @@ export function LegalHubPage() {
   return (
     <section className="section">
       <SectionHead
-        eyebrow="Legal"
         title="Legal and trust documents."
         lede="Plain-language policies for everyone who uses ARC. Where the law differs by country, the Privacy Policy and Terms show the rules for your region."
       />

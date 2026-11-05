@@ -38,7 +38,7 @@ export default function AdminPage() {
   const o = overview.data
   return (
     <div className="page page-wide">
-      <PageHeader eyebrow="Platform" title="Admin" description="Sign-ups, usage across ARC, and every demo request and contact message from the website." />
+      <PageHeader title="Admin" description="Sign-ups, usage across ARC, and every demo request and contact message from the website." />
       {overview.error && <ErrorState message={overview.error} onRetry={overview.reload} />}
       {o && (
         <div className="kpi-grid">

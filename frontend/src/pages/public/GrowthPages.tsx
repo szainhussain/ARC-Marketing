@@ -60,7 +60,6 @@ export function SolutionsPage() {
   return (
     <section className="section">
       <SectionHead
-        eyebrow="Solutions"
         title="One department, shaped around your goal."
         lede="Pick the situation closest to yours to see which agents do the work and what you get back."
       />
@@ -87,9 +86,11 @@ export function SolutionPage() {
   return (
     <>
       <section className="section">
-        <div className="section-eyebrow">
-          <Link to="/solutions">Solutions</Link> / {s.title}
-        </div>
+        <nav aria-label="Breadcrumb" className="crumbs" style={{ marginBottom: 14 }}>
+          <Link to="/solutions">Solutions</Link>
+          <span className="crumb-sep">/</span>
+          <span aria-current="page">{s.title}</span>
+        </nav>
         <h1 className="display-page">{s.title}</h1>
         <p className="lede">{s.short}</p>
         <p className="muted">
@@ -170,7 +171,7 @@ export function DemoPage() {
     <section className="section">
       <div className="two-up demo-layout">
         <div>
-          <SectionHead eyebrow="Book a demo" title="See ARC run your marketing." />
+          <SectionHead title="See ARC run your marketing." />
           <p className="lede">A 30-minute walkthrough with your own business as the example.</p>
           <ul className="check-list">
             {[
@@ -256,7 +257,6 @@ export function ScorecardPage() {
   return (
     <section className="section" style={{ maxWidth: 860 }}>
       <SectionHead
-        eyebrow="Free tool"
         title="How healthy is your marketing?"
         lede="Eight questions, two minutes. You get a score and a prioritised list of what to fix first. Nothing is stored or sent anywhere."
       />
@@ -306,9 +306,6 @@ export function ScorecardPage() {
               <span>{pct}</span>
             </div>
             <div>
-              <div className="section-eyebrow" style={{ marginBottom: 6 }}>
-                Your score
-              </div>
               <h2 style={{ fontSize: '1.6rem', marginBottom: 6 }}>{band}</h2>
               <p className="muted" style={{ margin: 0 }}>
                 {score} of {max} points. {gaps.length === 0 ? 'Every area is in good shape.' : `${gaps.length} area${gaps.length > 1 ? 's' : ''} to improve, most urgent first:`}
@@ -375,7 +372,6 @@ export function AgencyComparePage() {
   return (
     <section className="section">
       <SectionHead
-        eyebrow="Compare"
         title="ARC vs an agency or in-house time."
         lede="Enter what marketing costs you today. The calculation uses only your numbers and the published plan price — it is an estimate, not a promise."
       />

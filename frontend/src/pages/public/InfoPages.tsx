@@ -17,7 +17,6 @@ export function ProductPage() {
     <>
       <section className="section">
         <SectionHead
-          eyebrow="Product"
           title="An AI-operated marketing department, not another content tool."
           lede="ARC coordinates twelve specialist agents through one durable workflow, two control rooms and an approval system that keeps people in charge of the decisions that matter."
         />
@@ -59,7 +58,7 @@ export function ProductPage() {
         </div>
         <div className="cta-row" style={{ marginTop: 40 }}>
           <Link to="/signup" className="btn lg">
-            Build your marketing team
+            Start free trial
           </Link>
           <Link to="/how-it-works" className="btn secondary lg">
             How it works
@@ -75,7 +74,6 @@ export function AgentsPage() {
   return (
     <section className="section">
       <SectionHead
-        eyebrow="The 12 agents"
         title="Twelve specialists. One department."
         lede="Every agent below is a real, versioned component with its own instructions, output schema, permissions, budget and checks. The details come straight from the running system."
       />
@@ -98,7 +96,7 @@ export function HowItWorksPage() {
   return (
     <>
       <section className="section">
-        <SectionHead eyebrow="How it works" title="From brief to approved work, step by step." />
+        <SectionHead title="From brief to approved work, step by step." />
         <ol className="timeline" style={{ maxWidth: 760 }}>
           {steps.map(([t, b], i) => (
             <li key={t} className="info">
@@ -148,7 +146,6 @@ export function IntegrationsPublicPage() {
   return (
     <section className="section">
       <SectionHead
-        eyebrow="Integrations"
         title="Connected where it's real. Labelled where it isn't."
         lede="Each integration shows its true status and what it needs before it can go live."
       />
@@ -161,7 +158,7 @@ export function SecurityPage() {
   usePageMeta("Security", "Tenant isolation, approvals, audit logs and data controls in ARC.")
   return (
     <section className="section">
-      <SectionHead eyebrow="Security" title="Security, governance and data controls." />
+      <SectionHead title="Security, governance and data controls." />
       <div className="notice">
         ARC has not obtained SOC 2, ISO 27001 or any other certification, and makes no formal compliance claim (for
         example GDPR). This page describes controls that exist in the product today.
@@ -201,7 +198,6 @@ export function PricingPage() {
     <>
       <section className="section">
         <SectionHead
-          eyebrow="Pricing"
           title="A marketing department for less than one hire."
           lede="Every plan includes all twelve agents, approvals and exports. Start with a 14-day free trial — no card needed — and cancel any time."
         />
@@ -217,9 +213,6 @@ export function PricingPage() {
       <section className="section tight">
         <div className="card addon-card">
           <div>
-            <div className="section-eyebrow" style={{ marginBottom: 6 }}>
-              Add-on
-            </div>
             <h2>Strategist add-on: a human on your side</h2>
             <p className="muted" style={{ margin: 0 }}>
               A marketing strategist who reviews your plan each month, joins a monthly call and runs a quarterly
@@ -246,7 +239,7 @@ export function AboutPage() {
   usePageMeta("About", "Why ARC exists: marketing that operates, not just generates.")
   return (
     <section className="section">
-      <SectionHead eyebrow="About" title="Marketing that operates, not just generates." />
+      <SectionHead title="Marketing that operates, not just generates." />
       <div className="prose">
         <p>
           ARC exists because most businesses don't need another tool that writes posts. They need the coordination
@@ -297,7 +290,7 @@ export function ContactPage() {
 
   return (
     <section className="section" style={{ maxWidth: 640 }}>
-      <SectionHead eyebrow="Contact" title="Talk to us." lede="Sales, support, partnerships or security — we reply by email." />
+      <SectionHead title="Talk to us." lede="Sales, support, partnerships or security — we reply by email." />
       {status === 'sent' ? (
         <div className="banner success">Thanks — your message was received. We'll reply by email.</div>
       ) : (
@@ -337,7 +330,7 @@ export function DocsPage() {
   usePageMeta("Docs", "Getting started with ARC, the agents, runs, security and the API.")
   return (
     <section className="section">
-      <SectionHead eyebrow="Documentation" title="Docs" lede="Start here, then go deeper." />
+      <SectionHead title="Docs" lede="Start here, then go deeper." />
       <div className="cap-grid">
         {[
           ['Getting started', 'Create a workspace, complete onboarding, write a brief, and run the department.', '/signup'],

@@ -147,9 +147,9 @@ try {
   await step('8. review deliverables', async () => {
     await page.goto(campaignUrl + '/deliverables')
     await page.getByRole('heading', { name: 'Strategy', exact: true }).waitFor()
-    const count = await page.getByRole('button', { name: 'Request approval to hand off' }).count()
+    const count = await page.getByRole('button', { name: 'Request approval', exact: true }).count()
     if (count !== 12) throw new Error(`expected 12 deliverables awaiting approval, saw ${count}`)
-    await page.getByRole('button', { name: 'Request approval to hand off' }).first().click()
+    await page.getByRole('button', { name: 'Request approval', exact: true }).first().click()
     await page.getByText(/Approval:/).first().waitFor()
   })
 

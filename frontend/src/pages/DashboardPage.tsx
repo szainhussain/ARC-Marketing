@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AlertTriangle, ArrowRight, Info, MessageSquarePlus, Plus, Sparkles } from 'lucide-react'
+import { AlertTriangle, ArrowRight, Info, Sparkles } from 'lucide-react'
 import {
   Area,
   AreaChart,
@@ -13,7 +13,6 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { useAuth } from '../context/AuthContext'
 import { useWorkspace } from '../context/WorkspaceContext'
 import { useResource } from '../hooks/useResource'
 import { humanize, money, relativeTime } from '../lib/labels'
@@ -66,7 +65,6 @@ const AXIS = { stroke: '#6b6f74', fontSize: 11, tickLine: false, axisLine: false
 
 export default function DashboardPage() {
   const { activeOrganizationId: orgId } = useWorkspace()
-  const { memberships } = useAuth()
   const [days, setDays] = useState(30)
   const [campaignId, setCampaignId] = useState('')
   const qs = `days=${days}${campaignId ? `&campaign_id=${campaignId}` : ''}`
@@ -74,7 +72,6 @@ export default function DashboardPage() {
     pollMs: 15000,
   })
   const campaigns = useResource<{ campaigns: { id: string; name: string }[] }>(orgId ? `/organizations/${orgId}/campaigns` : null)
-  const workspaceName = memberships.find((m) => m.organization_id === orgId)?.organization_name
 
   if (!orgId) {
     return (
@@ -91,7 +88,6 @@ export default function DashboardPage() {
   return (
     <div className="page page-wide">
       <PageHeader
-        eyebrow={workspaceName}
         title="Business Command Center"
         description="What your marketing team is delivering, what needs you, and what it cost."
         actions={
@@ -109,8 +105,6 @@ export default function DashboardPage() {
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
-            <Link to="/app/campaigns/new" className="btn"><Plus size={15} aria-hidden="true" /> Create campaign</Link>
-            <Link to="/app/campaigns/new?ask=1" className="btn secondary"><MessageSquarePlus size={15} aria-hidden="true" /> Ask your marketing team</Link>
           </>
         }
       />
@@ -243,29 +237,30 @@ export default function DashboardPage() {
               <h2>Business results</h2>
               <Link to="/app/results" className="small">Record results →</Link>
             </div>
-            <p className="muted small">
-              Numbers come only from results your team records (or a connected source). ARC never estimates them.
-            </p>
-            <div className="unavailable-grid">
-              {data.business_metrics.map((m) => (
-                <div key={m.key} className={m.available ? 'metric-available' : undefined}>
-                  <div className="small" style={{ fontWeight: 600 }}>{m.label}</div>
-                  {m.available && m.value != null ? (
-                    <>
-                      <div className="metric-value">
-                        {m.unit === 'usd' ? money(m.value) : m.unit === '%' ? `${m.value.toFixed(2)}%` : m.unit === 'x' ? `${m.value.toFixed(2)}x` : m.value.toLocaleString()}
-                      </div>
-                      <div className="muted small">Entered manually</div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="muted small">Not connected</div>
-                      <div className="muted small mono" style={{ marginTop: 4 }}>Needs: {m.requires}</div>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
+            {data.business_metrics.some((m) => m.available) ? (
+              <div className="unavailable-grid">
+                {data.business_metrics.filter((m) => m.available && m.value != null).map((m) => (
+                  <div key={m.key} className="metric-available">
+                    <div className="small" style={{ fontWeight: 600 }}>{m.label}</div>
+                    <div className="metric-value">
+                      {m.unit === 'usd' ? money(m.value!) : m.unit === '%' ? `${m.value!.toFixed(2)}%` : m.unit === 'x' ? `${m.value!.toFixed(2)}x` : m.value!.toLocaleString()}
+                    </div>
+                    <div className="muted small">Entered manually</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="muted small" style={{ margin: 0 }}>
+                No results recorded for this period. Record spend, leads and revenue to see cost per lead and return on ad spend here.
+              </p>
+            )}
+            {data.business_metrics.some((m) => !m.available && m.link === '/app/integrations') && (
+              <p className="muted small" style={{ margin: '12px 0 0' }}>
+                Needs a connected source:{' '}
+                {data.business_metrics.filter((m) => !m.available && m.link === '/app/integrations').map((m) => m.label.toLowerCase()).join(', ')}.
+                ARC never estimates these.
+              </p>
+            )}
           </div>
 
           <div className="grid-3" style={{ marginTop: 18 }}>

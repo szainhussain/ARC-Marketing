@@ -12,7 +12,7 @@
   --color-fg: #f5f5f0;
   --color-muted: #1a1c21;
   --color-muted-fg: #a1a4a5;
-  --color-subtle-fg: #6b6f74;
+  --color-subtle-fg: #83878c;
   --color-border: #23262c;
   --color-border-strong: #33373e;
 
@@ -213,75 +213,12 @@ table.simple tr:hover td { background: var(--color-muted); }
 .kpi-tile:hover { box-shadow: var(--shadow-glow); transform: translateY(-2px); border-color: rgba(159, 216, 255, 0.35); }
 .kpi-tile .kpi-label { font-size: 0.76rem; font-weight: 600; color: var(--color-muted-fg); text-transform: uppercase; letter-spacing: 0.05em; }
 .kpi-tile .kpi-value {
-  font-size: 1.9rem; font-weight: 800; margin-top: 6px; letter-spacing: -0.02em;
-  background: linear-gradient(135deg, var(--color-fg), var(--color-accent));
-  -webkit-background-clip: text; background-clip: text; color: transparent;
+  font-size: 1.9rem; font-weight: 800; margin-top: 6px; letter-spacing: -0.02em; color: var(--color-fg);
+  font-variant-numeric: tabular-nums;
 }
 .kpi-tile .kpi-sub { font-size: 0.8rem; color: var(--color-muted-fg); margin-top: 4px; }
 
-/* Landing page: glow background + spotlight + arc motif */
-.hero { position: relative; text-align: center; padding: 120px 20px 96px; overflow: hidden; isolation: isolate; }
-.hero-glow {
-  position: absolute; inset: 0; z-index: -1; pointer-events: none;
-  background:
-    radial-gradient(60% 50% at 30% 0%, rgba(159, 216, 255, 0.22), transparent 70%),
-    radial-gradient(50% 40% at 80% 10%, rgba(129, 140, 248, 0.16), transparent 70%),
-    radial-gradient(40% 40% at 50% 100%, rgba(159, 216, 255, 0.08), transparent 70%);
-  animation: glow-drift 16s ease-in-out infinite alternate;
-}
-@keyframes glow-drift {
-  0% { transform: translate3d(0, 0, 0) scale(1); }
-  100% { transform: translate3d(-2%, 2%, 0) scale(1.06); }
-}
-.hero-grid {
-  position: absolute; inset: 0; z-index: -1; pointer-events: none;
-  background-image:
-    linear-gradient(to right, rgba(148, 163, 184, 0.06) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
-}
-.hero h1 {
-  font-size: clamp(2.3rem, 5vw, 3.6rem); max-width: 820px; margin: 0 auto 18px; line-height: 1.08;
-}
-.hero h1 .accent-text {
-  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-2));
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.hero p { font-size: 1.12rem; color: var(--color-muted-fg); max-width: 600px; margin: 0 auto 32px; line-height: 1.6; }
-.hero .tag {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 6px 14px; border-radius: 999px;
-  background: var(--color-muted); border: 1px solid var(--color-border);
-  color: var(--color-accent);
-  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.02em;
-  margin-bottom: 24px;
-}
-.hero .tag .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent); box-shadow: 0 0 8px var(--color-accent); }
 
-.workflow-strip { display: flex; align-items: flex-start; justify-content: center; flex-wrap: wrap; gap: 0; margin: 48px auto 0; max-width: 900px; }
-.workflow-step { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 122px; }
-.workflow-step .num {
-  width: 40px; height: 40px; border-radius: 50%;
-  background: var(--color-surface); color: var(--color-accent);
-  border: 1px solid var(--color-border-strong);
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 0.95rem;
-  transition: box-shadow var(--transition), border-color var(--transition), color var(--transition);
-}
-.workflow-step:hover .num { box-shadow: var(--shadow-glow); border-color: var(--color-accent); color: var(--color-fg); }
-.workflow-step .label { font-size: 0.82rem; font-weight: 600; color: var(--color-fg); text-align: center; }
-.workflow-arrow { color: var(--color-border-strong); font-size: 1.3rem; margin: 0 -2px; align-self: flex-start; margin-top: 10px; }
-
-.feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
-.feature-grid .card { margin-bottom: 0; }
-.feature-icon {
-  width: 42px; height: 42px; border-radius: var(--radius-sm);
-  background: var(--color-muted); color: var(--color-accent);
-  border: 1px solid var(--color-border);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.15rem; margin-bottom: 14px;
-}
 
 /* 3D tilt wrapper — mouse-tracked via JS setting --rx/--ry custom props */
 .tilt-card {
@@ -298,7 +235,7 @@ table.simple tr:hover td { background: var(--color-muted); }
 .deliverable-section { margin-bottom: 16px; }
 .deliverable-section:last-child { margin-bottom: 0; }
 .deliverable-section .section-label {
-  font-size: 0.74rem; font-weight: 700; text-transform: uppercase;
+  font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.05em; color: var(--color-muted-fg); margin-bottom: 6px;
 }
 .deliverable-list { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
@@ -326,7 +263,7 @@ table.simple tr:hover td { background: var(--color-muted); }
   border: 1px solid var(--color-border); border-radius: var(--radius-sm);
   padding: 14px; margin-bottom: 10px; background: var(--color-bg-elevated);
 }
-.variant-card .channel-tag { font-size: 0.74rem; font-weight: 700; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.04em; }
+.variant-card .channel-tag { font-size: 0.75rem; font-weight: 700; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.04em; }
 .variant-card .headline { font-weight: 700; margin: 4px 0; color: var(--color-fg); }
 .qa-check { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; padding: 6px 0; color: var(--color-fg); }
 .qa-check .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-success); flex-shrink: 0; }
@@ -434,3 +371,11 @@ button.chip.active { color: var(--color-on-accent); background: var(--color-acce
 @media (prefers-reduced-motion: reduce) {
   .status-pill.running::before, .status-pill.working::before, .wf-node .wf-dot { animation: none !important; }
 }
+
+/* Browser surfaces and text wrapping */
+::selection { background: rgba(159, 216, 255, 0.28); color: var(--color-fg); }
+input, textarea { caret-color: var(--color-accent); }
+html { scrollbar-color: var(--color-border-strong) var(--color-bg); }
+a { text-underline-offset: 0.18em; }
+h1, h2, h3, .display-h, .display-page { text-wrap: balance; }
+p, li, dd { text-wrap: pretty; }

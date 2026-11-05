@@ -305,8 +305,8 @@ export default function CampaignWorkspacePage({ section = 'overview' }: { sectio
         )}
       </div>)}
 
-      {section !== 'workflow' && (<div className="card">
-        <h2>Deliverables</h2>
+      {section !== 'workflow' && (<section className="deliverables" aria-labelledby="deliverables-h">
+        <h2 id="deliverables-h">Deliverables</h2>
         {deliverables.length === 0 && (
           <p className="muted">
             No deliverables yet. Each agent's draft appears here as soon as it finishes; nothing is
@@ -320,7 +320,7 @@ export default function CampaignWorkspacePage({ section = 'overview' }: { sectio
             <div key={d.id} className="card">
               <h2>{humanize(d.deliverable_type)}</h2>
               <p className="muted">
-                Version {d.current_version?.version_number} · review:{' '}
+                Version {d.current_version?.version_number} ·{' '}
                 <span className={`status-pill ${d.review_status}`}>{d.review_status}</span>
               </p>
               {orgId && (
@@ -354,7 +354,7 @@ export default function CampaignWorkspacePage({ section = 'overview' }: { sectio
               {d.deliverable_type === 'social_calendar' && orgId && <CalendarImport orgId={orgId} deliverableId={d.id} />}
 
               {!approval && (
-                <button onClick={() => requestApproval(d.id)}>Request approval to hand off</button>
+                <button style={{ marginTop: 14 }} onClick={() => requestApproval(d.id)}>Request approval</button>
               )}
               {approval && (
                 <div>
@@ -398,21 +398,20 @@ export default function CampaignWorkspacePage({ section = 'overview' }: { sectio
                         </div>
                       )}
                       <button onClick={() => execute(approval.id, platformByDeliverable[d.id] || '')}>
-                        Export for manual handoff
+                        Export for publishing
                       </button>
                     </div>
                   )}
                   {action && (
                     <div style={{ marginTop: 10 }}>
                       <div className="banner success">
-                        Handed off (export package generated, and sent to any Zapier/Make automation you connected). Publication status:{' '}
-                        <strong>{action.publication_status}</strong>.
+                        Exported, and sent to any Zapier or Make automation you connected. Status:{' '}
+                        <strong>{action.publication_status === 'unverified' ? 'not confirmed as published' : 'published'}</strong>.
                         {action.publication_status === 'unverified' && (
                           <>
                             {' '}
-                            This has <u>not</u> been marked published.{' '}
                             <button onClick={() => confirmPublication(approval.id, action.id)}>
-                              I posted this myself — confirm
+                              Mark as published
                             </button>
                           </>
                         )}
@@ -425,7 +424,7 @@ export default function CampaignWorkspacePage({ section = 'overview' }: { sectio
             </div>
           )
         })}
-      </div>)}
+      </section>)}
     </div>
   )
 }
