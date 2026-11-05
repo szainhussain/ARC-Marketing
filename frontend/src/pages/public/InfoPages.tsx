@@ -4,11 +4,15 @@ import { apiRequest, ApiError } from '../../api/client'
 import WorkflowDemo from '../../components/marketing/WorkflowDemo'
 import { Field } from '../../components/ui'
 import { CAPABILITIES } from '../../lib/marketing'
-import { AgentGrid, IntegrationList, PricingTable, SectionHead } from './sections'
+import { AgentGrid, IntegrationList, PlanComparison, PricingTable, SectionHead } from './sections'
+import { CtaPair, FaqList } from './GrowthPages'
+import { PRICING_FAQS } from '../../lib/growth'
+import { usePageMeta } from '../../lib/seo'
 
 import { API_BASE_URL as API } from '../../lib/apiBase'
 
 export function ProductPage() {
+  usePageMeta("Product", "How ARC works as an AI marketing department: twelve agents, two control rooms and an approval system.")
   return (
     <>
       <section className="section">
@@ -67,6 +71,7 @@ export function ProductPage() {
 }
 
 export function AgentsPage() {
+  usePageMeta("The 12 agents", "Meet ARC's twelve specialist marketing agents and what each one does.")
   return (
     <section className="section">
       <SectionHead
@@ -80,6 +85,7 @@ export function AgentsPage() {
 }
 
 export function HowItWorksPage() {
+  usePageMeta("How it works", "From brief to approved, published work: how ARC's agents, approvals and exports fit together.")
   const steps = [
     ['Set up your workspace', 'Business profile, brand voice, prohibited phrases, goals, channels, budgets and approval policies.'],
     ['Write a brief', 'Objective, audience, channels, dates and budget guidance for a campaign.'],
@@ -137,6 +143,7 @@ export function HowItWorksPage() {
 }
 
 export function IntegrationsPublicPage() {
+  usePageMeta("Integrations", "Which platforms ARC exports to and connects with today, and what is planned.")
   return (
     <section className="section">
       <SectionHead
@@ -150,6 +157,7 @@ export function IntegrationsPublicPage() {
 }
 
 export function SecurityPage() {
+  usePageMeta("Security", "Tenant isolation, approvals, audit logs and data controls in ARC.")
   return (
     <section className="section">
       <SectionHead eyebrow="Security" title="Security, governance and data controls." />
@@ -172,6 +180,11 @@ export function SecurityPage() {
         <p>Admins can export all workspace data as JSON. Owners can schedule deletion; data is permanently purged after a 30-day grace period. Uploaded files are type- and content-checked and only downloadable by members.</p>
         <h2>Secrets</h2>
         <p>Provider keys live on the server only. Webhook payloads in both directions are HMAC-signed with replay protection; outbound webhooks refuse private and internal addresses.</p>
+        <h2>Legal and data protection</h2>
+        <p>
+          Read our <Link to="/privacy">Privacy Policy</Link>, <Link to="/dpa">Data Processing Agreement</Link>,{' '}
+          <Link to="/ai-policy">AI Use Policy</Link> and the list of <Link to="/subprocessors">sub-processors</Link>.
+        </p>
         <h2>Report a vulnerability</h2>
         <p>
           Please use the <Link to="/contact">contact form</Link> with topic “Security”.
@@ -182,19 +195,54 @@ export function SecurityPage() {
 }
 
 export function PricingPage() {
+  usePageMeta('Pricing', 'ARC plans from $149/month with all twelve agents. 14-day free trial, no card needed, cancel any time.')
   return (
-    <section className="section">
-      <SectionHead
-        eyebrow="Pricing"
-        title="One department. Four ways to run it."
-        lede="All plans include all twelve agents. Limits are enforced by the backend; you can see your usage at any time."
-      />
-      <PricingTable />
-    </section>
+    <>
+      <section className="section">
+        <SectionHead
+          eyebrow="Pricing"
+          title="A marketing department for less than one hire."
+          lede="Every plan includes all twelve agents, approvals and exports. Start with a 14-day free trial — no card needed — and cancel any time."
+        />
+        <PricingTable />
+        <p style={{ marginTop: 18 }}>
+          <Link to="/compare/agency">Compare ARC with what you spend on an agency or in-house time →</Link>
+        </p>
+      </section>
+      <section className="section tight">
+        <h2>Compare plans</h2>
+        <PlanComparison />
+      </section>
+      <section className="section tight">
+        <div className="card addon-card">
+          <div>
+            <div className="section-eyebrow" style={{ marginBottom: 6 }}>
+              Add-on
+            </div>
+            <h2>Strategist add-on: a human on your side</h2>
+            <p className="muted" style={{ margin: 0 }}>
+              A marketing strategist who reviews your plan each month, joins a monthly call and runs a quarterly
+              review with you. Priced with you on a call.
+            </p>
+          </div>
+          <Link to="/demo" className="btn secondary">
+            Talk to us
+          </Link>
+        </div>
+      </section>
+      <section className="section tight">
+        <h2>Pricing questions</h2>
+        <FaqList id="pricing-faq" faqs={PRICING_FAQS} />
+        <div style={{ marginTop: 28 }}>
+          <CtaPair />
+        </div>
+      </section>
+    </>
   )
 }
 
 export function AboutPage() {
+  usePageMeta("About", "Why ARC exists: marketing that operates, not just generates.")
   return (
     <section className="section">
       <SectionHead eyebrow="About" title="Marketing that operates, not just generates." />
@@ -218,6 +266,7 @@ export function AboutPage() {
 }
 
 export function ContactPage() {
+  usePageMeta("Contact", "Talk to the ARC team about sales, support, partnerships or security.")
   const [form, setForm] = useState({ name: '', email: '', company: '', topic: 'sales', message: '' })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle')
@@ -284,6 +333,7 @@ export function ContactPage() {
 }
 
 export function DocsPage() {
+  usePageMeta("Docs", "Getting started with ARC, the agents, runs, security and the API.")
   return (
     <section className="section">
       <SectionHead eyebrow="Documentation" title="Docs" lede="Start here, then go deeper." />

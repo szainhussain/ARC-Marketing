@@ -5,7 +5,10 @@ import ProductPreview from '../../components/marketing/ProductPreview'
 import WorkflowDemo from '../../components/marketing/WorkflowDemo'
 import Reveal from '../../components/motion/Reveal'
 import { AgentGrid, IntegrationList, PricingTable, SectionHead } from './sections'
+import { CtaPair, FaqList, LoopDiagram } from './GrowthPages'
 import { CAPABILITIES } from '../../lib/marketing'
+import { HOME_FAQS, SOLUTIONS } from '../../lib/growth'
+import { usePageMeta } from '../../lib/seo'
 
 const PROBLEMS = [
   'Too many disconnected tools',
@@ -17,9 +20,8 @@ const PROBLEMS = [
   'Reporting without actionable learning',
 ]
 
-const LIFECYCLE = ['Understand', 'Strategize', 'Plan', 'Create', 'Review', 'Execute', 'Measure', 'Improve']
-
 export default function HomePage() {
+  usePageMeta('')
   const reduce = useReducedMotion()
   const enter = (delay: number) =>
     reduce ? {} : { initial: { opacity: 0, y: 18 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] as const } }
@@ -31,23 +33,17 @@ export default function HomePage() {
           <span className="dot" aria-hidden="true" /> Your marketing department. Always moving.
         </motion.span>
         <motion.h1 {...enter(0.05)}>
-          A full marketing team. <em>Working as one.</em>
+          Your whole marketing department. <em>Approved by you.</em>
         </motion.h1>
         <motion.p className="lede" {...enter(0.12)}>
-          Meet your AI-powered marketing department. Twelve specialist agents plan, create, coordinate, optimize, and
-          learn together—so your business can move from marketing ideas to measurable execution without managing a
-          dozen disconnected tools.
+          Twelve specialist AI agents plan, create, publish and measure your marketing every month — and nothing goes
+          out until you approve it. The coordination of an agency, at a fraction of the cost.
         </motion.p>
-        <motion.div className="cta-row" {...enter(0.18)}>
-          <Link to="/signup" className="btn lg">
-            Build your marketing team
-          </Link>
-          <a href="#workspace" className="btn secondary lg">
-            Explore the workspace
-          </a>
+        <motion.div {...enter(0.18)}>
+          <CtaPair center />
         </motion.div>
         <motion.p className="hero-note" {...enter(0.24)}>
-          One coordinated system. Clear controls. Work you can measure.
+          14-day free trial · No card needed · Cancel any time
         </motion.p>
         <motion.div id="workspace" {...enter(0.3)}>
           <ProductPreview />
@@ -76,27 +72,32 @@ export default function HomePage() {
 
       <section className="section">
         <SectionHead
-          eyebrow="The system"
-          title="From brief to execution, one coordinated system."
+          eyebrow="How it works"
+          title="Strategy to results, every month. You stay in control."
           lede="Your CMO agent sets direction, the Marketing Manager plans it, ten specialists build it, Operations checks it — and nothing leaves the workspace until you approve it."
         />
         <Reveal>
-          <div className="lifecycle" aria-label="Campaign lifecycle">
-            {LIFECYCLE.map((s, i) => (
-              <span key={s} style={{ display: 'contents' }}>
-                <span className="step">{s}</span>
-                {i < LIFECYCLE.length - 1 && (
-                  <span className="arrow" aria-hidden="true">
-                    →
-                  </span>
-                )}
-              </span>
-            ))}
-          </div>
+          <LoopDiagram />
         </Reveal>
         <Reveal>
           <WorkflowDemo />
         </Reveal>
+      </section>
+
+      <section className="section">
+        <SectionHead eyebrow="Solutions" title="Built around what you need to get done." />
+        <div className="cap-grid">
+          {SOLUTIONS.map((s) => (
+            <Link key={s.slug} to={`/solutions/${s.slug}`} className="cap solution-card">
+              <h3 style={{ marginTop: 0 }}>{s.title}</h3>
+              <p>{s.short}</p>
+              <span className="small solution-more">See how it works →</span>
+            </Link>
+          ))}
+        </div>
+        <p style={{ marginTop: 18 }}>
+          <Link to="/marketing-scorecard">Not sure where to start? Take the free 2-minute marketing scorecard →</Link>
+        </p>
       </section>
 
       <section className="section">
@@ -173,6 +174,14 @@ export default function HomePage() {
       <section className="section">
         <SectionHead eyebrow="Pricing" title="Plans that grow with your workload." />
         <PricingTable />
+        <p style={{ marginTop: 18 }}>
+          <Link to="/compare/agency">Compare ARC with what you spend on an agency today →</Link>
+        </p>
+      </section>
+
+      <section className="section">
+        <SectionHead eyebrow="FAQ" title="Questions, answered." />
+        <FaqList id="home-faq" faqs={HOME_FAQS} />
       </section>
 
       <section className="final-cta">
@@ -181,11 +190,7 @@ export default function HomePage() {
           <p className="lede" style={{ margin: '0 auto 30px', color: 'var(--color-muted-fg)', maxWidth: 560 }}>
             Bring your strategy, execution, and performance into one coordinated workspace.
           </p>
-          <div className="cta-row">
-            <Link to="/signup" className="btn lg">
-              Build your marketing team
-            </Link>
-          </div>
+          <CtaPair center />
           <p className="hero-note">
             <Repeat size={12} aria-hidden="true" /> Less coordination. More execution. Marketing that learns as it works.
           </p>

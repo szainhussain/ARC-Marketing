@@ -31,6 +31,7 @@ const SecuritySettingsPage = lazy(() => import('./pages/app/WorkspacePages').the
 const SettingsPage = lazy(() => import('./pages/app/WorkspacePages').then((m) => ({ default: m.SettingsPage })))
 const TeamPage = lazy(() => import('./pages/app/WorkspacePages').then((m) => ({ default: m.TeamPage })))
 const TestCheckoutPage = lazy(() => import('./pages/app/WorkspacePages').then((m) => ({ default: m.TestCheckoutPage })))
+const AdminPage = lazy(() => import('./pages/app/AdminPage'))
 const UsagePage = lazy(() => import('./pages/app/WorkspacePages').then((m) => ({ default: m.UsagePage })))
 import {
   AcceptInvitePage,
@@ -41,6 +42,7 @@ import {
   VerifyEmailPage,
 } from './pages/public/AuthPages'
 import HomePage from './pages/public/HomePage'
+import { AgencyComparePage, DemoPage, ScorecardPage, SolutionPage, SolutionsPage } from './pages/public/GrowthPages'
 import {
   AboutPage,
   AgentsPage,
@@ -73,6 +75,11 @@ export default function App() {
       <Route element={<PublicLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/product" element={<ProductPage />} />
+        <Route path="/solutions" element={<SolutionsPage />} />
+        <Route path="/solutions/:slug" element={<SolutionPage />} />
+        <Route path="/demo" element={<DemoPage />} />
+        <Route path="/marketing-scorecard" element={<ScorecardPage />} />
+        <Route path="/compare/agency" element={<AgencyComparePage />} />
         <Route path="/agents" element={<AgentsPage />} />
         <Route path="/how-it-works" element={<HowItWorksPage />} />
         <Route path="/integrations" element={<IntegrationsPublicPage />} />
@@ -149,6 +156,7 @@ export default function App() {
         <Route path="settings/automation" element={<AutomationSettingsPage />} />
         <Route path="settings/usage" element={<UsagePage />} />
         <Route path="audit-log" element={<AuditLogPage />} />
+        <Route path="admin" element={<AdminPage />} />
         <Route path="ops/agents/:agentId" element={<AgentAlias />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

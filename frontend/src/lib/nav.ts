@@ -10,6 +10,7 @@ import {
   FileText,
   Gauge,
   Image,
+  Inbox,
   LayoutDashboard,
   ListChecks,
   Megaphone,
@@ -72,5 +73,11 @@ export const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     ],
   },
 ]
+
+// Shown only to platform admins (PLATFORM_ADMIN_EMAILS on the server).
+export const ADMIN_GROUP = {
+  label: 'Platform',
+  items: [{ to: '/app/admin', label: 'Admin inbox', icon: Inbox, keywords: 'demo requests leads enquiries signups' }],
+}
 
 export const ALL_NAV: NavItem[] = NAV_GROUPS.flatMap((g) => g.items)

@@ -81,6 +81,8 @@ class BaseConfig:
     TRIAL_DAYS = int(os.environ.get("TRIAL_DAYS", "14"))
     # Bump when the Terms/Privacy Policy change; must match frontend/src/lib/legal.ts.
     TERMS_VERSION = "2026-11-05"
+    # Emails allowed into the platform-owner inbox (demo requests, contact form).
+    PLATFORM_ADMIN_EMAILS = {e.strip().lower() for e in os.environ.get("PLATFORM_ADMIN_EMAILS", "").split(",") if e.strip()}
 
     # Billing: "test" (local test mode, default), "stripe", or "none".
     BILLING_PROVIDER = os.environ.get("BILLING_PROVIDER", "test")

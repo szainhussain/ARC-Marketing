@@ -8,9 +8,9 @@ import { API_BASE_URL } from '../lib/apiBase'
 
 const LINKS = [
   { to: '/product', label: 'Product' },
-  { to: '/agents', label: 'Agents' },
+  { to: '/solutions', label: 'Solutions' },
   { to: '/how-it-works', label: 'How it works' },
-  { to: '/integrations', label: 'Integrations' },
+  { to: '/agents', label: 'Agents' },
   { to: '/pricing', label: 'Pricing' },
 ]
 
@@ -51,8 +51,11 @@ export default function PublicLayout() {
               <Link to="/login" className="signin desktop">
                 Sign in
               </Link>
+              <Link to="/demo" className="btn secondary desktop">
+                Book a demo
+              </Link>
               <Link to="/signup" className="btn desktop">
-                Build your marketing team
+                Start free trial
               </Link>
             </>
           )}
@@ -74,11 +77,13 @@ export default function PublicLayout() {
               {l.label}
             </Link>
           ))}
+          <Link to="/integrations">Integrations</Link>
           <Link to="/security">Security</Link>
+          <Link to="/demo">Book a demo</Link>
           <Link to={user ? '/app/dashboard' : '/login'}>{user ? 'Open workspace' : 'Sign in'}</Link>
           {!user && (
             <Link to="/signup" className="btn" style={{ marginTop: 10, justifyContent: 'center' }}>
-              Build your marketing team
+              Start free trial
             </Link>
           )}
         </nav>
@@ -102,6 +107,7 @@ export default function PublicLayout() {
           <div>
             <h4>Product</h4>
             <Link to="/product">Overview</Link>
+            <Link to="/solutions">Solutions</Link>
             <Link to="/agents">The 12 agents</Link>
             <Link to="/how-it-works">How it works</Link>
             <Link to="/integrations">Integrations</Link>
@@ -118,6 +124,8 @@ export default function PublicLayout() {
           </div>
           <div>
             <h4>Resources</h4>
+            <Link to="/marketing-scorecard">Free marketing scorecard</Link>
+            <Link to="/compare/agency">ARC vs an agency</Link>
             <Link to="/docs">Documentation</Link>
             <a href={`${API_BASE_URL}/openapi.json`}>API reference</a>
             <a href={`${API_BASE_URL}/health/ready`}>System status</a>
@@ -125,6 +133,7 @@ export default function PublicLayout() {
           <div>
             <h4>Company</h4>
             <Link to="/about">About</Link>
+            <Link to="/demo">Book a demo</Link>
             <Link to="/contact">Contact</Link>
           </div>
         </div>

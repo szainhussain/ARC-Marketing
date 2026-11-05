@@ -4,7 +4,7 @@ import { Bell, LogOut, Menu, Plus, Search } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useWorkspace } from '../context/WorkspaceContext'
 import { useResource } from '../hooks/useResource'
-import { ALL_NAV, NAV_GROUPS } from '../lib/nav'
+import { ADMIN_GROUP, ALL_NAV, NAV_GROUPS } from '../lib/nav'
 import { Dialog, PageSkeleton } from './ui'
 import Logo from './Logo'
 
@@ -65,7 +65,7 @@ export default function AppLayout() {
           <Logo size={24} />
           ARC
         </Link>
-        {NAV_GROUPS.map((group) => (
+        {(user?.is_platform_admin ? [...NAV_GROUPS, ADMIN_GROUP] : NAV_GROUPS).map((group) => (
           <div key={group.label} className="sidebar-group">
             <div className="sidebar-group-label">{group.label}</div>
             {group.items.map((item) => (

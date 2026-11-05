@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { LEGAL, LEGAL_DOCS, REGIONS, SUBPROCESSORS, loadRegion, regionById, saveRegion, type RegionId } from '../../lib/legal'
 import { SectionHead } from './sections'
+import { usePageMeta } from '../../lib/seo'
 
 type Section = { id: string; heading: string; body: ReactNode }
 
@@ -9,6 +10,7 @@ const Contact = () => <Link to={LEGAL.contactPath}>contact form</Link>
 
 
 function LegalDoc({ title, summary, sections, children }: { title: string; summary: string; sections: Section[]; children?: ReactNode }) {
+  usePageMeta(title, summary)
   return (
     <section className="section legal">
       <SectionHead eyebrow="Legal" title={title} />
@@ -79,6 +81,7 @@ const ul = (items: ReactNode[]) => (
 // ---- Hub -------------------------------------------------------------------
 
 export function LegalHubPage() {
+  usePageMeta('Legal', 'ARC legal and trust documents: terms, privacy, DPA, AI use, acceptable use, cookies and sub-processors.')
   return (
     <section className="section">
       <SectionHead

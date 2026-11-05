@@ -2,6 +2,7 @@ from flask import jsonify
 from flask_login import login_required, current_user
 
 from app.api.v1 import api_v1
+from app.api.v1.admin import is_platform_admin
 
 
 @api_v1.route("/me", methods=["GET"])
@@ -10,7 +11,7 @@ def me():
     return (
         jsonify(
             {
-                "user": current_user.to_public_dict(),
+                "user": {**current_user.to_public_dict(), "is_platform_admin": is_platform_admin(current_user)},
                 "memberships": [m.to_public_dict() for m in current_user.memberships],
             }
         ),

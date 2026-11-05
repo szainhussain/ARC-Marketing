@@ -155,6 +155,68 @@ export function PricingTable() {
   )
 }
 
+const COMPARE_ROWS: { label: string; key: string; money?: boolean }[] = [
+  { label: 'Campaign runs per month', key: 'monthly_workflow_runs' },
+  { label: 'Active campaigns', key: 'active_campaigns' },
+  { label: 'Team seats', key: 'seats' },
+  { label: 'Knowledge entries', key: 'knowledge_entries' },
+  { label: 'Agent executions per month', key: 'monthly_agent_executions' },
+  { label: 'Approved exports per month', key: 'monthly_exports' },
+  { label: 'AI budget per month (est.)', key: 'monthly_ai_budget_usd', money: true },
+  { label: 'AI budget per run (est.)', key: 'max_run_budget_usd', money: true },
+]
+
+export function PlanComparison() {
+  const { data } = useResource<{ plans: Plan[] }>('/public/plans')
+  if (!data) return null
+  const plans = data.plans
+  return (
+    <div className="table-wrap">
+      <table className="compare-table plan-compare">
+        <caption className="sr-only">Plan comparison</caption>
+        <thead>
+          <tr>
+            <th scope="col">Compare plans</th>
+            {plans.map((p) => (
+              <th key={p.code} scope="col" className={p.code === 'growth' ? 'arc-col' : ''}>
+                {p.name}
+                <div className="muted small">{p.monthly_price_usd == null ? 'Custom' : `$${p.monthly_price_usd}/mo`}</div>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">All 12 agents</th>
+            {plans.map((p) => (
+              <td key={p.code}>
+                <Check size={15} aria-label="Included" />
+              </td>
+            ))}
+          </tr>
+          {COMPARE_ROWS.map((r) => (
+            <tr key={r.key}>
+              <th scope="row">{r.label}</th>
+              {plans.map((p) => {
+                const v = p.entitlements[r.key]
+                return <td key={p.code}>{v == null ? (p.monthly_price_usd == null ? 'Custom' : 'Unlimited') : r.money ? `$${v}` : v.toLocaleString()}</td>
+              })}
+            </tr>
+          ))}
+          <tr>
+            <th scope="row">Approval inbox, audit log, data export</th>
+            {plans.map((p) => (
+              <td key={p.code}>
+                <Check size={15} aria-label="Included" />
+              </td>
+            ))}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 function fmt(v: number | null | undefined) {
   return v == null ? 'Unlimited' : String(v)
 }

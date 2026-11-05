@@ -83,7 +83,7 @@ def public_contact_route():
         errors.append({"field": "email", "issue": "A valid email is required"})
     if len(message) < 10:
         errors.append({"field": "message", "issue": "Tell us a little more (10+ characters)"})
-    if topic not in ("sales", "support", "partnership", "security", "other"):
+    if topic not in ("sales", "demo", "support", "partnership", "security", "other"):
         errors.append({"field": "topic", "issue": "Unknown topic"})
     if errors:
         raise ValidationError("Please correct the highlighted fields.", details=errors)
