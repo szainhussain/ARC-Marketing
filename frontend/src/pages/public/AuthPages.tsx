@@ -62,6 +62,7 @@ export function SignupPage() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const [form, setForm] = useState({ full_name: '', email: '', password: '' })
+  const [accepted, setAccepted] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -70,6 +71,7 @@ export function SignupPage() {
     e.preventDefault()
     const local: Record<string, string> = {}
     if (!form.full_name.trim()) local.full_name = 'Required'
+    if (!accepted) local.accept_terms = 'Please accept the Terms of Service and Privacy Policy'
     if (!/^\S+@\S+\.\S+$/.test(form.email)) local.email = 'A valid email is required'
     if (form.password.length < 8) local.password = 'Must be at least 8 characters'
     setErrors(local)
@@ -77,7 +79,7 @@ export function SignupPage() {
     setBusy(true)
     setError(null)
     try {
-      await register(form.email, form.password, form.full_name)
+      await register(form.email, form.password, form.full_name, accepted)
       const next = params.get('next')
       navigate(next && next.startsWith('/accept-invite') ? next : '/create-workspace')
     } catch (err) {
@@ -103,11 +105,37 @@ export function SignupPage() {
         <Field id="su-password" label="Password" error={errors.password} hint="At least 8 characters.">
           <input id="su-password" type="password" autoComplete="new-password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
         </Field>
+        <div className={`consent${errors.accept_terms ? ' has-error' : ''}`}>
+          <input
+            id="su-terms"
+            type="checkbox"
+            checked={accepted}
+            onChange={(e) => setAccepted(e.target.checked)}
+            aria-invalid={!!errors.accept_terms}
+            aria-describedby={errors.accept_terms ? 'su-terms-error' : undefined}
+          />
+          <label htmlFor="su-terms">
+            I agree to the{' '}
+            <Link to="/terms" target="_blank">
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link to="/privacy" target="_blank">
+              Privacy Policy
+            </Link>
+            .
+          </label>
+        </div>
+        {errors.accept_terms && (
+          <p id="su-terms-error" className="small text-danger" role="alert" style={{ marginTop: -6 }}>
+            {errors.accept_terms}
+          </p>
+        )}
         <button type="submit" disabled={busy} style={{ width: '100%', justifyContent: 'center' }}>
           {busy ? 'Creating account…' : 'Create account'}
         </button>
         <p className="small muted" style={{ marginBottom: 0 }}>
-          By continuing you agree to the <Link to="/terms">terms</Link> and <Link to="/privacy">privacy policy</Link>. Already have an account? <Link to="/login">Sign in</Link>
+          Already have an account? <Link to="/login">Sign in</Link>
         </p>
       </form>
     </div>

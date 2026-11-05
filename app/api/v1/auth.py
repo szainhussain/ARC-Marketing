@@ -1,9 +1,10 @@
-from flask import jsonify, request
+from flask import current_app, jsonify, request
 from flask_login import login_required, login_user, logout_user
 from flask_wtf.csrf import generate_csrf
 
 from app.api.v1 import api_v1
 from app.extensions import csrf, db, limiter
+from app.models.base import utcnow
 from app.models.user import User
 from app.services.errors import Conflict, ValidationError
 
@@ -29,13 +30,16 @@ def register():
         errors.append({"field": "password", "issue": "Must be at least 8 characters"})
     if not full_name:
         errors.append({"field": "full_name", "issue": "Required"})
+    if payload.get("accept_terms") is not True:
+        errors.append({"field": "accept_terms", "issue": "Please accept the Terms of Service and Privacy Policy"})
     if errors:
         raise ValidationError("Please correct the highlighted fields.", details=errors)
 
     if User.query.filter_by(email=email).first() is not None:
         raise Conflict("An account with this email already exists.")
 
-    user = User(email=email, full_name=full_name)
+    user = User(email=email, full_name=full_name,
+                terms_version=current_app.config["TERMS_VERSION"], terms_accepted_at=utcnow())
     user.set_password(password)
     db.session.add(user)
     db.session.commit()

@@ -318,6 +318,23 @@ def test_export_excludes_secrets_and_deletion_purges(app, client, monkeypatch):
     assert db.session.get(Organization, org["id"]) is None
 
 
+def test_worker_housekeeping_purges_due_workspaces_hourly(app, client, monkeypatch):
+    """Free hosting has no cron: the worker loop runs the purge itself, at most hourly."""
+    from app.models.organization import Organization
+    from app.workflows import engine
+
+    org = _org(client)
+    client.post(f"/api/v1/organizations/{org['id']}/deletion", json={"confirm_name": "Acme Co"})
+    stored = db.session.get(Organization, org["id"])
+    stored.deletion_scheduled_at = utcnow() - timedelta(minutes=1)
+    db.session.commit()
+    monkeypatch.setattr(engine, "_next_housekeeping_at", None)
+    engine.work_once()
+    db.session.expire_all()
+    assert db.session.get(Organization, org["id"]) is None
+    assert engine.run_housekeeping_if_due() is False  # not again within the hour
+
+
 # ---- Approvals --------------------------------------------------------------
 
 def test_approval_context_expiry_and_revoke(app, client, monkeypatch):

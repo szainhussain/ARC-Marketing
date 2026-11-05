@@ -322,10 +322,36 @@ def claim_next_task(now: datetime | None = None) -> Task | None:
     return None
 
 
+_HOUSEKEEPING_EVERY = timedelta(hours=1)
+_next_housekeeping_at = None
+
+
+def run_housekeeping_if_due() -> bool:
+    """Hourly upkeep that would otherwise need a cron job (free hosts have
+    none): purge workspaces whose deletion grace period has ended."""
+
+    global _next_housekeeping_at
+    now = utcnow()
+    if _next_housekeeping_at is not None and now < _next_housekeeping_at:
+        return False
+    _next_housekeeping_at = now + _HOUSEKEEPING_EVERY
+    from app.services.data_lifecycle import purge_due_workspaces
+
+    try:
+        purged = purge_due_workspaces()
+        if purged:
+            log.warning("Housekeeping purged %s workspace(s)", purged)
+    except Exception:  # noqa: BLE001 - upkeep must never stop agent work
+        log.exception("Housekeeping failed")
+        db.session.rollback()
+    return True
+
+
 def work_once() -> bool:
     """One worker iteration. Returns True if a task was processed."""
 
     recover_expired_leases()
+    run_housekeeping_if_due()
     from app.services.webhook_service import deliver_due
 
     deliver_due()

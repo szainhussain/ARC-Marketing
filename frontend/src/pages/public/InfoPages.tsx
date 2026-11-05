@@ -314,39 +314,3 @@ export function DocsPage() {
     </section>
   )
 }
-
-export function PrivacyPage() {
-  return (
-    <section className="section">
-      <SectionHead eyebrow="Legal" title="Privacy" />
-      <div className="notice">Draft for review — not yet reviewed by counsel. Do not rely on this as final legal terms.</div>
-      <div className="prose">
-        <h2>What we collect</h2>
-        <p>Account details (name, email), workspace content you provide (business profile, campaign briefs, knowledge, uploaded files), content generated for you by agents, and operational records (tasks, approvals, audit events, usage).</p>
-        <h2>How it's used</h2>
-        <p>To run your workspace. Campaign and profile content is sent to the AI provider your deployment is configured with, only for generating your deliverables.</p>
-        <h2>Your controls</h2>
-        <p>Workspace admins can export all workspace data. Owners can schedule deletion, after which data is purged following a 30-day grace period.</p>
-        <h2>Contact</h2>
-        <p>Use the <Link to="/contact">contact form</Link>.</p>
-      </div>
-    </section>
-  )
-}
-
-export function TermsPage() {
-  return (
-    <section className="section">
-      <SectionHead eyebrow="Legal" title="Terms of service" />
-      <div className="notice">Draft for review — not yet reviewed by counsel. Do not rely on this as final legal terms.</div>
-      <div className="prose">
-        <h2>The service</h2>
-        <p>ARC coordinates AI agents that produce marketing drafts and plans for your review. ARC does not publish, send or spend on your behalf; you remain responsible for anything you approve and publish.</p>
-        <h2>No guaranteed outcomes</h2>
-        <p>AI output can be wrong. Results depend on your business, data, channels and budget. Review everything before use.</p>
-        <h2>Plans and billing</h2>
-        <p>Plan prices shown are provisional until final commercial terms are published. Limits are enforced as described on the pricing page.</p>
-      </div>
-    </section>
-  )
-}

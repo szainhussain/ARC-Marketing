@@ -32,7 +32,7 @@ def client(app):
 def register_and_login(client, email="owner@example.com", password="correct-horse-1"):
     resp = client.post(
         "/api/v1/auth/register",
-        json={"email": email, "password": password, "full_name": "Test Owner"},
+        json={"email": email, "password": password, "full_name": "Test Owner", "accept_terms": True},
     )
     assert resp.status_code == 201, resp.get_json()
     return resp.get_json()["user"]

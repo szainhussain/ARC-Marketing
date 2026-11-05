@@ -8,7 +8,7 @@ type AuthState = {
   loading: boolean
   refresh: () => Promise<void>
   login: (email: string, password: string) => Promise<void>
-  register: (email: string, password: string, fullName: string) => Promise<void>
+  register: (email: string, password: string, fullName: string, acceptTerms: boolean) => Promise<void>
   logout: () => Promise<void>
 }
 
@@ -46,10 +46,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await refresh()
   }
 
-  async function register(email: string, password: string, fullName: string) {
+  async function register(email: string, password: string, fullName: string, acceptTerms: boolean) {
     const data = await apiRequest<{ user: User }>('/auth/register', {
       method: 'POST',
-      body: { email, password, full_name: fullName },
+      body: { email, password, full_name: fullName, accept_terms: acceptTerms },
     })
     setUser(data.user)
     await refresh()

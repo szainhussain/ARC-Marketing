@@ -79,6 +79,8 @@ class BaseConfig:
     APPROVAL_TTL_DAYS = int(os.environ.get("APPROVAL_TTL_DAYS", "14"))
     DELETION_GRACE_DAYS = int(os.environ.get("DELETION_GRACE_DAYS", "30"))
     TRIAL_DAYS = int(os.environ.get("TRIAL_DAYS", "14"))
+    # Bump when the Terms/Privacy Policy change; must match frontend/src/lib/legal.ts.
+    TERMS_VERSION = "2026-11-05"
 
     # Billing: "test" (local test mode, default), "stripe", or "none".
     BILLING_PROVIDER = os.environ.get("BILLING_PROVIDER", "test")

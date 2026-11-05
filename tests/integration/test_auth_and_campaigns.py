@@ -9,7 +9,21 @@ def test_register_requires_valid_fields(client):
     body = resp.get_json()
     assert body["error"]["code"] == "VALIDATION_ERROR"
     fields = {d["field"] for d in body["error"]["details"]}
-    assert {"email", "password", "full_name"} <= fields
+    assert {"email", "password", "full_name", "accept_terms"} <= fields
+
+
+def test_register_requires_and_records_terms_acceptance(app, client):
+    base = {"email": "terms@example.com", "password": "correct-horse-1", "full_name": "T"}
+    for value in (None, False, "true"):
+        resp = client.post("/api/v1/auth/register", json={**base, "accept_terms": value})
+        assert resp.status_code == 400
+        assert "accept_terms" in {d["field"] for d in resp.get_json()["error"]["details"]}
+    assert client.post("/api/v1/auth/register", json={**base, "accept_terms": True}).status_code == 201
+    from app.models.user import User
+
+    with app.app_context():
+        user = User.query.filter_by(email="terms@example.com").one()
+        assert user.terms_version == app.config["TERMS_VERSION"] and user.terms_accepted_at is not None
 
 
 def test_login_failure_message_does_not_reveal_account_existence(client):

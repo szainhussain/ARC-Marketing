@@ -75,6 +75,7 @@ try {
     await page.getByLabel('Full name').fill('E2E Owner')
     await page.getByLabel('Email').fill(email)
     await page.getByLabel('Password').fill('correct-horse-1')
+    await page.getByLabel(/I agree to the/).check()
     await page.getByRole('button', { name: 'Create account' }).click()
     await page.waitForURL('**/create-workspace')
   })
@@ -223,6 +224,7 @@ try {
     await p2.getByLabel('Full name').fill('Intruder')
     await p2.getByLabel('Email').fill(`intruder-${stamp}@example.com`)
     await p2.getByLabel('Password').fill('correct-horse-1')
+    await p2.getByLabel(/I agree to the/).check()
     await p2.getByRole('button', { name: 'Create account' }).click()
     await p2.waitForURL('**/create-workspace')
     const statuses = await p2.evaluate(async ({ api, org }) => {

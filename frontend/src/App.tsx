@@ -49,11 +49,18 @@ import {
   HowItWorksPage,
   IntegrationsPublicPage,
   PricingPage,
-  PrivacyPage,
   ProductPage,
   SecurityPage,
-  TermsPage,
 } from './pages/public/InfoPages'
+const AcceptableUsePage = lazy(() => import('./pages/public/LegalPages').then((m) => ({ default: m.AcceptableUsePage })))
+const AiPolicyPage = lazy(() => import('./pages/public/LegalPages').then((m) => ({ default: m.AiPolicyPage })))
+const CookiesPage = lazy(() => import('./pages/public/LegalPages').then((m) => ({ default: m.CookiesPage })))
+const DpaPage = lazy(() => import('./pages/public/LegalPages').then((m) => ({ default: m.DpaPage })))
+const LegalHubPage = lazy(() => import('./pages/public/LegalPages').then((m) => ({ default: m.LegalHubPage })))
+const PrivacyPage = lazy(() => import('./pages/public/LegalPages').then((m) => ({ default: m.PrivacyPage })))
+const RefundsPage = lazy(() => import('./pages/public/LegalPages').then((m) => ({ default: m.RefundsPage })))
+const SubprocessorsPage = lazy(() => import('./pages/public/LegalPages').then((m) => ({ default: m.SubprocessorsPage })))
+const TermsPage = lazy(() => import('./pages/public/LegalPages').then((m) => ({ default: m.TermsPage })))
 
 function AgentAlias() {
   const { agentId } = useParams()
@@ -76,6 +83,13 @@ export default function App() {
         <Route path="/docs" element={<DocsPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<TermsPage />} />
+        <Route path="/legal" element={<LegalHubPage />} />
+        <Route path="/cookies" element={<CookiesPage />} />
+        <Route path="/dpa" element={<DpaPage />} />
+        <Route path="/acceptable-use" element={<AcceptableUsePage />} />
+        <Route path="/ai-policy" element={<AiPolicyPage />} />
+        <Route path="/subprocessors" element={<SubprocessorsPage />} />
+        <Route path="/refunds" element={<RefundsPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />

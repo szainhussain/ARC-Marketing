@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import Logo from './Logo'
+import { PageSkeleton } from './ui'
 import { API_BASE_URL } from '../lib/apiBase'
 
 const LINKS = [
@@ -83,7 +84,9 @@ export default function PublicLayout() {
         </nav>
       )}
       <main id="main" tabIndex={-1}>
-        <Outlet />
+        <Suspense fallback={<PageSkeleton />}>
+          <Outlet />
+        </Suspense>
       </main>
       <footer className="site-footer">
         <div className="footer-grid">
@@ -105,10 +108,13 @@ export default function PublicLayout() {
             <Link to="/pricing">Pricing</Link>
           </div>
           <div>
-            <h4>Trust</h4>
+            <h4>Trust & legal</h4>
             <Link to="/security">Security</Link>
-            <Link to="/privacy">Privacy</Link>
-            <Link to="/terms">Terms</Link>
+            <Link to="/privacy">Privacy Policy</Link>
+            <Link to="/terms">Terms of Service</Link>
+            <Link to="/ai-policy">AI Use Policy</Link>
+            <Link to="/dpa">DPA</Link>
+            <Link to="/legal">All legal documents</Link>
           </div>
           <div>
             <h4>Resources</h4>

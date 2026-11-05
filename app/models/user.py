@@ -16,6 +16,9 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, UserMixin, db.Model):
     # everywhere"). It is part of the Flask-Login session id, see get_id().
     session_version = db.Column(db.Integer, default=1, nullable=False)
     email_verified_at = db.Column(db.DateTime(timezone=True))
+    # Which version of the Terms/Privacy Policy the user accepted, and when.
+    terms_version = db.Column(db.String(32))
+    terms_accepted_at = db.Column(db.DateTime(timezone=True))
 
     memberships = db.relationship(
         "Membership", back_populates="user", cascade="all, delete-orphan"
