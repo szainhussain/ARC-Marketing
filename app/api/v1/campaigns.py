@@ -108,3 +108,18 @@ def list_campaign_deliverables_route(organization_id, campaign_id):
         organization_id=organization_id, campaign_id=campaign_id
     ).all()
     return jsonify({"deliverables": [d.to_dict() for d in deliverables]}), 200
+
+
+@api_v1.route("/organizations/<organization_id>/campaigns/<campaign_id>/recurrence", methods=["POST"])
+@login_required
+def set_recurrence_route(organization_id, campaign_id):
+    from app.models.membership import OPERATOR_ROLES
+    from app.services.campaign_service import get_campaign_or_404
+    from app.services.recurrence_service import set_recurrence
+
+    membership = get_membership_or_403(organization_id)
+    require_role(membership, OPERATOR_ROLES)
+    payload = request.get_json(silent=True) or {}
+    campaign = set_recurrence(get_campaign_or_404(organization_id, campaign_id), current_user.id,
+                              payload.get("recurrence"), payload.get("recurrence_day"))
+    return jsonify({"campaign": campaign.to_dict()}), 200

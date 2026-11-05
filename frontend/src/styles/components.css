@@ -450,3 +450,11 @@ kbd { font-family: var(--font-mono); font-size: 0.72rem; padding: 1px 6px; borde
   .report-page, .report-page * { color: #111 !important; background: #fff !important; box-shadow: none !important; }
   .report-page .card, .report-page .kpi-tile { border: 1px solid #ccc !important; break-inside: avoid; }
 }
+
+.always-on.on { border-color: rgba(110, 231, 168, 0.4); }
+.always-on-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.always-on-row > svg { color: var(--color-accent); }
+.always-on.on .always-on-row > svg { color: var(--color-success); }
+
+.retention-options { margin: 0 0 16px; padding-left: 20px; color: var(--color-muted-fg); line-height: 1.75; font-size: 0.9rem; }
+.retention-options strong { color: var(--color-fg); }

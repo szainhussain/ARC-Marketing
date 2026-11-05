@@ -328,7 +328,8 @@ _next_housekeeping_at = None
 
 def run_housekeeping_if_due() -> bool:
     """Hourly upkeep that would otherwise need a cron job (free hosts have
-    none): purge workspaces whose deletion grace period has ended."""
+    none): purge workspaces whose deletion grace period has ended, and start
+    this month's run for always-on campaigns."""
 
     global _next_housekeeping_at
     now = utcnow()
@@ -336,14 +337,14 @@ def run_housekeeping_if_due() -> bool:
         return False
     _next_housekeeping_at = now + _HOUSEKEEPING_EVERY
     from app.services.data_lifecycle import purge_due_workspaces
+    from app.services.recurrence_service import run_due_recurrences
 
-    try:
-        purged = purge_due_workspaces()
-        if purged:
-            log.warning("Housekeeping purged %s workspace(s)", purged)
-    except Exception:  # noqa: BLE001 - upkeep must never stop agent work
-        log.exception("Housekeeping failed")
-        db.session.rollback()
+    for job in (purge_due_workspaces, run_due_recurrences):
+        try:
+            job()
+        except Exception:  # noqa: BLE001 - upkeep must never stop agent work
+            log.exception("Housekeeping job %s failed", job.__name__)
+            db.session.rollback()
     return True
 
 

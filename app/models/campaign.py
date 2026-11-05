@@ -30,6 +30,11 @@ class Campaign(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
 
     status = db.Column(db.String(32), default=STATUS_DRAFT, nullable=False)
     idempotency_key = db.Column(db.String(255), index=True)
+    # Always-on: "monthly" starts a new department run on recurrence_day each month.
+    recurrence = db.Column(db.String(16), default="none", nullable=False, server_default="none")
+    recurrence_day = db.Column(db.Integer)
+    next_run_at = db.Column(db.DateTime(timezone=True), index=True)
+    recurrence_set_by_user_id = db.Column(db.String(36), db.ForeignKey("users.id"))
 
     __table_args__ = (
         db.UniqueConstraint(
@@ -61,6 +66,9 @@ class Campaign(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
             "constraints": self.constraints,
             "success_metrics": self.success_metrics,
             "status": self.status,
+            "recurrence": self.recurrence or "none",
+            "recurrence_day": self.recurrence_day,
+            "next_run_at": self.next_run_at.isoformat() if self.next_run_at else None,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
         }

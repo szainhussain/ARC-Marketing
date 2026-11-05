@@ -1,3 +1,4 @@
+import RetentionCard from '../../components/RetentionCard'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Download, Plus } from 'lucide-react'
@@ -248,6 +249,9 @@ export function BillingPage() {
                 { key: 'w', header: 'When', render: (r) => <span className="muted small">{relativeTime(r.created_at)}</span> },
               ]} />
           </div>
+          {isOwner && orgId && (
+            <RetentionCard orgId={orgId} workspaceName={ws.data?.workspace.name || ''} planName={data.subscription.plan.name} />
+          )}
         </>
       )}
     </div>

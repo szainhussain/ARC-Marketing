@@ -38,6 +38,9 @@ export type Campaign = {
   constraints: string | null
   success_metrics: string | null
   status: 'draft' | 'active' | 'archived'
+  recurrence?: 'none' | 'monthly'
+  recurrence_day?: number | null
+  next_run_at?: string | null
   created_at: string
   updated_at: string
 }

@@ -5,6 +5,7 @@ import DeliverableContent from '../components/DeliverableContent'
 import { CollabToolbar, CommentsPanel, DeliverableEditor, ShareForReview } from '../components/DeliverableCollab'
 import PlatformExportView from '../components/PlatformExportView'
 import WorkflowGraphPanel from '../components/WorkflowGraphPanel'
+import AlwaysOnCard from '../components/AlwaysOnCard'
 import { PageHeader, PageSkeleton, Tabs } from '../components/ui'
 import { useNavigate } from 'react-router-dom'
 import { useWorkspace } from '../context/WorkspaceContext'
@@ -203,6 +204,7 @@ export default function CampaignWorkspacePage({ section = 'overview' }: { sectio
       />
       {error && <div className="banner error">{error}</div>}
 
+      {section === 'overview' && orgId && <AlwaysOnCard orgId={orgId} campaign={campaign} onChange={setCampaign} />}
       {section === 'overview' && <CampaignBrief campaign={campaign} />}
 
       {section !== 'deliverables' && (<div className="card">
