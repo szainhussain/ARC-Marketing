@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields, validate
+from marshmallow import Schema, fields, validate, pre_load
 
 
 class StrategySchema(Schema):
@@ -208,3 +208,25 @@ class AssistantAnswerSchema(Schema):
     answer = fields.String(required=True)
     source_ids = fields.List(fields.String(), load_default=list)
     suggested_action = fields.Nested(AssistantActionSchema, load_default=lambda: {"type": "none", "label": ""})
+
+    @pre_load
+    def _tolerate_shapes(self, data, **kwargs):
+        """Weaker models send the action as a bare string or ids as numbers;
+        normalise those shapes (the answer itself is still required)."""
+
+        if not isinstance(data, dict):
+            return data
+        data = dict(data)
+        action = data.get("suggested_action")
+        if action is None or action == "":
+            data.pop("suggested_action", None)
+        elif isinstance(action, str):
+            data["suggested_action"] = {"type": action if action in ASSISTANT_ACTIONS else "none", "label": ""}
+        elif isinstance(action, dict) and action.get("type") not in ASSISTANT_ACTIONS:
+            data["suggested_action"] = {"type": "none", "label": str(action.get("label") or "")}
+        ids = data.get("source_ids")
+        if isinstance(ids, (str, int)):
+            ids = [ids]
+        if isinstance(ids, list):
+            data["source_ids"] = [str(i) for i in ids if isinstance(i, (str, int))]
+        return data

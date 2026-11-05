@@ -118,3 +118,18 @@ def test_monthly_limit(app, client, monkeypatch):
     url = f"/api/v1/organizations/{org['id']}/assistant/messages"
     assert client.post(url, json={"content": "one"}).status_code == 202
     assert client.post(url, json={"content": "two"}).status_code == 429
+
+
+def test_answer_schema_tolerates_weaker_model_shapes():
+    from app.ai.schemas import AssistantAnswerSchema
+
+    s = AssistantAnswerSchema()
+    assert s.load({"answer": "Hi", "suggested_action": "none"})["suggested_action"]["type"] == "none"
+    assert s.load({"answer": "Hi", "suggested_action": "record_results"})["suggested_action"]["type"] == "record_results"
+    assert s.load({"answer": "Hi", "suggested_action": {"type": "launch_rockets"}})["suggested_action"]["type"] == "none"
+    assert s.load({"answer": "Hi", "suggested_action": None, "source_ids": 7})["source_ids"] == ["7"]
+    import pytest
+    from marshmallow import ValidationError
+
+    with pytest.raises(ValidationError):
+        s.load({"suggested_action": "none"})  # an answer is still required
