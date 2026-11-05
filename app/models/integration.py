@@ -32,6 +32,7 @@ class Integration(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
     account_url = db.Column(db.String(500))
     connected_by_user_id = db.Column(db.String(36), db.ForeignKey("users.id", name="fk_integrations_connected_by"))
     connected_at = db.Column(db.DateTime(timezone=True))
+    settings_json = db.Column(db.Text)  # non-secret settings, e.g. outreach sender address
 
     def to_dict(self) -> dict:
         return {

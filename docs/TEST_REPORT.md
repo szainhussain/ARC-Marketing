@@ -382,3 +382,20 @@ local stack: article renders on the SEO deliverable, publish section and
 Integrations card show the correct "not set up / not connected" states, 0
 console errors. **Not executed:** a real WordPress.com OAuth round trip and
 post (needs the WordPress.com app credentials on Render).
+
+
+## Phase 2, part 2 — Outreach email (2026-11-06)
+
+`pytest`: 165 passed (11 new: `tests/integration/test_outreach.py`,
+`tests/security/test_outreach_isolation.py`). Against a fake Brevo/Resend:
+lists need a lawful basis and attestation; nothing sends until approved and
+started; daily limit enforced; editing after approval needs re-approval;
+changing the sender mid-send pauses the batch; kill switch stops sending;
+one-click unsubscribe works without login, is permanent and blocks the
+address in later lists; an interrupted Brevo send is never retried; a
+rejected key is refused and keys never appear in responses; other
+workspaces get 403 on every endpoint; viewers can't approve, start, connect
+or upload. Browser check on the local stack: list upload (invalid row
+skipped), batch creation, personalised preview with footer, and the real
+Brevo API rejecting a fake key with a clear message. **Not executed:** a
+real send through a connected Brevo/Resend account.

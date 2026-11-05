@@ -34,6 +34,8 @@ const TestCheckoutPage = lazy(() => import('./pages/app/WorkspacePages').then((m
 const ResultsPage = lazy(() => import('./pages/app/ResultsPages').then((m) => ({ default: m.ResultsPage })))
 const MonthlyReportPage = lazy(() => import('./pages/app/ResultsPages').then((m) => ({ default: m.MonthlyReportPage })))
 const ReviewPage = lazy(() => import('./pages/public/ReviewPage'))
+const UnsubscribePage = lazy(() => import('./pages/public/UnsubscribePage'))
+const OutreachPage = lazy(() => import('./pages/app/OutreachPage'))
 const AdminPage = lazy(() => import('./pages/app/AdminPage'))
 const UsagePage = lazy(() => import('./pages/app/WorkspacePages').then((m) => ({ default: m.UsagePage })))
 import {
@@ -82,6 +84,7 @@ export default function App() {
         <Route path="/solutions/:slug" element={<SolutionPage />} />
         <Route path="/demo" element={<DemoPage />} />
         <Route path="/review/:token" element={<ReviewPage />} />
+        <Route path="/unsubscribe/:token" element={<UnsubscribePage />} />
         <Route path="/marketing-scorecard" element={<ScorecardPage />} />
         <Route path="/compare/agency" element={<AgencyComparePage />} />
         <Route path="/agents" element={<AgentsPage />} />
@@ -149,6 +152,7 @@ export default function App() {
         <Route path="analytics" element={<AnalyticsPage />} />
         <Route path="reports" element={<Navigate to="/app/analytics" replace />} />
         <Route path="results" element={<ResultsPage />} />
+        <Route path="outreach" element={<OutreachPage />} />
         <Route path="reports/monthly" element={<MonthlyReportPage />} />
         <Route path="research" element={<ResearchPage />} />
         <Route path="integrations" element={<IntegrationsPage />} />

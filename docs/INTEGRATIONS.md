@@ -51,6 +51,22 @@ Source of truth: `app/integrations/catalog.py`, served at
   `POST /organizations/<id>/approvals/<id>/publish/wordpress`,
   `GET /organizations/<id>/deliverables/<id>/publications`.
 
+## Live connector: outreach email (Brevo or Resend, client-owned)
+
+- **Per workspace:** Outreach → *Connect sender*: provider, API key, verified
+  from-address, from-name, postal address, optional reply-to. Brevo free
+  plan sends up to 300 emails/day; Resend free plan 100/day (check current
+  limits with the provider).
+- **Flow:** upload a list (lawful basis + source + attestation) → create a
+  batch (optionally from a PR-agent outreach draft) → request approval →
+  approve → start. Pause, resume and cancel at any time. See D18.
+- **Endpoints:** `/organizations/<id>/outreach` (overview), `/outreach/sender`
+  (POST/DELETE), `/outreach/lists`, `/outreach/lists/<id>/contacts`,
+  `/outreach/suppressions`, `/outreach/batches`, `/outreach/batches/<id>`
+  (PATCH), `/outreach/batches/<id>/preview`,
+  `/outreach/batches/<id>/{request-approval,approve,reject,start,pause,cancel}`,
+  public `POST /api/v1/outreach/unsubscribe/<token>`.
+
 ## Live connectors — prerequisites (not built)
 
 | Connector | You need to provide |

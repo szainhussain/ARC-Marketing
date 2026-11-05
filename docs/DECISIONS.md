@@ -382,3 +382,32 @@ The user chose WordPress.com as the pilot channel (Phase 2) and chose
 - New locked policy `live_publish` (require_approval). Spend stays blocked:
   ad launching (Phase 2, part 3) will add its own cap + kill-switch path
   and is built against a fake ad platform until the user has API access.
+
+## D18 — Outreach email: client-owned sender, batch approval, lawful lists only
+
+The user chose "each client connects their own" sender. A workspace admin
+connects a Brevo or Resend API key (encrypted at rest, checked against the
+provider) plus a verified from-address and a postal address. Emails go out
+from the client's own domain and reputation.
+
+- **Lists:** CSV upload only, with a lawful basis (consent / existing
+  customer / legitimate interest), a source description and an attestation
+  that contacts weren't scraped or bought. Invalid, duplicate and
+  previously-unsubscribed addresses are skipped. No scraping exists.
+- **Batch approval:** one template + one list + sender + daily limit,
+  approved as a whole by an approver role. Approval freezes the recipient
+  list and stores a SHA-256 of all of it. Editing the batch or changing the
+  sender cancels the approval; the worker recomputes the hash before every
+  email and pauses the batch on any drift.
+- **Sending:** worker step, per-batch daily limit under a workspace cap
+  (`OUTREACH_DAILY_CAP`, default 200), a few seconds between emails, kill
+  switch checked each time. Resend sends carry an Idempotency-Key, so an
+  interrupted attempt is retried; Brevo has none, so an interrupted Brevo
+  send is marked failed rather than risking a duplicate email.
+- **Compliance:** every email has the sender's postal address, why the
+  person is receiving it, an unsubscribe link (a page that needs one click,
+  so link scanners can't unsubscribe people) and RFC 8058
+  `List-Unsubscribe` + `List-Unsubscribe-Post` headers pointing at a
+  CSRF-exempt one-click endpoint. Unsubscribes go on a workspace-wide
+  suppression list that the API never removes from.
+- Locked policy `outreach_email` (require_approval).

@@ -32,3 +32,4 @@ from app.models.results import CampaignResult  # noqa: F401
 from app.models.media import GeneratedImage  # noqa: F401
 from app.models.assistant import AssistantMessage  # noqa: F401
 from app.models.embedding import EmbeddingChunk  # noqa: F401
+from app.models.outreach import OutreachBatch, OutreachContact, OutreachList, OutreachMessage, OutreachSuppression  # noqa: F401

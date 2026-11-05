@@ -115,6 +115,9 @@ class BaseConfig:
     WORDPRESS_CLIENT_ID = os.environ.get("WORDPRESS_CLIENT_ID", "").strip()
     WORDPRESS_CLIENT_SECRET = os.environ.get("WORDPRESS_CLIENT_SECRET", "").strip()
     WORDPRESS_REDIRECT_URI = os.environ.get("WORDPRESS_REDIRECT_URI", "").strip()
+    # Outreach email: workspace-wide daily cap and pacing between emails.
+    OUTREACH_DAILY_CAP = int(os.environ.get("OUTREACH_DAILY_CAP", "200"))
+    OUTREACH_SECONDS_BETWEEN = float(os.environ.get("OUTREACH_SECONDS_BETWEEN", "4"))
     # Fernet key for third-party tokens at rest (see app/crypto.py).
     INTEGRATION_ENCRYPTION_KEY = os.environ.get("INTEGRATION_ENCRYPTION_KEY", "").strip()
     UPLOAD_DIR = os.environ.get("UPLOAD_DIR", "storage/uploads")
@@ -131,6 +134,7 @@ class TestingConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     WTF_CSRF_ENABLED = False
     WORKER_RETRY_BASE_SECONDS = 0.0
+    OUTREACH_SECONDS_BETWEEN = 0.0
     RATELIMIT_ENABLED = False
     SESSION_COOKIE_SECURE = False
 

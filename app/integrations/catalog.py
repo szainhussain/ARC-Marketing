@@ -30,6 +30,11 @@ CATALOG = [
      "detail": "Publishes an approved blog article to your WordPress.com site (or saves it as a draft), "
                "then reads it back from WordPress to confirm it is live. Nothing is posted before approval.",
      "prerequisite": "A WordPress.com site you can publish to. Connect it under Integrations."},
+    {"key": "outreach:email", "name": "Outreach email — Brevo or Resend", "category": "Outreach",
+     "status": AVAILABLE, "agents": ["pr_partnerships", "key_accounts"],
+     "detail": "Sends an approved email to a contact list you uploaded, from your own Brevo or Resend account, "
+               "with a daily limit, one-click unsubscribe and a suppression list. Nothing is sent before approval.",
+     "prerequisite": "A Brevo or Resend account with a verified sender, and a contact list you're allowed to email."},
     {"key": "automation:zapier", "name": "Zapier — publish approved content", "category": "Automation",
      "status": AVAILABLE, "agents": ["social_media", "creative_studio", "paid_media"],
      "detail": "Approved content is sent to your Zap via a signed webhook (content.approved_for_publishing); "
