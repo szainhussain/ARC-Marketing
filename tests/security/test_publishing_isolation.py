@@ -23,6 +23,7 @@ def test_other_workspace_is_denied_everything(app, client, fake_wp):
     assert client.delete(f"{base}/integrations/wordpress").status_code == 403
     assert client.post(f"{base}/approvals/x/publish/wordpress", json={}, headers={"Idempotency-Key": "k"}).status_code == 403
     assert client.get(f"{base}/deliverables/x/publications").status_code == 403
+    assert client.post(f"{base}/external-actions/x/unpublish").status_code == 403
     # A's signed state is useless in B's session.
     cb = client.get(f"/api/v1/integrations/wordpress/callback?code=good-code&state={state_a}")
     assert "wordpress=error" in cb.headers["Location"]

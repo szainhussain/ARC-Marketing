@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { ExternalLink, Globe } from 'lucide-react'
 import { apiRequest, ApiError } from '../api/client'
 import { useResource } from '../hooks/useResource'
-import { StatusPill, useToast } from './ui'
+import { ConfirmDialog, StatusPill, useToast } from './ui'
 
 type WordPressStatus = { configured: boolean; connected: boolean; state: string; site_url: string | null; site_name: string | null }
 type Publication = {
@@ -107,6 +107,7 @@ const LABEL: Record<string, string> = {
   platform_verified_published: 'Live on your site',
   draft_created: 'Saved as a WordPress draft',
   unverified: 'Posted, not yet confirmed live',
+  removed_from_site: 'Removed from your site',
 }
 
 /** Deliverable card: publish each approved blog article to the connected site. */
@@ -118,6 +119,8 @@ export function WordPressPublish({ orgId, deliverableId, approvalId, articles }:
   const pubs = data?.publications || []
   const busy = pubs.some((p) => p.status === 'queued' || p.status === 'executing')
   const [sending, setSending] = useState<number | null>(null)
+  const [removing, setRemoving] = useState<Publication | null>(null)
+  const [removeBusy, setRemoveBusy] = useState(false)
   useEffect(() => {
     setPollMs(busy ? 3000 : undefined)
   }, [busy])
@@ -130,7 +133,7 @@ export function WordPressPublish({ orgId, deliverableId, approvalId, articles }:
       await apiRequest(`/organizations/${orgId}/approvals/${approvalId}/publish/wordpress`, {
         method: 'POST',
         body: { article_index: index, mode },
-        idempotencyKey: `wp-${approvalId}-${index}-${mode}`,
+        idempotencyKey: `wp-${approvalId}-${index}-${mode}-${Date.now()}`,
       })
       toast({ tone: 'success', title: mode === 'publish' ? 'Publishing to WordPress…' : 'Saving a WordPress draft…' })
       reload()
@@ -138,6 +141,21 @@ export function WordPressPublish({ orgId, deliverableId, approvalId, articles }:
       toast({ tone: 'error', title: err instanceof ApiError ? err.message : 'Could not publish' })
     } finally {
       setSending(null)
+    }
+  }
+
+  async function unpublish() {
+    if (!removing) return
+    setRemoveBusy(true)
+    try {
+      await apiRequest(`/organizations/${orgId}/external-actions/${removing.id}/unpublish`, { method: 'POST' })
+      toast({ tone: 'success', title: 'Removed from your site (moved to WordPress trash)' })
+      setRemoving(null)
+      reload()
+    } catch (err) {
+      toast({ tone: 'error', title: err instanceof ApiError ? err.message : 'Could not unpublish' })
+    } finally {
+      setRemoveBusy(false)
     }
   }
 
@@ -151,13 +169,16 @@ export function WordPressPublish({ orgId, deliverableId, approvalId, articles }:
       ) : (
         <ul className="gen-list">
           {articles.map((a, i) => {
-            const pub = pubs.find((p) => p.item_index === i && p.status !== 'failed') || pubs.find((p) => p.item_index === i)
+            const pub = pubs.find((p) => p.item_index === i && p.status !== 'failed' && p.publication_status !== 'removed_from_site')
+              || pubs.find((p) => p.item_index === i)
+            const canPublish = !pub || pub.status === 'failed' || pub.publication_status === 'removed_from_site'
             return (
               <li key={i}>
                 <div className="gen-row">
                   <span className="small">{String(a.title || `Article ${i + 1}`)}</span>
-                  {!pub || pub.status === 'failed' ? (
+                  {canPublish ? (
                     <span className="head-actions">
+                      {pub?.publication_status === 'removed_from_site' && <StatusPill status="cancelled" label={LABEL.removed_from_site} />}
                       <button className="small-btn" disabled={sending === i} onClick={() => publish(i, 'publish')}>
                         Publish now
                       </button>
@@ -173,6 +194,9 @@ export function WordPressPublish({ orgId, deliverableId, approvalId, articles }:
                           View <ExternalLink size={12} aria-hidden="true" />
                         </a>
                       )}
+                      <button className="secondary small-btn" onClick={() => setRemoving(pub)}>
+                        Unpublish
+                      </button>
                     </span>
                   ) : (
                     <StatusPill status="running" label={pub.publish_mode === 'draft' ? 'Saving draft…' : 'Publishing…'} />
@@ -184,6 +208,16 @@ export function WordPressPublish({ orgId, deliverableId, approvalId, articles }:
           })}
         </ul>
       )}
+      <ConfirmDialog
+        open={!!removing}
+        title="Unpublish this article?"
+        body="ARC moves the post to your WordPress trash, so it's no longer public. WordPress keeps it for 30 days if you want to restore it there, and you can publish it again from here."
+        confirmLabel="Unpublish"
+        tone="danger"
+        busy={removeBusy}
+        onConfirm={unpublish}
+        onCancel={() => setRemoving(null)}
+      />
     </div>
   )
 }

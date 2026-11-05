@@ -47,6 +47,10 @@ class FakeWP:
             self.posts[pid] = {"ID": pid, "slug": data["slug"], "status": data["status"], "content": data["content"],
                                "URL": f"https://fernleaf.wordpress.com/{data['slug']}/"}
             return self.posts[pid]
+        if path.endswith("/delete"):
+            post = self.posts[int(path.rsplit("/", 2)[1])]
+            post["status"] = "trash"
+            return post
         if "/posts/" in path:
             return self.posts[int(path.rsplit("/", 1)[1])]
         return {"URL": "https://fernleaf.wordpress.com"}
@@ -216,3 +220,36 @@ def test_revoked_token_marks_connection_for_reauth(app, client, fake_wp):
 def test_markdown_converter_escapes_everything():
     out = wp.markdown_to_html('## <img src=x onerror=alert(1)>\n\nHi **"there"** & <b>x</b>')
     assert "<img" not in out and "&lt;img" in out and "<strong>\"there\"</strong>" in out and "&amp;" in out
+
+
+def test_unpublish_moves_post_to_trash_and_allows_republishing(app, client, fake_wp):
+    org_id, _, did, aid = _setup(app, client, fake_wp)
+    pub_url = f"/api/v1/organizations/{org_id}/approvals/{aid}/publish/wordpress"
+    client.post(pub_url, json={"article_index": 0}, headers={"Idempotency-Key": "pub-u1"})
+    drain()
+    pub = client.get(f"/api/v1/organizations/{org_id}/deliverables/{did}/publications").get_json()["publications"][0]
+    r = client.post(f"/api/v1/organizations/{org_id}/external-actions/{pub['id']}/unpublish")
+    assert r.status_code == 200 and r.get_json()["external_action"]["publication_status"] == "removed_from_site"
+    assert next(iter(fake_wp.posts.values()))["status"] == "trash"
+    # Unpublishing twice is harmless; publishing again creates a fresh post.
+    assert client.post(f"/api/v1/organizations/{org_id}/external-actions/{pub['id']}/unpublish").status_code == 200
+    again = client.post(pub_url, json={"article_index": 0}, headers={"Idempotency-Key": "pub-u2"}).get_json()["external_action"]
+    assert again["id"] != pub["id"] and again["status"] == "queued"
+    drain()
+    assert len(fake_wp.posts) == 2
+
+
+def test_unpublish_works_with_kill_switch_on_and_needs_a_posted_article(app, client, fake_wp):
+    org_id, _, did, aid = _setup(app, client, fake_wp)
+    client.post(f"/api/v1/organizations/{org_id}/approvals/{aid}/publish/wordpress", json={"article_index": 0},
+                headers={"Idempotency-Key": "pub-u3"})
+    with app.app_context():
+        queued = ExternalAction.query.filter_by(idempotency_key="pub-u3").one().id
+    assert client.post(f"/api/v1/organizations/{org_id}/external-actions/{queued}/unpublish").status_code == 409
+    drain()
+    with app.app_context():
+        from app.models.organization import Organization
+
+        db.session.get(Organization, org_id).kill_switch_enabled = True
+        db.session.commit()
+    assert client.post(f"/api/v1/organizations/{org_id}/external-actions/{queued}/unpublish").status_code == 200

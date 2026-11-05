@@ -176,5 +176,12 @@ class WordPressComConnector(Connector):
                      token=self.token)
         return {"verification_supported": True, "status": post.get("status"), "url": post.get("URL")}
 
+    def unpublish(self, action_reference: str) -> dict:
+        """Moves the post to the site's trash (WordPress keeps it 30 days,
+        so it can be restored from WordPress). A trashed post isn't public."""
+        post = _http("POST", f"{API}/rest/v1.1/sites/{self.site}/posts/{urllib.parse.quote(action_reference)}/delete",
+                     {}, token=self.token)
+        return {"status": post.get("status")}
+
     def disconnect(self) -> None:
         return None

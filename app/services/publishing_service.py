@@ -26,6 +26,7 @@ from app.models.external_action import (
     PUBLICATION_DRAFT_CREATED,
     PUBLICATION_NOT_APPLICABLE,
     PUBLICATION_PLATFORM_VERIFIED,
+    PUBLICATION_REMOVED,
     PUBLICATION_UNVERIFIED,
     STATUS_EXECUTING,
     STATUS_FAILED,
@@ -191,7 +192,8 @@ def request_publish(membership: Membership, approval_id: str, article_index, ide
                                           ExternalAction.approval_id == approval.id,
                                           ExternalAction.connector == PROVIDER,
                                           ExternalAction.item_index == article_index,
-                                          ExternalAction.status.in_((STATUS_QUEUED, STATUS_EXECUTING, STATUS_SUCCEEDED))).first()
+                                          ExternalAction.status.in_((STATUS_QUEUED, STATUS_EXECUTING, STATUS_SUCCEEDED)),
+                                          ExternalAction.publication_status != PUBLICATION_REMOVED).first()
     if already:
         return already  # one live post per approved article version
     action = ExternalAction(organization_id=org_id, approval_id=approval.id, connector=PROVIDER,
@@ -314,3 +316,40 @@ def process_next_publication() -> bool:
            else "Blog draft created on WordPress", body=article.get("title"), link=action.external_url or None)
     db.session.commit()
     return True
+
+
+def unpublish(membership: Membership, action_id: str) -> ExternalAction:
+    """Take a post down from the connected site (moves it to WordPress's
+    trash). Allowed even with the kill switch on: it only removes content."""
+    if membership.role not in APPROVAL_CAPABLE_ROLES:
+        raise PermissionDenied("Your role does not permit unpublishing.")
+    action = ExternalAction.query.filter_by(id=action_id, organization_id=membership.organization_id,
+                                            connector=PROVIDER).first()
+    if action is None:
+        raise NotFound("Publication not found.")
+    if action.status != STATUS_SUCCEEDED or not action.external_reference:
+        raise Conflict("This article hasn't been posted to WordPress.")
+    if action.publication_status == PUBLICATION_REMOVED:
+        return action
+    integ = get_connection(membership.organization_id)
+    token = decrypt_secret(integ.credential_ciphertext) if integ and integ.state == STATE_CONNECTED and integ.credential_ciphertext else None
+    if not token:
+        raise Conflict("Reconnect WordPress.com in Integrations to unpublish this post.")
+    conn = wp.WordPressComConnector(token, integ.external_account_id)
+    try:
+        result = conn.unpublish(action.external_reference)
+    except wp.WordPressError as exc:
+        if exc.status == 404:
+            result = {"status": "missing"}  # already deleted in WordPress
+        elif exc.status in (401, 403):
+            integ.state = STATE_REAUTH_REQUIRED
+            db.session.commit()
+            raise Conflict("WordPress.com rejected ARC's access. Reconnect the site in Integrations.") from exc
+        else:
+            raise ServiceUnavailable(f"Could not unpublish: {exc}") from exc
+    action.publication_status = PUBLICATION_REMOVED
+    record_audit_event(membership.organization_id, "external_action.unpublished", actor_user_id=membership.user_id,
+                       target_type="external_action", target_id=action.id,
+                       metadata={"provider": PROVIDER, "url": action.external_url, "wordpress_status": result.get("status")})
+    db.session.commit()
+    return action

@@ -259,7 +259,17 @@ export default function CampaignWorkspacePage({ section = 'overview' }: { sectio
               {run.budget_usd != null && ` of ${money(run.budget_usd)} run budget`}
               {runActive && ' · updating live'}
             </p>
-            {run.error_summary && <div className="banner warning">{run.error_summary}</div>}
+            {run.error_summary && (
+              <div className="banner warning">
+                {run.error_summary}
+                {run.error_summary.includes('Business profile is missing') && (
+                  <div style={{ marginTop: 10 }}>
+                    <Link className="btn small-btn" to="/app/onboarding">Complete your business profile</Link>{' '}
+                    <span className="small">Then come back and click <strong>Start a new run</strong>.</span>
+                  </div>
+                )}
+              </div>
+            )}
             {run.status === 'queued' && run.tasks.every((t) => t.attempt_count === 0) && (
               <div className="banner warning">
                 Queued and waiting for the worker. If nothing changes, make sure <code>flask worker</code> is

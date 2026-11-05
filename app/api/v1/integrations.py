@@ -70,3 +70,10 @@ def wordpress_publish_route(organization_id, approval_id):
 def deliverable_publications_route(organization_id, deliverable_id):
     get_membership_or_403(organization_id)
     return jsonify({"publications": publishing_service.list_publications(organization_id, deliverable_id)}), 200
+
+
+@api_v1.route("/organizations/<organization_id>/external-actions/<action_id>/unpublish", methods=["POST"])
+@login_required
+def wordpress_unpublish_route(organization_id, action_id):
+    membership = get_membership_or_403(organization_id)
+    return jsonify({"external_action": publishing_service.unpublish(membership, action_id).to_dict()}), 200

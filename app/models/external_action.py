@@ -22,6 +22,8 @@ PUBLICATION_MANUALLY_CONFIRMED = "manually_confirmed_published"
 # URL). Never set from a request, a webhook or an agent (docs/DECISIONS.md D17).
 PUBLICATION_PLATFORM_VERIFIED = "platform_verified_published"
 PUBLICATION_DRAFT_CREATED = "draft_created"
+# A person removed it from the site via the connector (moved to WordPress trash).
+PUBLICATION_REMOVED = "removed_from_site"
 
 STATUS_QUEUED = "queued"
 
