@@ -1,12 +1,13 @@
 # Render Blueprint — free tier: one web service that also runs the agent
-# worker in-process. Database: a free Neon PostgreSQL (paste its URL as
-# DATABASE_URL). See docs/DEPLOYMENT.md "Free hosting".
+# worker in-process. Database and file storage: a free Supabase project
+# (Postgres via its Session pooler URL as DATABASE_URL, plus a private
+# Storage bucket). See docs/DEPLOYMENT.md "Free hosting".
 services:
   - type: web
     name: arc-api
     runtime: python
     plan: free
-    region: virginia      # same area as the Neon database (AWS us-east-1)
+    region: virginia      # same area as the Supabase project (AWS us-east-1)
     buildCommand: pip install -r requirements.txt
     startCommand: >-
       flask db upgrade && flask seed-plans &&
@@ -23,7 +24,15 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
-        sync: false          # paste your Neon connection string
+        sync: false          # Supabase > Connect > Session pooler URI (IPv4), with your DB password
+      - key: STORAGE_BACKEND
+        sync: false          # set to "supabase" once the two SUPABASE_ values below are in
+      - key: SUPABASE_URL
+        sync: false          # e.g. https://<project-ref>.supabase.co
+      - key: SUPABASE_SECRET_KEY
+        sync: false          # Supabase > Project Settings > API Keys > secret key (server only)
+      - key: SUPABASE_STORAGE_BUCKET
+        value: arc-uploads   # create it as a PRIVATE bucket
       - key: FRONTEND_ORIGIN
         sync: false          # e.g. https://arc-marketing.vercel.app (comma-separate several)
       - key: AI_PROVIDER

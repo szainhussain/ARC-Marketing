@@ -1,24 +1,44 @@
 # Deployment
 
-**Status: runs locally and in Docker Compose. Not deployed anywhere.**
+**Status: deployed** — frontend on Vercel (usearc.vercel.app), API + worker on
+Render, database and file storage on Supabase.
 
-## Free hosting (Vercel + Render free + Neon free)
+## Free hosting (Vercel + Render free + Supabase free)
 
 | Piece | Where | Notes |
 |---|---|---|
-| Frontend | Vercel (Hobby) | Root `frontend`; env `VITE_API_BASE_URL=https://<render-service>.onrender.com/api/v1` |
+| Frontend | Vercel (Hobby) | Root `frontend`; `vercel.json` proxies `/api/*` to Render so cookies are first-party |
 | API + agent worker | Render free web service via `render.yaml` | Worker runs in-process (`RUN_EMBEDDED_WORKER=true`, 1 gunicorn worker) |
-| PostgreSQL | Neon free | Paste its connection string as `DATABASE_URL` |
+| PostgreSQL | Supabase free | `DATABASE_URL` = the **Session pooler** URI (Connect button). The direct `db.<ref>.supabase.co` host is IPv6-only on the free plan and Render can't reach it |
+| Uploaded files | Supabase Storage (private bucket) | `STORAGE_BACKEND=supabase`, `SUPABASE_URL`, `SUPABASE_SECRET_KEY` (server only), `SUPABASE_STORAGE_BUCKET` |
+
+Supabase can't host the API itself: Edge Functions run TypeScript only, with
+short time limits, and agent runs are long-running Python.
 
 Free-tier trade-offs (verify current terms on each provider's pricing page):
 the Render service sleeps after ~15 minutes without traffic and takes about a
 minute to wake, and the in-process worker pauses while it sleeps (queued
 work resumes on the next request; open campaign pages poll, which keeps it
-awake during a run). Uploaded files live on ephemeral disk and are lost on
-redeploy/restart. Frontend and API on different domains need
-`SESSION_COOKIE_SAMESITE=None` and `WTF_CSRF_SSL_STRICT=false` (set in the
-blueprint); Safari may still block the cross-site cookie — a custom domain
-(`app.` + `api.` subdomains) fixes that.
+awake during a run). A free Supabase project is paused after about a week
+with no database activity and must be restored from its dashboard; an uptime
+monitor hitting `/api/v1/health/ready` (which queries the database) every
+few minutes prevents both. Supabase's built-in email is for its own Auth
+product, which ARC doesn't use, so transactional email needs a separate
+provider (e.g. Resend).
+
+### Moving the database from Neon to Supabase
+
+1. Supabase: new project (region East US / us-east-1), save the DB password.
+2. Storage → New bucket `arc-uploads`, **Public off**.
+3. Render → arc-api → Environment: replace `DATABASE_URL` with the Session
+   pooler URI; add `STORAGE_BACKEND=supabase`, `SUPABASE_URL`,
+   `SUPABASE_SECRET_KEY`, `SUPABASE_STORAGE_BUCKET=arc-uploads`. Save → redeploy.
+   On start, `flask db upgrade` creates the tables and `flask seed-plans` the plans.
+4. Optional — keep existing data instead of starting fresh, before step 3:
+   `pg_dump --no-owner --no-privileges -Fc "<neon url>" -f arc.dump` then
+   `pg_restore --no-owner --no-privileges -d "<supabase session pooler url>" arc.dump`.
+5. Check `/api/v1/health/ready` returns `"database": "ok"`, sign up, upload a
+   file on the Assets page, then delete the Neon project.
 
 ## Processes
 
@@ -43,7 +63,9 @@ Names only — see `.env.example` for placeholders. Required in production:
 `RATELIMIT_STORAGE_URI`, `BILLING_PROVIDER` (`none` default in
 production), `STRIPE_SECRET_KEY`, `BILLING_WEBHOOK_SECRET`, `TRIAL_DAYS`,
 `APPROVAL_TTL_DAYS`, `INVITATION_TTL_DAYS`, `DELETION_GRACE_DAYS`,
-`UPLOAD_DIR`, `MAX_UPLOAD_MB`, `KILL_SWITCH_ENABLED`. Never set
+`UPLOAD_DIR`, `MAX_UPLOAD_MB`, `STORAGE_BACKEND` (`local` or `supabase`),
+`SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `SUPABASE_STORAGE_BUCKET`,
+`KILL_SWITCH_ENABLED`. Never set
 `ALLOW_FIXTURE_PROVIDER` or `WEBHOOK_ALLOW_PRIVATE_TARGETS` in production
 (`ProductionConfig` forces the fixture provider off).
 
@@ -55,8 +77,9 @@ Frontend build: `VITE_API_BASE_URL=https://api.<domain>/api/v1`.
 - API + worker: Render, Railway, Fly.io or a container host (two services
   from the same image; the worker overrides the command).
 - PostgreSQL: managed, with point-in-time recovery.
-- Uploads: replace `LocalStorage` with an S3/GCS implementation
-  (`app/storage.py`) — local disk is not durable on most PaaS hosts.
+- Uploads: `STORAGE_BACKEND=supabase` (`app/storage.py`) — local disk is not
+  durable on most PaaS hosts. Another provider means one more class with
+  the same `put`/`get`/`delete` methods.
 - Cookies: API and frontend on the same registrable domain
   (`app.<domain>` + `api.<domain>`) so `SameSite=Lax` session cookies
   work; `SESSION_COOKIE_SECURE` is forced on in production; HTTPS only.

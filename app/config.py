@@ -91,6 +91,12 @@ class BaseConfig:
     IS_PRODUCTION = False
     TRUSTED_PROXY_HOPS = int(os.environ.get("TRUSTED_PROXY_HOPS", "0"))
 
+    # "local" (files under UPLOAD_DIR) or "supabase" (private Supabase Storage bucket).
+    STORAGE_BACKEND = os.environ.get("STORAGE_BACKEND", "local").strip().lower()
+    SUPABASE_URL = os.environ.get("SUPABASE_URL", "").strip()
+    SUPABASE_SECRET_KEY = (os.environ.get("SUPABASE_SECRET_KEY")
+                           or os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or "").strip()
+    SUPABASE_STORAGE_BUCKET = os.environ.get("SUPABASE_STORAGE_BUCKET", "arc-uploads").strip()
     UPLOAD_DIR = os.environ.get("UPLOAD_DIR", "storage/uploads")
     MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", "10"))
     MAX_CONTENT_LENGTH = int(os.environ.get("MAX_UPLOAD_MB", "10")) * 1024 * 1024
