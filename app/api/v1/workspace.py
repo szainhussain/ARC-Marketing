@@ -660,7 +660,10 @@ def integration_catalog_route(organization_id):
     disabled = {
         i.provider for i in Integration.query.filter_by(organization_id=organization_id, state="disabled")
     }
-    items = [{**c, "enabled": c["key"] not in disabled if c["status"] == AVAILABLE else None} for c in CATALOG]
+    # Only manual-export destinations have a per-workspace switch; webhook-based
+    # automations are switched on by adding a webhook endpoint.
+    items = [{**c, "enabled": c["key"] not in disabled if c["status"] == AVAILABLE and c["key"].startswith("manual_export:") else None}
+             for c in CATALOG]
     return jsonify({"integrations": items}), 200
 
 

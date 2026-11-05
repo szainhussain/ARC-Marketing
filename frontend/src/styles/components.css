@@ -434,3 +434,7 @@ kbd { font-family: var(--font-mono); font-size: 0.72rem; padding: 1px 6px; borde
 .share-links li { display: flex; justify-content: space-between; gap: 10px; color: var(--color-muted-fg); }
 .review-page { max-width: 900px; }
 @media (max-width: 560px) { .comment-form, .share-url { flex-direction: column; align-items: stretch; } }
+
+.automation-card { border-color: rgba(110, 231, 168, 0.35); }
+.automation-steps { margin: 0 0 14px; padding-left: 20px; color: var(--color-muted-fg); line-height: 1.7; font-size: 0.9rem; }
+.automation-steps strong { color: var(--color-fg); }

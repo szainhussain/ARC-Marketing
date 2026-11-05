@@ -39,8 +39,8 @@ class BillingEvent(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
         }
 
 
-WEBHOOK_EVENTS = ("run.completed", "run.failed", "approval.requested", "approval.decided",
-                  "deliverable.created", "budget.threshold")
+WEBHOOK_EVENTS = ("content.approved_for_publishing", "run.completed", "run.failed", "approval.requested",
+                  "approval.decided", "deliverable.created", "budget.threshold")
 
 
 class WebhookEndpoint(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):

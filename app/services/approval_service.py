@@ -159,14 +159,24 @@ def _approval_context(organization_id: str, deliverable) -> dict:
     risk = "high" if failed else ("medium" if external else "low")
     checks.append({"check": "version_bound", "passed": True,
                    "detail": "Approval is tied to this exact version; any edit invalidates it."})
-    checks.append({"check": "no_auto_publish", "passed": True,
-                   "detail": "Approving does not publish. It allows a manual export only."})
+    from app.models.billing import WebhookEndpoint
+
+    automations = [e for e in WebhookEndpoint.query.filter_by(organization_id=organization_id, is_active=True)
+                   if "content.approved_for_publishing" in e.events]
+    if automations:
+        checks.append({"check": "no_auto_publish", "passed": True,
+                       "detail": "Approving does not publish by itself. When you export it, the approved content is "
+                                 f"sent to {len(automations)} connected automation(s) (e.g. Zapier or Make)."})
+        outcome = ("When you export, an export package is generated and the approved content is sent to your connected "
+                   "automation(s), which may publish it. ARC never spends money.")
+    else:
+        checks.append({"check": "no_auto_publish", "passed": True,
+                       "detail": "Approving does not publish. It allows a manual export only."})
+        outcome = ("An export package is generated for you to copy into the destination platform yourself. "
+                   "Nothing is posted, sent or spent by ARC.")
     return {
         "requesting_agent_id": task.agent_id if task else None,
-        "expected_outcome": (
-            "An export package is generated for you to copy into the destination platform yourself. "
-            "Nothing is posted, sent or spent by ARC."
-        ),
+        "expected_outcome": outcome,
         "risk_level": risk,
         "risk_notes": json.dumps(checks),
         "expires_at": utcnow() + timedelta(days=current_app.config.get("APPROVAL_TTL_DAYS", 14)),

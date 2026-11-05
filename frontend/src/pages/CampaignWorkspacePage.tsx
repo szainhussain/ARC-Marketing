@@ -403,7 +403,7 @@ export default function CampaignWorkspacePage({ section = 'overview' }: { sectio
                   {action && (
                     <div style={{ marginTop: 10 }}>
                       <div className="banner success">
-                        Handed off (export package generated). Publication status:{' '}
+                        Handed off (export package generated, and sent to any Zapier/Make automation you connected). Publication status:{' '}
                         <strong>{action.publication_status}</strong>.
                         {action.publication_status === 'unverified' && (
                           <>

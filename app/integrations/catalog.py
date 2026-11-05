@@ -25,6 +25,16 @@ CATALOG = [
     {"key": "manual_export:tiktok_ads", "name": "TikTok Ads — manual export", "category": "Paid media",
      "status": AVAILABLE, "agents": ["paid_media", "social_media"],
      "detail": "Formats ad text for manual entry. Never posts or spends.", "prerequisite": None},
+    {"key": "automation:zapier", "name": "Zapier — publish approved content", "category": "Automation",
+     "status": AVAILABLE, "agents": ["social_media", "creative_studio", "paid_media"],
+     "detail": "Approved content is sent to your Zap via a signed webhook (content.approved_for_publishing); "
+               "your Zap posts it to any of thousands of apps. Nothing is sent before approval.",
+     "prerequisite": "A Zapier account and a Zap that starts with 'Webhooks by Zapier — Catch Hook'."},
+    {"key": "automation:make", "name": "Make — publish approved content", "category": "Automation",
+     "status": AVAILABLE, "agents": ["social_media", "creative_studio", "paid_media"],
+     "detail": "Approved content is sent to your Make scenario via a signed webhook "
+               "(content.approved_for_publishing). Nothing is sent before approval.",
+     "prerequisite": "A Make account and a scenario that starts with a 'Custom webhook' trigger."},
     {"key": "meta_graph", "name": "Meta Graph API (publishing)", "category": "Social & publishing",
      "status": SUPPORTED, "agents": ["social_media"],
      "detail": "Connector contract exists; live publishing is not built.",

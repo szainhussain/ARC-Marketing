@@ -317,6 +317,7 @@ export function IntegrationsPage() {
   const [creating, setCreating] = useState(false)
   const [form, setForm] = useState<{ url: string; events: string[]; description: string }>({ url: '', events: ['run.completed'], description: '' })
   const [secret, setSecret] = useState<string | null>(null)
+  const [urlPlaceholder, setUrlPlaceholder] = useState('https://example.com/arc-webhook')
   const action = useAction()
 
   async function toggle(item: CatalogItem) {
@@ -361,10 +362,41 @@ export function IntegrationsPage() {
         ))}
       </div>
 
+      <div className="card automation-card" style={{ marginTop: 24 }}>
+        <h2>Publish approved content with Zapier or Make</h2>
+        <p className="muted small" style={{ marginTop: -6 }}>
+          Connect once, and every time you export an approved deliverable ARC sends the exact approved content to your
+          automation, which can post it to Instagram, LinkedIn, Facebook, email tools, Slack, Google Sheets and thousands
+          of other apps. Nothing is sent before approval, and ARC never marks anything published until you confirm it.
+        </p>
+        <ol className="automation-steps">
+          <li>In Zapier, create a Zap starting with <strong>Webhooks by Zapier → Catch Hook</strong> (in Make: a scenario starting with a <strong>Custom webhook</strong>) and copy its URL.</li>
+          <li>Click a button below and paste the URL.</li>
+          <li>Approve and export a deliverable, then map fields like <code>data.content</code> or <code>data.platform_export</code> to your posting step.</li>
+        </ol>
+        <div className="head-actions">
+          {[
+            ['Zapier', 'https://hooks.zapier.com/hooks/catch/…'],
+            ['Make', 'https://hook.eu1.make.com/…'],
+          ].map(([name, placeholder]) => (
+            <button
+              key={name}
+              onClick={() => {
+                setForm({ url: '', events: ['content.approved_for_publishing'], description: `${name}: publish approved content` })
+                setUrlPlaceholder(placeholder)
+                setCreating(true)
+              }}
+            >
+              <Plus size={14} aria-hidden="true" /> Connect {name}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="card" style={{ marginTop: 24 }}>
         <div className="card-head">
           <h2>Outbound webhooks</h2>
-          <button className="small-btn" onClick={() => setCreating(true)}><Plus size={14} aria-hidden="true" /> Add endpoint</button>
+          <button className="small-btn" onClick={() => { setForm({ url: '', events: ['run.completed'], description: '' }); setUrlPlaceholder('https://example.com/arc-webhook'); setCreating(true) }}><Plus size={14} aria-hidden="true" /> Add endpoint</button>
         </div>
         <p className="muted small">Signed with <code>ARC-Signature</code> (HMAC-SHA256, 5-minute replay window). HTTPS only; private addresses are refused. Retries 6 times with backoff.</p>
         {hooks.error ? <p className="muted small">{hooks.error}</p> : (
@@ -398,7 +430,7 @@ export function IntegrationsPage() {
       <Dialog open={creating} onClose={() => setCreating(false)} title="Add webhook endpoint"
         footer={<><button className="secondary" onClick={() => setCreating(false)}>Cancel</button><button disabled={action.busy} onClick={createHook}>Create</button></>}>
         {action.error && <div className="banner error">{action.error}</div>}
-        <Field id="wh-url" label="HTTPS URL"><input id="wh-url" type="url" placeholder="https://example.com/arc-webhook" value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} /></Field>
+        <Field id="wh-url" label="HTTPS URL"><input id="wh-url" type="url" placeholder={urlPlaceholder} value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} /></Field>
         <fieldset className="field" style={{ border: 'none', padding: 0 }}>
           <legend className="small" style={{ fontWeight: 600, marginBottom: 6 }}>Events</legend>
           {(hooks.data?.event_types || []).map((ev) => (

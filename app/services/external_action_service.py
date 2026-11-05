@@ -113,8 +113,34 @@ def execute_manual_handoff(
         target_id=action.id,
         metadata={"result": result},
     )
+    _emit_publishing_event(organization_id, action, approval, deliverable, content, result)
     db.session.commit()
     return action
+
+
+def _emit_publishing_event(organization_id, action, approval, deliverable, content, result) -> int:
+    """Send the exact approved content to Zapier/Make/any subscribed webhook.
+    Queued here, delivered by the worker; publication stays 'unverified'
+    until a person confirms it, whatever the automation does with it."""
+
+    from app.models.campaign import Campaign
+    from app.services.webhook_service import emit
+
+    campaign = db.session.get(Campaign, deliverable.campaign_id)
+    origin = current_app.config.get("FRONTEND_ORIGIN", "")
+    return emit(organization_id, "content.approved_for_publishing", {
+        "external_action_id": action.id,
+        "approval_id": approval.id,
+        "deliverable_id": deliverable.id,
+        "deliverable_type": deliverable.deliverable_type,
+        "version_number": deliverable.current_version.version_number,
+        "campaign": {"id": deliverable.campaign_id, "name": campaign.name if campaign else None},
+        "target_platform": action.target_platform,
+        "approved_by": approval.decided_by_external_name or ("workspace member" if approval.decided_by_user_id else None),
+        "content": content,
+        "platform_export": result.get("platform_export"),
+        "confirm_publication_url": f"{origin}/app/campaigns/{deliverable.campaign_id}/deliverables",
+    })
 
 
 def get_external_action_or_404(organization_id: str, action_id: str) -> ExternalAction:
