@@ -63,6 +63,20 @@ def login():
 
         raise AuthenticationError("Invalid email or password.")
 
+    if user.mfa_enabled_at:
+        from app.services.errors import AuthenticationError
+        from app.services.mfa_service import verify_second_factor
+
+        code, recovery = payload.get("mfa_code"), payload.get("recovery_code")
+        if not code and not recovery:
+            err = AuthenticationError("Enter the 6-digit code from your authenticator app.")
+            err.code = "MFA_REQUIRED"
+            raise err
+        if not verify_second_factor(user, code, recovery):
+            err = AuthenticationError("That code didn't work. Try the newest code, or a recovery code.")
+            err.code = "MFA_INVALID"
+            raise err
+
     login_user(user)
     return jsonify({"user": user.to_public_dict()}), 200
 
@@ -179,3 +193,51 @@ def sign_out_everywhere():
     db.session.commit()
     logout_user()
     return jsonify({"status": "ok"}), 200
+
+
+@api_v1.route("/auth/mfa", methods=["GET"])
+@login_required
+def mfa_status():
+    from flask_login import current_user
+
+    from app.services.mfa_service import recovery_codes_left
+
+    return jsonify({"enabled": current_user.mfa_enabled_at is not None,
+                    "recovery_codes_left": recovery_codes_left(current_user)}), 200
+
+
+@api_v1.route("/auth/mfa/setup", methods=["POST"])
+@login_required
+@limiter.limit("10 per hour")
+def mfa_setup():
+    from flask_login import current_user
+
+    from app.services.mfa_service import start_setup
+
+    return jsonify(start_setup(current_user)), 200
+
+
+@api_v1.route("/auth/mfa/enable", methods=["POST"])
+@login_required
+@limiter.limit("10 per hour")
+def mfa_enable():
+    from flask_login import current_user
+
+    from app.services.mfa_service import confirm_setup
+
+    codes = confirm_setup(current_user, (request.get_json(silent=True) or {}).get("code"))
+    login_user(current_user._get_current_object())  # keep this session, sign out the others
+    return jsonify({"enabled": True, "recovery_codes": codes}), 200
+
+
+@api_v1.route("/auth/mfa/disable", methods=["POST"])
+@login_required
+@limiter.limit("10 per hour")
+def mfa_disable():
+    from flask_login import current_user
+
+    from app.services.mfa_service import disable
+
+    p = request.get_json(silent=True) or {}
+    disable(current_user, p.get("password"), p.get("code"), p.get("recovery_code"))
+    return jsonify({"enabled": False}), 200

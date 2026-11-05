@@ -753,7 +753,7 @@ export function DpaPage() {
         'Encryption of data in transit (TLS) and encryption at rest provided by our database and storage providers.',
         'Server-side tenant isolation on every request, tested for every workspace-scoped endpoint.',
         'Role-based access with least privilege; only approvers can approve, only owners manage billing and deletion.',
-        'Hashed passwords, rate-limited authentication, HttpOnly session cookies and CSRF protection; password reset revokes other sessions.',
+        'Hashed passwords, optional two-factor sign-in (TOTP) with hashed recovery codes, rate-limited authentication, HttpOnly session cookies and CSRF protection; password reset revokes other sessions.',
         'Agents can only produce schema-validated drafts — no code execution, database access or arbitrary web requests.',
         'Approvals bound to an exact version and payload hash, re-checked immediately before any export or outbound action.',
         'Append-only audit log of consequential actions; signed webhooks with replay protection.',

@@ -1,3 +1,4 @@
+import TwoFactorCard from '../../components/TwoFactorCard'
 import RetentionCard from '../../components/RetentionCard'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
@@ -426,6 +427,7 @@ export function SecuritySettingsPage() {
           <Field id="sec-new" label="New password" hint="At least 8 characters."><input id="sec-new" type="password" autoComplete="new-password" value={pw.new_password} onChange={(e) => setPw({ ...pw, new_password: e.target.value })} /></Field>
           <button disabled={action.busy} onClick={changePassword}>Change password</button>
         </div>
+        <TwoFactorCard />
         <div className="card">
           <h2>Sessions & verification</h2>
           <p className="small">Email: {user?.email} — {user?.email_verified ? <span className="text-success">verified</span> : <span className="text-warning">not verified</span>}</p>
@@ -592,7 +594,11 @@ export function AuditLogPage() {
   const rows = (data?.audit_events || []).filter((e) => !q || `${e.action} ${e.target_type}`.toLowerCase().includes(q.toLowerCase()))
   return (
     <div className="page page-wide">
-      <PageHeader title="Audit log" description="Append-only record of who did what. The most recent 200 events; the full log is in the workspace export." />
+      <PageHeader
+        title="Audit log"
+        description="Append-only record of who did what. Showing the most recent 200 events; download the full log as CSV (owners and admins)."
+        actions={orgId ? <a className="btn secondary" href={`${API}/organizations/${orgId}/audit-events/export.csv`}>Download CSV</a> : undefined}
+      />
       {error && <ErrorState message={error} />}
       <FilterBar search={q} onSearch={setQ} placeholder="Filter by action, e.g. approval" />
       <div className="card">

@@ -458,3 +458,6 @@ kbd { font-family: var(--font-mono); font-size: 0.72rem; padding: 1px 6px; borde
 
 .retention-options { margin: 0 0 16px; padding-left: 20px; color: var(--color-muted-fg); line-height: 1.75; font-size: 0.9rem; }
 .retention-options strong { color: var(--color-fg); }
+
+.recovery-codes { list-style: none; padding: 0; margin: 10px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 18px; color: var(--color-fg); }
+.mfa-secret { font-size: 0.95rem; letter-spacing: 0.06em; padding: 2px 6px; border-radius: 6px; background: var(--color-muted); color: var(--color-fg); word-break: break-all; }

@@ -19,6 +19,12 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, UserMixin, db.Model):
     # Which version of the Terms/Privacy Policy the user accepted, and when.
     terms_version = db.Column(db.String(32))
     terms_accepted_at = db.Column(db.DateTime(timezone=True))
+    # Two-factor sign-in (see services/mfa_service.py).
+    mfa_secret = db.Column(db.String(64))
+    mfa_pending_secret = db.Column(db.String(64))
+    mfa_enabled_at = db.Column(db.DateTime(timezone=True))
+    mfa_last_step = db.Column(db.BigInteger)
+    mfa_recovery_hashes = db.Column(db.Text)
 
     memberships = db.relationship(
         "Membership", back_populates="user", cascade="all, delete-orphan"
@@ -35,4 +41,5 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, UserMixin, db.Model):
 
     def to_public_dict(self) -> dict:
         return {"id": self.id, "email": self.email, "full_name": self.full_name,
-                "email_verified": self.email_verified_at is not None}
+                "email_verified": self.email_verified_at is not None,
+                "mfa_enabled": self.mfa_enabled_at is not None}

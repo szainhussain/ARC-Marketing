@@ -176,7 +176,7 @@ export function SecurityPage() {
         <h2>Approvals and emergency stop</h2>
         <p>Approvals are bound to an exact version and payload hash, expire, can be revoked, and are re-checked immediately before any export. Owners and admins can pause all agents or engage a kill switch that the backend enforces.</p>
         <h2>Accounts and sessions</h2>
-        <p>Passwords are hashed, sign-in and reset endpoints are rate-limited, sessions use HttpOnly cookies with CSRF protection, and a password reset or “sign out everywhere” revokes every other session. MFA is designed but not yet available.</p>
+        <p>Passwords are hashed, sign-in and reset endpoints are rate-limited, sessions use HttpOnly cookies with CSRF protection, and a password reset or “sign out everywhere” revokes every other session. Two-factor sign-in with any authenticator app, plus single-use recovery codes, is available in Security settings. Owners and admins can download the full audit log as CSV.</p>
         <h2>Your data</h2>
         <p>Admins can export all workspace data as JSON. Owners can schedule deletion; data is permanently purged after a 30-day grace period. Uploaded files are type- and content-checked and only downloadable by members.</p>
         <h2>Secrets</h2>

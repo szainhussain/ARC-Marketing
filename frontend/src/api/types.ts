@@ -1,4 +1,4 @@
-export type User = { id: string; email: string; full_name: string; email_verified?: boolean; is_platform_admin?: boolean }
+export type User = { id: string; email: string; full_name: string; email_verified?: boolean; is_platform_admin?: boolean; mfa_enabled?: boolean }
 
 export type Membership = { organization_id: string; organization_name: string; role: string }
 

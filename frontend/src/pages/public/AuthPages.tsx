@@ -17,21 +17,63 @@ export function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [mfaStep, setMfaStep] = useState(false)
+  const [useRecovery, setUseRecovery] = useState(false)
+  const [code, setCode] = useState('')
 
   async function submit(e: FormEvent) {
     e.preventDefault()
     setBusy(true)
     setError(null)
     try {
-      await login(email, password)
+      await login(email, password, mfaStep ? (useRecovery ? { recovery_code: code } : { mfa_code: code }) : undefined)
       const next = params.get('next')
       navigate(next && next.startsWith('/') && !next.startsWith('//') ? next : '/app/dashboard')
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not reach the ARC service. It may be waking up — try again in a minute.')
+      if (err instanceof ApiError && err.code === 'MFA_REQUIRED') {
+        setMfaStep(true)
+        setError(null)
+      } else setError(err instanceof ApiError ? err.message : 'Could not reach the ARC service. It may be waking up — try again in a minute.')
     } finally {
       setBusy(false)
     }
   }
+
+  if (mfaStep)
+    return (
+      <div className="auth-wrap">
+        <form className="card auth-card" onSubmit={submit}>
+          <h1>Two-factor sign-in</h1>
+          <p className="muted">
+            {useRecovery ? 'Enter one of your recovery codes. Each code works once.' : 'Enter the 6-digit code from your authenticator app.'}
+          </p>
+          {error && <div className="banner error" role="alert">{error}</div>}
+          <Field id="login-code" label={useRecovery ? 'Recovery code' : 'Authentication code'}>
+            <input
+              id="login-code"
+              autoComplete="one-time-code"
+              inputMode={useRecovery ? 'text' : 'numeric'}
+              autoFocus
+              required
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder={useRecovery ? 'xxxx-xxxx-xxxx' : '123456'}
+            />
+          </Field>
+          <button type="submit" disabled={busy || !code.trim()} style={{ width: '100%', justifyContent: 'center' }}>
+            {busy ? 'Checking…' : 'Verify and sign in'}
+          </button>
+          <p className="small" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 0 }}>
+            <button type="button" className="link-btn small" onClick={() => { setUseRecovery(!useRecovery); setCode(''); setError(null) }}>
+              {useRecovery ? 'Use an authenticator code' : 'Use a recovery code'}
+            </button>
+            <button type="button" className="link-btn small" onClick={() => { setMfaStep(false); setCode(''); setPassword('') }}>
+              Back
+            </button>
+          </p>
+        </form>
+      </div>
+    )
 
   return (
     <div className="auth-wrap">
