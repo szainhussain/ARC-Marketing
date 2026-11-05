@@ -247,3 +247,22 @@ def propose_knowledge_from_record(organization_id: str, run_id: str, deliverable
 
 def org_or_404(organization_id: str) -> Organization:
     return db.session.get(Organization, organization_id)
+
+
+def search_approved_knowledge(organization_id: str, query: str, limit: int = 5) -> list[dict]:
+    """Keyword search over approved entries only (proposed or archived entries
+    never reach the assistant, just as they never reach agents)."""
+
+    import re
+
+    words = {w for w in re.findall(r"[a-z0-9]{3,}", (query or "").lower())}
+    rows = KnowledgeEntry.query.filter_by(organization_id=organization_id, status="approved") \
+        .order_by(KnowledgeEntry.updated_at.desc()).limit(300).all()
+    scored = []
+    for r in rows:
+        text = f"{r.title} {r.body}".lower()
+        score = sum(text.count(w) for w in words)
+        if score:
+            scored.append((score, r))
+    scored.sort(key=lambda x: -x[0])
+    return [{"id": r.id, "title": r.title, "kind": r.kind, "note": r.body[:600]} for _, r in scored[:limit]]

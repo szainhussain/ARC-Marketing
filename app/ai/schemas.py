@@ -190,3 +190,21 @@ SCHEMAS_BY_TASK_TYPE = {
     "account_plan": AccountPlanSchema,
     "campaign_record": CampaignRecordSchema,
 }
+
+
+# ---- Ask ARC (workspace assistant) -------------------------------------------
+# Not a deliverable type, so it is deliberately not in SCHEMAS_BY_TASK_TYPE.
+
+ASSISTANT_ACTIONS = ("none", "create_campaign", "open_approvals", "record_results", "open_reports",
+                     "open_brand", "open_knowledge", "contact_team")
+
+
+class AssistantActionSchema(Schema):
+    type = fields.String(required=True, validate=validate.OneOf(ASSISTANT_ACTIONS))
+    label = fields.String(load_default="")
+
+
+class AssistantAnswerSchema(Schema):
+    answer = fields.String(required=True)
+    source_ids = fields.List(fields.String(), load_default=list)
+    suggested_action = fields.Nested(AssistantActionSchema, load_default=lambda: {"type": "none", "label": ""})

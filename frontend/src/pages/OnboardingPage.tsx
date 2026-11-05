@@ -233,7 +233,10 @@ export function ProfileForm({ mode }: { mode: 'wizard' | 'edit' }) {
         navigate('/app/campaigns/new')
       } else if (mode === 'edit') toast({ title: 'Brand profile saved', tone: 'success' })
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not save.')
+      if (err instanceof ApiError) {
+        setError(err.message)
+        setErrors(Object.fromEntries(err.details.map((d) => [d.field, d.issue])))
+      } else setError('Could not save.')
     } finally {
       setSaving(false)
     }

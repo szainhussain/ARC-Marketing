@@ -72,14 +72,45 @@ def _filename(*parts: str) -> str:
     return re.sub(r"[^A-Za-z0-9._-]+", "-", base).strip("-").lower()[:120] or "arc-export"
 
 
+def schema_order(content, schema_cls):
+    """Stored content is key-sorted; put it back in the schema's declared order
+    (the order the agent writes it), including nested objects in lists."""
+
+    from marshmallow import fields as mf
+
+    if schema_cls is None or not isinstance(content, dict):
+        return content
+    declared = schema_cls._declared_fields
+    out = {}
+    for name in list(declared) + [k for k in content if k not in declared]:
+        if name not in content:
+            continue
+        value, field = content[name], declared.get(name)
+        nested = None
+        if isinstance(field, mf.List) and isinstance(field.inner, mf.Nested):
+            nested = field.inner.nested
+        elif isinstance(field, mf.Nested):
+            nested = field.nested
+        if nested is not None and not isinstance(nested, type):
+            nested = type(nested)
+        if nested is not None and isinstance(value, list):
+            value = [schema_order(v, nested) for v in value]
+        elif nested is not None:
+            value = schema_order(value, nested)
+        out[name] = value
+    return out
+
+
 def export_deliverable(organization_id: str, deliverable_id: str, fmt: str) -> tuple[bytes, str, str]:
     fmt = _check_format(fmt)
     d = get_deliverable_or_404(organization_id, deliverable_id)
     version = d.current_version
-    content = json.loads(version.content_json) if version else {}
+    from app.ai.schemas import SCHEMAS_BY_TASK_TYPE
+
+    content = schema_order(json.loads(version.content_json) if version else {}, SCHEMAS_BY_TASK_TYPE.get(d.deliverable_type))
     campaign = Campaign.query.filter_by(id=d.campaign_id, organization_id=organization_id).first()
     title = d.deliverable_type.replace("_", " ").capitalize()
-    subtitle = f"{campaign.name if campaign else ''} · Version {version.version_number if version else 1} · {d.review_status}"
+    subtitle = f"{campaign.name if campaign else ''} · Version {version.version_number if version else 1} · {(d.review_status or '').replace('_', ' ').capitalize()}"
     doc = Document(title=title, subtitle=subtitle, blocks=content_to_blocks(content))
     data = render(fmt, doc, load_brand(organization_id))
     return data, f"{_filename(campaign.name if campaign else '', d.deliverable_type)}.{fmt}", FORMATS[fmt]

@@ -65,6 +65,9 @@ production), `STRIPE_SECRET_KEY`, `BILLING_WEBHOOK_SECRET`, `TRIAL_DAYS`,
 `APPROVAL_TTL_DAYS`, `INVITATION_TTL_DAYS`, `DELETION_GRACE_DAYS`,
 `UPLOAD_DIR`, `MAX_UPLOAD_MB`, `STORAGE_BACKEND` (`local` or `supabase`),
 `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `SUPABASE_STORAGE_BUCKET`,
+`GEMINI_API_KEY` (on-brand image generation; without it image jobs fail as
+capability_unavailable), `IMAGE_MODEL`, `IMAGE_MONTHLY_LIMIT`, `ASSISTANT_MONTHLY_LIMIT`,
+`PLATFORM_ADMIN_EMAILS`,
 `KILL_SWITCH_ENABLED`. Never set
 `ALLOW_FIXTURE_PROVIDER` or `WEBHOOK_ALLOW_PRIVATE_TARGETS` in production
 (`ProductionConfig` forces the fixture provider off).

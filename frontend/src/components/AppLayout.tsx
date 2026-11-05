@@ -1,11 +1,12 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Bell, LogOut, Menu, Plus, Search } from 'lucide-react'
+import { Bell, LogOut, Menu, MessageCircle, Plus, Search } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useWorkspace } from '../context/WorkspaceContext'
 import { useResource } from '../hooks/useResource'
 import { ADMIN_GROUP, ALL_NAV, NAV_GROUPS } from '../lib/nav'
-import { Dialog, PageSkeleton } from './ui'
+import { Dialog, Drawer, PageSkeleton } from './ui'
+import AssistantChat from './AssistantChat'
 import Logo from './Logo'
 
 type Workspace = { name: string; automation_paused: boolean; kill_switch_enabled: boolean; your_role_label: string }
@@ -17,6 +18,7 @@ export default function AppLayout() {
   const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const [assistantOpen, setAssistantOpen] = useState(false)
 
   const workspace = useResource<{ workspace: Workspace }>(orgId ? `/organizations/${orgId}` : null, { pollMs: 30000 })
   const notifications = useResource<{ unread_count: number }>(
@@ -134,6 +136,9 @@ export default function AppLayout() {
           <Link to="/app/campaigns/new" className="btn small-btn" style={{ padding: '7px 12px' }}>
             <Plus size={14} aria-hidden="true" /> <span className="cmdk-label">Create campaign</span>
           </Link>
+          <button type="button" className="secondary small-btn ask-arc" onClick={() => setAssistantOpen(true)} aria-haspopup="dialog">
+            <MessageCircle size={14} aria-hidden="true" /> <span className="cmdk-label">Ask ARC</span>
+          </button>
           <Link to="/app/notifications" className="icon-btn bell" aria-label={`Notifications, ${unread} unread`}>
             <Bell size={18} />
             {unread > 0 && <span className="bell-dot">{unread > 9 ? '9+' : unread}</span>}
@@ -153,6 +158,9 @@ export default function AppLayout() {
       </div>
 
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <Drawer open={assistantOpen} onClose={() => setAssistantOpen(false)} title="Ask ARC">
+        {orgId && <AssistantChat orgId={orgId} onNavigate={() => setAssistantOpen(false)} />}
+      </Drawer>
     </div>
   )
 }

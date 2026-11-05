@@ -106,6 +106,7 @@ class BaseConfig:
     IMAGE_MODEL = os.environ.get("IMAGE_MODEL", "gemini-2.5-flash-image")
     IMAGE_TIMEOUT_SECONDS = int(os.environ.get("IMAGE_TIMEOUT_SECONDS", "90"))
     IMAGE_MONTHLY_LIMIT = int(os.environ.get("IMAGE_MONTHLY_LIMIT", "50"))
+    ASSISTANT_MONTHLY_LIMIT = int(os.environ.get("ASSISTANT_MONTHLY_LIMIT", "300"))
     UPLOAD_DIR = os.environ.get("UPLOAD_DIR", "storage/uploads")
     MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", "10"))
     MAX_CONTENT_LENGTH = int(os.environ.get("MAX_UPLOAD_MB", "10")) * 1024 * 1024

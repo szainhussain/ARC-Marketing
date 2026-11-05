@@ -340,7 +340,8 @@ def render_pdf(doc: Document, brand: Brand) -> bytes:
         elif b.kind == "bullets":
             story.append(ListFlowable([ListItem(Paragraph(escape(i), body)) for i in b.items], bulletType="bullet"))
         elif b.kind == "table":
-            data = [[Paragraph(f"<b>{escape(c)}</b>", cell) for c in b.columns]]
+            head = ParagraphStyle("ch", parent=cell, textColor=colors.HexColor(_on(brand.primary)))
+            data = [[Paragraph(f"<b>{escape(c)}</b>", head) for c in b.columns]]
             data += [[Paragraph(escape(v), cell) for v in r] for r in b.rows]
             t = Table(data, colWidths=[width / max(1, len(b.columns))] * len(b.columns), repeatRows=1)
             t.setStyle(TableStyle([
@@ -349,9 +350,6 @@ def render_pdf(doc: Document, brand: Brand) -> bytes:
                 ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#CCCCCC")),
                 ("VALIGN", (0, 0), (-1, -1), "TOP"),
             ]))
-            # Header text colour also needs to apply to the Paragraphs.
-            for p in data[0]:
-                p.style = ParagraphStyle("ch", parent=cell, textColor=colors.HexColor(_on(brand.primary)))
             story.append(t)
         story.append(Spacer(1, 3 * mm))
     SimpleDocTemplate(out, pagesize=A4, leftMargin=18 * mm, rightMargin=18 * mm, topMargin=18 * mm,

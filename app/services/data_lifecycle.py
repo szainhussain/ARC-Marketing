@@ -17,6 +17,7 @@ from app.models.business_profile import BusinessProfile
 from app.models.campaign import Campaign
 from app.models.collaboration import DeliverableComment, ReviewLink
 from app.models.media import GeneratedImage
+from app.models.assistant import AssistantMessage
 from app.models.results import CampaignResult
 from app.models.deliverable import Deliverable, DeliverableVersion
 from app.models.document import Document
@@ -75,6 +76,7 @@ def export_workspace(org_id: str) -> dict:
         "approvals": _rows(Approval, org_id),
         "comments": _rows(DeliverableComment, org_id),
         "generated_images": _rows(GeneratedImage, org_id),
+        "assistant_messages": _rows(AssistantMessage, org_id),
         "results": _rows(CampaignResult, org_id),
         "review_links": _rows(ReviewLink, org_id),
         "external_actions": _rows(ExternalAction, org_id),
@@ -98,7 +100,7 @@ def purge_workspace(org_id: str) -> None:
         storage.delete(doc.storage_key)
     if task_ids:
         TaskDependency.query.filter(TaskDependency.task_id.in_(task_ids)).delete(synchronize_session=False)
-    for model in (GeneratedImage, DeliverableComment, ReviewLink, CampaignResult, WebhookDelivery, WebhookEndpoint, Notification, Invitation, ActionPolicy, CalendarEntry,
+    for model in (AssistantMessage, GeneratedImage, DeliverableComment, ReviewLink, CampaignResult, WebhookDelivery, WebhookEndpoint, Notification, Invitation, ActionPolicy, CalendarEntry,
                   KnowledgeEntry, ExternalAction, Approval, AgentExecution, UsageRecord, AgentSetting,
                   Integration, Document):
         model.query.filter_by(organization_id=org_id).delete(synchronize_session=False)

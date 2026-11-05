@@ -485,3 +485,17 @@ kbd { font-family: var(--font-mono); font-size: 0.75rem; padding: 1px 6px; borde
 .gen-thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .gen-thumbs img { width: 120px; object-fit: cover; border-radius: 8px; border: 1px solid var(--color-border); display: block; background: var(--color-muted); }
 .gen-pending, .gen-failed { display: inline-flex; align-items: center; min-height: 40px; padding: 6px 10px; border-radius: 8px; border: 1px dashed var(--color-border-strong); color: var(--color-muted-fg); max-width: 420px; }
+
+/* Ask ARC assistant */
+.ask-arc { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; }
+.assistant { display: flex; flex-direction: column; height: 100%; min-height: 60vh; gap: 12px; }
+.assistant-log { flex: 1; overflow-y: auto; display: grid; align-content: start; gap: 10px; padding-right: 4px; }
+.assistant-empty { display: grid; gap: 8px; justify-items: start; }
+.assistant-msg { max-width: 92%; padding: 10px 12px; border-radius: 12px; line-height: 1.55; font-size: 0.92rem; }
+.assistant-msg p { margin: 0; white-space: pre-line; }
+.assistant-msg.user { justify-self: end; background: var(--color-info-bg); color: var(--color-fg); border: 1px solid rgba(159, 216, 255, 0.25); }
+.assistant-msg.assistant { justify-self: start; background: var(--color-surface-2); border: 1px solid var(--color-border); }
+.assistant-msg.failed { border-color: rgba(255, 138, 128, 0.35); }
+.assistant-sources { margin-top: 6px; color: var(--color-muted-fg); }
+.assistant-form { display: grid; gap: 8px; border-top: 1px solid var(--color-border); padding-top: 12px; }
+.assistant-form textarea { resize: vertical; }
