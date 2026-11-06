@@ -41,3 +41,18 @@ def test_viewer_cannot_administer(app, client):
     ]:
         resp = getattr(client, method)(f"/api/v1/organizations/{org}{suffix}", json=body)
         assert resp.status_code == 403, f"{method} {suffix}"
+
+
+def test_workspace_accent_is_tenant_scoped(app, client):
+    from app.extensions import db
+    from app.models.organization import Organization
+
+    register_and_login(client, email="a2@example.com")
+    a = create_org(client, name="A")["id"]
+    client.post("/api/v1/auth/logout")
+    register_and_login(client, email="b2@example.com")
+    create_org(client, name="B")
+    assert client.patch(f"/api/v1/organizations/{a}", json={"accent_color": "rose"}).status_code == 403
+    assert client.get(f"/api/v1/organizations/{a}").status_code == 403
+    db.session.expire_all()
+    assert db.session.get(Organization, a).accent_color is None

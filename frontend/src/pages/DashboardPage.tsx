@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { AXIS, CHART, TOOLTIP } from '../lib/chartTheme'
 import { Link } from 'react-router-dom'
 import { AlertTriangle, ArrowRight, Info, Sparkles } from 'lucide-react'
 import {
@@ -60,8 +61,6 @@ type Dashboard = {
   recommendations: { title: string; detail: string; link: string; action: string }[]
 }
 
-const TOOLTIP = { contentStyle: { background: '#16181d', border: '1px solid #33373e', borderRadius: 8, fontSize: 12 } }
-const AXIS = { stroke: '#6b6f74', fontSize: 11, tickLine: false, axisLine: false }
 
 export default function DashboardPage() {
   const { activeOrganizationId: orgId } = useWorkspace()
@@ -204,13 +203,13 @@ export default function DashboardPage() {
               <h2>Agent task throughput</h2>
               <ResponsiveContainer width="100%" height={240}>
                 <AreaChart data={series} margin={{ left: -16, right: 8 }}>
-                  <CartesianGrid stroke="#23262c" vertical={false} />
+                  <CartesianGrid stroke={CHART.grid} vertical={false} />
                   <XAxis dataKey="label" {...AXIS} interval="preserveStartEnd" />
                   <YAxis allowDecimals={false} {...AXIS} />
                   <Tooltip {...TOOLTIP} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Area name="Succeeded" type="monotone" dataKey="tasks_succeeded" stroke="#6ee7a8" fill="rgba(110,231,168,0.15)" />
-                  <Area name="Failed attempts" type="monotone" dataKey="tasks_failed" stroke="#ff8a80" fill="rgba(255,138,128,0.1)" />
+                  <Area name="Succeeded" type="monotone" dataKey="tasks_succeeded" stroke={CHART.success} fill={CHART.successFill} />
+                  <Area name="Failed attempts" type="monotone" dataKey="tasks_failed" stroke={CHART.danger} fill={CHART.dangerFill} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -221,11 +220,11 @@ export default function DashboardPage() {
               ) : (
                 <ResponsiveContainer width="100%" height={240}>
                   <BarChart data={data.cost_by_agent} layout="vertical" margin={{ left: 10, right: 12 }}>
-                    <CartesianGrid stroke="#23262c" horizontal={false} />
+                    <CartesianGrid stroke={CHART.grid} horizontal={false} />
                     <XAxis type="number" {...AXIS} tickFormatter={(v) => `$${v}`} />
                     <YAxis type="category" dataKey="number" {...AXIS} width={24} tickFormatter={(v) => String(v).padStart(2, '0')} />
                     <Tooltip {...TOOLTIP} formatter={(v: number) => money(v)} labelFormatter={(n) => data.cost_by_agent.find((a) => a.number === n)?.agent_name || n} />
-                    <Bar name="Est. cost" dataKey="cost_usd" fill="#9fd8ff" radius={[0, 4, 4, 0]} />
+                    <Bar name="Est. cost" dataKey="cost_usd" fill={CHART.accent} radius={[0, 4, 4, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               )}

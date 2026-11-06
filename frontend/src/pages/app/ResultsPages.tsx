@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { AXIS, CHART, TOOLTIP } from '../../lib/chartTheme'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { FileText, Plus, Printer } from 'lucide-react'
@@ -25,8 +26,6 @@ type Metrics = {
 type ResultRow = Metrics & { id: string; campaign_id: string; campaign_name: string | null; channel: string; period_start: string; period_end: string; notes: string | null }
 type Summary = { totals: Metrics; by_channel: (Metrics & { channel: string })[]; by_campaign: (Metrics & { campaign_id: string; campaign_name: string | null })[]; results: ResultRow[] }
 
-const TOOLTIP = { contentStyle: { background: '#16181d', border: '1px solid #33373e', borderRadius: 8, fontSize: 12 } }
-const AXIS = { stroke: '#6b6f74', fontSize: 11, tickLine: false, axisLine: false }
 const CHANNELS = ['Instagram', 'Facebook', 'LinkedIn', 'TikTok', 'Google Ads', 'Meta Ads', 'Email', 'SEO / organic', 'Google Business Profile', 'Events', 'Other']
 const NUM_FIELDS: [keyof Metrics, string][] = [
   ['spend', 'Spend (USD)'],
@@ -190,13 +189,13 @@ export function ResultsPage() {
               <h2>Leads and conversions by channel</h2>
               <ResponsiveContainer width="100%" height={240}>
                 <BarChart data={chart} margin={{ left: -10, right: 8 }}>
-                  <CartesianGrid stroke="#23262c" vertical={false} />
+                  <CartesianGrid stroke={CHART.grid} vertical={false} />
                   <XAxis dataKey="channel" {...AXIS} />
                   <YAxis {...AXIS} allowDecimals={false} />
-                  <Tooltip {...TOOLTIP} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
+                  <Tooltip {...TOOLTIP} cursor={TOOLTIP.cursor} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Bar dataKey="Leads" fill="#9fd8ff" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="Conversions" fill="#c7b8ff" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Leads" fill={CHART.accent} radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Conversions" fill={CHART.accent2} radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

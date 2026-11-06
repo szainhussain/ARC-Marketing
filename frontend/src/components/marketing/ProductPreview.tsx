@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { TOOLTIP } from '../../lib/chartTheme'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
 import { AGENT_META } from '../../lib/agentMeta'
@@ -59,13 +60,13 @@ export default function ProductPreview() {
                     <AreaChart data={SERIES} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                       <defs>
                         <linearGradient id="pv" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0" stopColor="#9fd8ff" stopOpacity={0.35} />
-                          <stop offset="1" stopColor="#9fd8ff" stopOpacity={0} />
+                          <stop offset="0" stopColor="var(--color-accent)" stopOpacity={0.35} />
+                          <stop offset="1" stopColor="var(--color-accent)" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <XAxis dataKey="d" hide />
-                      <Tooltip contentStyle={{ background: '#16181d', border: '1px solid #33373e', borderRadius: 8 }} />
-                      <Area type="monotone" dataKey="tasks" stroke="#9fd8ff" fill="url(#pv)" strokeWidth={2} isAnimationActive={!reduce} />
+                      <Tooltip {...TOOLTIP} />
+                      <Area type="monotone" dataKey="tasks" stroke="var(--color-accent)" fill="url(#pv)" strokeWidth={2} isAnimationActive={!reduce} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
@@ -99,7 +100,7 @@ export default function ProductPreview() {
                   const s = STATUS[i]
                   return (
                     <div key={id} className="mini" style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                      <meta.icon size={16} color="#9fd8ff" aria-hidden="true" />
+                      <meta.icon size={16} color="var(--color-accent)" aria-hidden="true" />
                       <div style={{ minWidth: 0 }}>
                         <div className="small" style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {meta.short}

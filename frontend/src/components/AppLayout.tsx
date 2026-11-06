@@ -3,13 +3,23 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-do
 import { Bell, LogOut, Menu, MessageCircle, Plus, Search } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useWorkspace } from '../context/WorkspaceContext'
+import { useTheme } from '../context/ThemeContext'
+import type { WorkspaceAccent } from '../lib/theme'
+import ThemeToggle from './ThemeToggle'
 import { useResource } from '../hooks/useResource'
 import { ADMIN_GROUP, ALL_NAV, NAV_GROUPS } from '../lib/nav'
 import { Dialog, Drawer, PageSkeleton } from './ui'
 import AssistantChat from './AssistantChat'
 import Logo from './Logo'
 
-type Workspace = { name: string; automation_paused: boolean; kill_switch_enabled: boolean; your_role_label: string }
+type Workspace = {
+  name: string
+  automation_paused: boolean
+  kill_switch_enabled: boolean
+  your_role_label: string
+  accent_color: WorkspaceAccent | null
+  brand_accent: string | null
+}
 
 export default function AppLayout() {
   const { user, memberships, logout } = useAuth()
@@ -53,6 +63,14 @@ export default function AppLayout() {
   }
 
   const ws = workspace.data?.workspace
+  // The workspace's accent (preset or Brand Kit colour) applies while inside the app.
+  const { setWorkspaceAppearance } = useTheme()
+  const wsAccent = ws?.accent_color ?? null
+  const wsBrand = ws?.brand_accent ?? null
+  useEffect(() => {
+    setWorkspaceAppearance({ accent: wsAccent, brandHex: wsBrand })
+  }, [wsAccent, wsBrand, setWorkspaceAppearance])
+  useEffect(() => () => setWorkspaceAppearance(null), [setWorkspaceAppearance])
   const unread = notifications.data?.unread_count || 0
   const pendingApprovals = approvals.data?.approvals.length || 0
 
@@ -139,6 +157,7 @@ export default function AppLayout() {
           <button type="button" className="secondary small-btn ask-arc" onClick={() => setAssistantOpen(true)} aria-haspopup="dialog">
             <MessageCircle size={14} aria-hidden="true" /> <span className="cmdk-label">Ask ARC</span>
           </button>
+          <ThemeToggle />
           <Link to="/app/notifications" className="icon-btn bell" aria-label={`Notifications, ${unread} unread`}>
             <Bell size={18} />
             {unread > 0 && <span className="bell-dot">{unread > 9 ? '9+' : unread}</span>}

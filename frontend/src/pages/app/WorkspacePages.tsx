@@ -1,5 +1,7 @@
 import TwoFactorCard from '../../components/TwoFactorCard'
 import RetentionCard from '../../components/RetentionCard'
+import AppearanceSettings from '../../components/AppearanceSettings'
+import type { WorkspaceAccent } from '../../lib/theme'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Download, Plus } from 'lucide-react'
@@ -28,6 +30,7 @@ import { API_BASE_URL as API } from '../../lib/apiBase'
 type Workspace = {
   id: string; name: string; timezone: string; max_concurrent_tasks: number; default_run_budget_usd: number | null
   platform_default_run_budget_usd: number; automation_paused: boolean; kill_switch_enabled: boolean; your_role: string; your_role_label: string
+  accent_color: WorkspaceAccent | null; brand_accent: string | null
 }
 
 function useWorkspaceInfo() {
@@ -365,6 +368,17 @@ export function SettingsPage() {
         </div>
         {canEdit && <button disabled={action.busy} onClick={save}>Save</button>}
       </div>
+      <AppearanceSettings
+        workspaceId={w.id}
+        accentColor={w.accent_color}
+        brandAccent={w.brand_accent}
+        canEdit={canEdit}
+        onSaved={() => {
+          toast({ title: 'Workspace colour saved', tone: 'success' })
+          ws.reload()
+        }}
+        onError={(message) => toast({ title: message, tone: 'error' })}
+      />
       <div className="grid-3">
         {[
           ['Automation', 'Policies, budgets, concurrency and emergency controls.', '/app/settings/automation'],
@@ -445,7 +459,7 @@ export function SecuritySettingsPage() {
         </div>
       )}
       {w && w.your_role === 'owner' && (
-        <div className="card" style={{ borderColor: 'rgba(255,138,128,0.35)' }}>
+        <div className="card" style={{ borderColor: 'color-mix(in srgb, var(--color-danger) 35%, transparent)' }}>
           <h2>Delete workspace</h2>
           <p className="muted small">Pauses all agents and blocks exports immediately; data is permanently purged after 30 days. You can cancel during that time.</p>
           <Field id="del-confirm" label={`Type “${w.name}” to confirm`}><input id="del-confirm" value={confirmName} onChange={(e) => setConfirmName(e.target.value)} /></Field>

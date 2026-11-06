@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { AXIS, CHART, TOOLTIP } from '../../lib/chartTheme'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Download, Plus, Trash2, Upload } from 'lucide-react'
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
@@ -25,8 +26,6 @@ import { WordPressCard } from '../../components/WordPressPublish'
 import { humanize, money, relativeTime } from '../../lib/labels'
 
 import { API_BASE_URL as API } from '../../lib/apiBase'
-const TOOLTIP = { contentStyle: { background: '#16181d', border: '1px solid #33373e', borderRadius: 8, fontSize: 12 } }
-const AXIS = { stroke: '#6b6f74', fontSize: 11, tickLine: false, axisLine: false }
 
 /* ---------------- Assets ---------------- */
 
@@ -162,13 +161,13 @@ export function AnalyticsPage() {
               <h2>Executions and retries</h2>
               <ResponsiveContainer width="100%" height={250}>
                 <LineChart data={series} margin={{ left: -16, right: 8 }}>
-                  <CartesianGrid stroke="#23262c" vertical={false} />
+                  <CartesianGrid stroke={CHART.grid} vertical={false} />
                   <XAxis dataKey="label" {...AXIS} interval="preserveStartEnd" />
                   <YAxis allowDecimals={false} {...AXIS} />
                   <Tooltip {...TOOLTIP} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Line name="Succeeded" dataKey="tasks_succeeded" stroke="#6ee7a8" dot={false} strokeWidth={2} />
-                  <Line name="Retried (transient)" dataKey="retries" stroke="#f5c76a" dot={false} strokeWidth={2} />
+                  <Line name="Succeeded" dataKey="tasks_succeeded" stroke={CHART.success} dot={false} strokeWidth={2} />
+                  <Line name="Retried (transient)" dataKey="retries" stroke={CHART.warning} dot={false} strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -176,11 +175,11 @@ export function AnalyticsPage() {
               <h2>Estimated cost per day</h2>
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={series} margin={{ left: -10, right: 8 }}>
-                  <CartesianGrid stroke="#23262c" vertical={false} />
+                  <CartesianGrid stroke={CHART.grid} vertical={false} />
                   <XAxis dataKey="label" {...AXIS} interval="preserveStartEnd" />
                   <YAxis {...AXIS} tickFormatter={(v) => `$${v}`} />
                   <Tooltip {...TOOLTIP} formatter={(v: number) => money(v)} />
-                  <Bar name="Est. cost" dataKey="cost_usd" fill="#9fd8ff" radius={[4, 4, 0, 0]} />
+                  <Bar name="Est. cost" dataKey="cost_usd" fill={CHART.accent} radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

@@ -10,6 +10,23 @@
       content="ARC — a coordinated AI marketing department that plans, drafts, and reviews campaigns continuously, with human approval on every consequential action."
     />
     <title>ARC — Strategy. Plan. Execution.</title>
+    <script>
+      // Apply the saved theme and accent before first paint (see src/lib/theme.ts; same keys).
+      (function () {
+        try {
+          var pref = localStorage.getItem('arc-theme')
+          var theme = pref === 'light' || pref === 'dark' ? pref
+            : window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
+          var root = document.documentElement
+          root.setAttribute('data-theme', theme)
+          var vars = JSON.parse(localStorage.getItem('arc-accent-vars') || 'null')
+          if (vars && vars[theme]) for (var k in vars[theme]) if (/^--color-[a-z0-9-]+$/.test(k)) root.style.setProperty(k, vars[theme][k])
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', theme === 'light' ? '#f8fafc' : '#08090b')
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark')
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

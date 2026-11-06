@@ -6,6 +6,8 @@ import { ConfirmDialog, DataTable, ErrorState, KpiCard, Tabs } from './ui'
 import WorkflowGraph from './WorkflowGraph'
 import WorkflowDemo from './marketing/WorkflowDemo'
 import AgentDetailDialog from './marketing/AgentDetailDialog'
+import ThemeToggle from './ThemeToggle'
+import { ThemeProvider } from '../context/ThemeContext'
 import type { PublicAgent } from '../lib/agentMeta'
 import type { Task } from '../api/types'
 
@@ -122,5 +124,26 @@ describe('AgentDetailDialog video', () => {
   it('shows no Watch tab for an agent without a video', () => {
     render(<AgentDetailDialog agent={{ ...agent, agent_id: 'unknown_agent' }} all={[]} onClose={() => {}} />)
     expect(screen.queryByRole('tab', { name: /Watch/ })).toBeNull()
+  })
+})
+
+describe('ThemeToggle', () => {
+  it('switches theme, remembers it, and restores "Match my device"', () => {
+    localStorage.clear()
+    render(<ThemeProvider><ThemeToggle /></ThemeProvider>)
+    fireEvent.click(screen.getByRole('button', { name: /Theme:/ }))
+    fireEvent.click(screen.getByRole('menuitemradio', { name: 'Light' }))
+    expect(document.documentElement.dataset.theme).toBe('light')
+    expect(localStorage.getItem('arc-theme')).toBe('light')
+    expect(document.documentElement.style.getPropertyValue('--color-accent')).toBe('#0369a1')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Theme: Light' }))
+    fireEvent.click(screen.getByRole('menuitemradio', { name: 'Dark' }))
+    expect(document.documentElement.dataset.theme).toBe('dark')
+    expect(document.documentElement.style.getPropertyValue('--color-accent')).toBe('#9fd8ff')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Theme: Dark' }))
+    fireEvent.click(screen.getByRole('menuitemradio', { name: 'Match my device' }))
+    expect(localStorage.getItem('arc-theme')).toBeNull()
   })
 })
