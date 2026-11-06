@@ -7,6 +7,8 @@ import WorkflowGraph from './WorkflowGraph'
 import WorkflowDemo from './marketing/WorkflowDemo'
 import AgentDetailDialog from './marketing/AgentDetailDialog'
 import ThemeToggle from './ThemeToggle'
+import CostByAgentChart from './CostByAgentChart'
+import { costTick } from '../lib/chartTheme'
 import { ThemeProvider } from '../context/ThemeContext'
 import type { PublicAgent } from '../lib/agentMeta'
 import type { Task } from '../api/types'
@@ -145,5 +147,29 @@ describe('ThemeToggle', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Theme: Dark' }))
     fireEvent.click(screen.getByRole('menuitemradio', { name: 'Match my device' }))
     expect(localStorage.getItem('arc-theme')).toBeNull()
+  })
+})
+
+describe('CostByAgentChart', () => {
+  const row = (agent_id: string, number: number, cost_usd: number, executions = 1) =>
+    ({ agent_id, agent_name: agent_id, number, executions, cost_usd })
+
+  it('says so when no agent ran', () => {
+    render(<CostByAgentChart rows={[]} />)
+    expect(screen.getByText('No agent activity in this period')).toBeTruthy()
+  })
+
+  it('explains a $0 period instead of drawing empty bars', () => {
+    render(<CostByAgentChart rows={[row('cmo', 1, 0, 2), row('social_media', 3, 0, 1)]} />)
+    expect(screen.getByText('No AI cost in this period')).toBeTruthy()
+    expect(screen.getByText(/2 agents ran 3 times, all estimated at \$0\.00/)).toBeTruthy()
+  })
+
+  it('formats tiny costs so axis ticks stay distinct', () => {
+    expect(costTick(0)).toBe('$0')
+    expect(costTick(0.004)).toBe('$0.004')
+    expect(costTick(0.015)).toBe('$0.015')
+    expect(costTick(0.03)).toBe('$0.03')
+    expect(costTick(1.5)).toBe('$1.50')
   })
 })

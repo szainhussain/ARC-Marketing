@@ -25,3 +25,10 @@ export const TOOLTIP = {
 }
 
 export const AXIS = { stroke: 'var(--chart-axis)', tick: { fill: 'var(--chart-axis)' }, fontSize: 11, tickLine: false, axisLine: false }
+
+/** Axis label for a cost: up to 3 decimals under $1 ("$0.015", "$0.004"), cents above,
+ * so small-cost ticks stay distinct instead of rounding to "$0.01" / "$0.00". */
+export function costTick(v: number): string {
+  if (v === 0) return '$0'
+  return v < 1 ? `$${Number(v.toFixed(3))}` : `$${v.toFixed(2)}`
+}
