@@ -24,7 +24,9 @@
   --color-accent-2: #c7b8ff;
   --color-accent-hover: #c3e7ff;
   --color-on-accent: #08090b;
-  --color-accent-glow: rgba(159, 216, 255, 0.28);
+  /* Accent tokens are overridden inline on <html> by the chosen accent (src/lib/theme.ts);
+     everything else tints from them with color-mix(), so it follows theme and accent. */
+  --color-accent-glow: color-mix(in srgb, var(--color-accent) 28%, transparent);
 
   --color-success: #6ee7a8;
   --color-success-bg: rgba(110, 231, 168, 0.1);
@@ -32,8 +34,29 @@
   --color-warning-bg: rgba(245, 199, 106, 0.1);
   --color-danger: #ff8a80;
   --color-danger-bg: rgba(255, 138, 128, 0.1);
-  --color-info: #9fd8ff;
-  --color-info-bg: rgba(159, 216, 255, 0.1);
+  --color-info: var(--color-accent);
+  --color-info-bg: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  --color-on-danger: #1a0a0a;
+  --color-danger-hover: #fca5a5;
+
+  --color-header-bg: rgba(8, 9, 11, 0.82);
+  --color-scrim: rgba(4, 5, 7, 0.72);
+  --color-disabled-bg: #24262b;
+  --color-disabled-fg: #6b6f74;
+  --color-code-bg: #000309;
+  --color-code-fg: #c3cad9;
+
+  /* Charts (Recharts reads these via var()). */
+  --chart-grid: #23262c;
+  --chart-axis: #8a8e93;
+  --chart-tooltip-bg: #16181d;
+  --chart-tooltip-border: #33373e;
+  --chart-cursor: rgba(255, 255, 255, 0.04);
+
+  /* Logo stays ARC-branded whatever the accent. */
+  --logo-from: #c3e7ff;
+  --logo-to: #c7b8ff;
+  --logo-dot: #9fd8ff;
 
   --font-ui: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
   --font-display: 'Instrument Serif', 'Times New Roman', serif;
@@ -48,7 +71,7 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.6);
-  --shadow-glow: 0 0 0 1px rgba(159, 216, 255, 0.18), 0 0 28px rgba(159, 216, 255, 0.12);
+  --shadow-glow: 0 0 0 1px color-mix(in srgb, var(--color-accent) 18%, transparent), 0 0 28px color-mix(in srgb, var(--color-accent) 12%, transparent);
   --focus-ring: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-accent);
 
   --duration-fast: 120ms;
@@ -60,6 +83,64 @@
 
   font-family: var(--font-ui);
   color-scheme: dark;
+}
+
+/* Light theme: high-contrast white UI (docs/DECISIONS.md D20). Text 19:1, muted 7:1,
+   subtle 5.9:1 on the page background; accent presets are AA-checked in theme.test.tsx. */
+:root[data-theme='light'] {
+  color-scheme: light;
+  --color-bg: #f8fafc;
+  --color-bg-elevated: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-2: #f1f5f9;
+  --color-fg: #020617;
+  --color-muted: #eef2f6;
+  --color-muted-fg: #475569;
+  --color-subtle-fg: #566275;
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+
+  --color-primary: #0f172a;
+  --color-primary-hover: #1e293b;
+  --color-on-primary: #ffffff;
+
+  --color-accent: #0369a1;
+  --color-accent-2: #6d28d9;
+  --color-accent-hover: #075985;
+  --color-on-accent: #ffffff;
+  --color-accent-glow: color-mix(in srgb, var(--color-accent) 22%, transparent);
+
+  --color-success: #047857;
+  --color-success-bg: rgba(4, 120, 87, 0.08);
+  --color-warning: #a34a06;
+  --color-warning-bg: rgba(217, 119, 6, 0.1);
+  --color-danger: #b91c1c;
+  --color-danger-bg: rgba(185, 28, 28, 0.07);
+  --color-info-bg: color-mix(in srgb, var(--color-accent) 8%, transparent);
+  --color-on-danger: #ffffff;
+  --color-danger-hover: #991b1b;
+
+  --color-header-bg: rgba(248, 250, 252, 0.86);
+  --color-scrim: rgba(15, 23, 42, 0.45);
+  --color-disabled-bg: #e2e8f0;
+  --color-disabled-fg: #64748b;
+  --color-code-bg: #0f172a;
+  --color-code-fg: #e2e8f0;
+
+  --chart-grid: #e2e8f0;
+  --chart-axis: #566275;
+  --chart-tooltip-bg: #ffffff;
+  --chart-tooltip-border: #cbd5e1;
+  --chart-cursor: rgba(15, 23, 42, 0.05);
+
+  --logo-from: #0369a1;
+  --logo-to: #6d28d9;
+  --logo-dot: #0369a1;
+
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 20px 50px rgba(15, 23, 42, 0.14);
+  --shadow-glow: 0 0 0 1px color-mix(in srgb, var(--color-accent) 25%, transparent), 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -135,18 +216,18 @@ button, .btn {
 button:hover { background: var(--color-primary-hover); box-shadow: var(--shadow-sm); }
 button:active { transform: scale(0.98); }
 button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
-button:disabled { background: #24262b; color: #6b6f74; cursor: not-allowed; box-shadow: none; }
+button:disabled { background: var(--color-disabled-bg); color: var(--color-disabled-fg); cursor: not-allowed; box-shadow: none; }
 button.secondary { background: transparent; color: var(--color-fg); border: 1px solid var(--color-border-strong); }
 button.secondary:hover { background: var(--color-muted); }
-button.danger { background: var(--color-danger); color: #1a0a0a; }
-button.danger:hover { background: #fca5a5; }
+button.danger { background: var(--color-danger); color: var(--color-on-danger); }
+button.danger:hover { background: var(--color-danger-hover); }
 button.accent { background: var(--color-accent); color: var(--color-on-accent); }
 button.accent:hover { background: var(--color-accent-hover); box-shadow: var(--shadow-glow); }
 
 .banner { padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 18px; font-size: 0.9rem; border: 1px solid transparent; }
-.banner.error { background: var(--color-danger-bg); color: var(--color-danger); border-color: rgba(248, 113, 113, 0.3); }
-.banner.success { background: var(--color-success-bg); color: var(--color-success); border-color: rgba(74, 222, 128, 0.3); }
-.banner.warning { background: var(--color-warning-bg); color: var(--color-warning); border-color: rgba(251, 191, 36, 0.3); }
+.banner.error { background: var(--color-danger-bg); color: var(--color-danger); border-color: color-mix(in srgb, var(--color-danger) 30%, transparent); }
+.banner.success { background: var(--color-success-bg); color: var(--color-success); border-color: color-mix(in srgb, var(--color-success) 30%, transparent); }
+.banner.warning { background: var(--color-warning-bg); color: var(--color-warning); border-color: color-mix(in srgb, var(--color-warning) 30%, transparent); }
 
 .status-pill {
   display: inline-flex;
@@ -170,7 +251,7 @@ nav.app-nav {
   align-items: center;
   gap: 24px;
   padding: 14px 28px;
-  background: rgba(8, 9, 11, 0.82);
+  background: var(--color-header-bg);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--color-border);
   position: sticky;
@@ -210,7 +291,7 @@ table.simple tr:hover td { background: var(--color-muted); }
   padding: 20px;
   transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition);
 }
-.kpi-tile:hover { box-shadow: var(--shadow-glow); transform: translateY(-2px); border-color: rgba(159, 216, 255, 0.35); }
+.kpi-tile:hover { box-shadow: var(--shadow-glow); transform: translateY(-2px); border-color: color-mix(in srgb, var(--color-accent) 35%, transparent); }
 .kpi-tile .kpi-label { font-size: 0.76rem; font-weight: 600; color: var(--color-muted-fg); text-transform: uppercase; letter-spacing: 0.05em; }
 .kpi-tile .kpi-value {
   font-size: 1.9rem; font-weight: 800; margin-top: 6px; letter-spacing: -0.02em; color: var(--color-fg);
@@ -226,7 +307,7 @@ table.simple tr:hover td { background: var(--color-muted); }
   transition: transform 120ms ease-out, box-shadow var(--transition), border-color var(--transition);
   will-change: transform;
 }
-.tilt-card:hover { border-color: rgba(159, 216, 255, 0.35); box-shadow: var(--shadow-glow); }
+.tilt-card:hover { border-color: color-mix(in srgb, var(--color-accent) 35%, transparent); box-shadow: var(--shadow-glow); }
 @media (prefers-reduced-motion: reduce) {
   .tilt-card { transform: none !important; }
 }
@@ -271,8 +352,8 @@ table.simple tr:hover td { background: var(--color-muted); }
 details.raw-json { margin-top: 10px; }
 details.raw-json summary { cursor: pointer; font-size: 0.78rem; color: var(--color-muted-fg); font-weight: 600; }
 pre.content-json {
-  background: #000309;
-  color: #c3cad9;
+  background: var(--color-code-bg);
+  color: var(--color-code-fg);
   border: 1px solid var(--color-border);
   padding: 14px;
   border-radius: var(--radius-sm);
@@ -312,18 +393,18 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 .control-title { font-weight: 700; margin-bottom: 2px; }
 .kpi-link, .kpi-link:hover { text-decoration: none; color: inherit; }
 
-.status-pill.running, .status-pill.working, .status-pill.retrying { background: rgba(159, 216, 255, 0.14); color: var(--color-accent); }
+.status-pill.running, .status-pill.working, .status-pill.retrying { background: color-mix(in srgb, var(--color-accent) 14%, transparent); color: var(--color-accent); }
 .status-pill.ready, .status-pill.queued, .status-pill.idle, .status-pill.waiting_for_dependency, .status-pill.scheduled {
   background: var(--color-muted); color: var(--color-muted-fg);
 }
 .status-pill.paused, .status-pill.workspace_paused, .status-pill.waiting_for_approval { background: var(--color-warning-bg); color: var(--color-warning); }
-.status-pill.cancelled, .status-pill.invalidated { background: var(--color-muted); color: #64748b; }
+.status-pill.cancelled, .status-pill.invalidated { background: var(--color-muted); color: var(--color-subtle-fg); }
 .status-pill.running::before, .status-pill.working::before { animation: pulse-dot 1.4s ease-in-out infinite; }
 @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 
 .agent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; margin-bottom: 18px; }
 .agent-card { margin-bottom: 0; display: flex; flex-direction: column; gap: 6px; transition: border-color var(--transition), box-shadow var(--transition); }
-.agent-card.working { border-color: rgba(159, 216, 255, 0.45); box-shadow: var(--shadow-glow); }
+.agent-card.working { border-color: color-mix(in srgb, var(--color-accent) 45%, transparent); box-shadow: var(--shadow-glow); }
 .agent-card.paused, .agent-card.workspace_paused { opacity: 0.75; }
 .agent-card-head { display: flex; justify-content: space-between; align-items: center; }
 .agent-num { font-family: ui-monospace, Menlo, monospace; font-size: 0.8rem; color: var(--color-muted-fg); }
@@ -345,13 +426,13 @@ button.chip.active { color: var(--color-on-accent); background: var(--color-acce
 
 .approval-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
 .approval-title { font-weight: 700; }
-.warn-chip { background: var(--color-warning-bg); color: var(--color-warning); border-color: rgba(251, 191, 36, 0.3); }
+.warn-chip { background: var(--color-warning-bg); color: var(--color-warning); border-color: color-mix(in srgb, var(--color-warning) 30%, transparent); }
 
 /* Workflow dependency graph */
 .wf-graph { overflow-x: auto; padding: 6px 0 14px; margin-bottom: 8px; }
 .wf-graph svg { display: block; }
 .wf-edge { fill: none; stroke: var(--color-border-strong); stroke-width: 1.5; }
-.wf-edge.done { stroke: rgba(74, 222, 128, 0.55); }
+.wf-edge.done { stroke: color-mix(in srgb, var(--color-success) 55%, transparent); }
 .wf-node rect { fill: var(--color-surface-2); stroke: var(--color-border); stroke-width: 1; transition: stroke var(--transition); }
 .wf-node[role='button'] { cursor: pointer; }
 .wf-node[role='button']:hover rect, .wf-node.selected rect { stroke: var(--color-accent); }
@@ -361,9 +442,9 @@ button.chip.active { color: var(--color-on-accent); background: var(--color-acce
 .wf-sub { fill: var(--color-muted-fg); font-size: 11px; }
 .wf-dot { fill: var(--color-muted-fg); }
 .wf-node.succeeded .wf-dot { fill: var(--color-success); }
-.wf-node.succeeded rect { stroke: rgba(74, 222, 128, 0.35); }
+.wf-node.succeeded rect { stroke: color-mix(in srgb, var(--color-success) 35%, transparent); }
 .wf-node.failed .wf-dot, .wf-node.failed .wf-sub { fill: var(--color-danger); }
-.wf-node.failed rect { stroke: rgba(248, 113, 113, 0.5); }
+.wf-node.failed rect { stroke: color-mix(in srgb, var(--color-danger) 50%, transparent); }
 .wf-node.running rect { stroke: var(--color-accent); }
 .wf-node.running .wf-dot, .wf-node.retrying .wf-dot { fill: var(--color-accent); animation: pulse-dot 1.4s ease-in-out infinite; }
 .wf-node.retrying .wf-sub { fill: var(--color-warning); }
@@ -373,7 +454,7 @@ button.chip.active { color: var(--color-on-accent); background: var(--color-acce
 }
 
 /* Browser surfaces and text wrapping */
-::selection { background: rgba(159, 216, 255, 0.28); color: var(--color-fg); }
+::selection { background: color-mix(in srgb, var(--color-accent) 28%, transparent); color: var(--color-fg); }
 input, textarea { caret-color: var(--color-accent); }
 html { scrollbar-color: var(--color-border-strong) var(--color-bg); }
 a { text-underline-offset: 0.18em; }

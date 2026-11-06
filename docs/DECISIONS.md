@@ -433,3 +433,31 @@ money, spend accrues on a clock so every guardrail can be exercised.
   today's spend across the workspace exceeds the cap -> pause every ad.
 - Meta Marketing API / Google Ads API connectors implement the same four
   methods (create, pause, resume, archive + status) once the user has access.
+
+## D20 — Light theme, and accent colours a client can personalise
+
+**Decision:** Every page supports a high-contrast light theme alongside the original dark
+one. Each person chooses Light, Dark or "Match my device" (the default), saved in their
+browser. Accent colour has two layers: workspace owners/admins pick a workspace default
+(one of six presets, or "Brand colour" from the Brand Kit), and anyone can override it for
+themselves with a preset.
+
+**Why:** most business users run light mode during the day, and clients asked to see their
+own brand in the workspace. Colours are tokens (D13), so the light theme is a second set of
+token values (`:root[data-theme='light']` in `index.css`) rather than per-page styling;
+tints, borders and glows use `color-mix()` on the tokens so they follow both theme and accent.
+
+**Contrast is enforced, not hoped for:** the six presets have tuned dark and light values,
+and `src/lib/theme.test.tsx` checks every one is at least 4.5:1 (WCAG AA) against the
+background and card surfaces in both themes, and that button text on the accent is too.
+A Brand Kit colour is lightened (dark theme) or darkened (light theme) until it reaches
+4.5:1 on every surface, so a pale yellow or a dark navy brand can never make text
+unreadable. Light-theme body text is 19:1, muted text 7:1.
+
+**Details:** the workspace accent is `organizations.accent_color`, changed only through
+the admin-only `PATCH /organizations/<id>` and validated against an allowlist; it's display
+only and is not part of the business profile, so it never reaches agent prompts.
+`index.html` applies the saved theme and accent before first paint, so there's no flash.
+Charts read the same tokens via `var()` (`src/lib/chartTheme.ts`). Public pages always use
+ARC Blue unless the visitor picked their own preset; a workspace's brand colour only
+applies inside that workspace. The logo keeps ARC's own colours in every accent.

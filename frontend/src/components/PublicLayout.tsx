@@ -1,4 +1,5 @@
 import { Suspense, useEffect, useState } from 'react'
+import ThemeToggle from './ThemeToggle'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
@@ -42,6 +43,7 @@ export default function PublicLayout() {
         </nav>
         <span className="spacer" />
         <div className="site-actions">
+          <ThemeToggle />
           {user ? (
             <Link to="/app/dashboard" className="btn desktop">
               Open workspace

@@ -84,9 +84,20 @@ def _workspace_dict(org: Organization, membership: Membership) -> dict:
         "platform_default_run_budget_usd": current_app.config.get("AI_WORKFLOW_BUDGET_USD", 1.0),
         "automation_paused": org.automation_paused,
         "kill_switch_enabled": org.kill_switch_enabled,
+        "accent_color": org.accent_color,
+        "brand_accent": _brand_accent(org.id),
         "your_role": membership.role,
         "your_role_label": ROLE_LABELS.get(membership.role, membership.role),
     }
+
+
+def _brand_accent(organization_id: str) -> str | None:
+    """The Brand Kit's primary colour, offered as the workspace's app accent."""
+    from app.models.business_profile import BusinessProfile
+    from app.services.business_profile_service import brand_palette
+
+    palette = brand_palette(BusinessProfile.query.filter_by(organization_id=organization_id).first())
+    return palette[0] if palette else None
 
 
 @api_v1.route("/organizations/<organization_id>", methods=["GET"])
@@ -110,6 +121,16 @@ def update_workspace_route(organization_id):
         org.name = str(p["name"]).strip()[:255]
     if "timezone" in p:
         org.timezone = str(p["timezone"])[:64] or "UTC"
+    if "accent_color" in p:
+        from app.models.organization import ACCENT_CHOICES
+
+        value = p["accent_color"]
+        if value in (None, "", "arc"):
+            org.accent_color = None
+        elif value in ACCENT_CHOICES:
+            org.accent_color = value
+        else:
+            raise _invalid("accent_color", f"Choose one of: {', '.join(ACCENT_CHOICES)}")
     if "max_concurrent_tasks" in p:
         try:
             value = int(p["max_concurrent_tasks"])

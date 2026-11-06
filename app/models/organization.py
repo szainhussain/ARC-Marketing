@@ -17,6 +17,9 @@ class Organization(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
     default_run_budget_usd = db.Column(db.Float)  # null = platform default
     max_concurrent_tasks = db.Column(db.Integer, default=2, nullable=False)
     timezone = db.Column(db.String(64), default="UTC", nullable=False)
+    # Workspace default accent for the app UI: an ACCENT_PRESETS name or "brand"
+    # (the Brand Kit's primary colour). Null means ARC's default. Display only.
+    accent_color = db.Column(db.String(16))
     deletion_scheduled_at = db.Column(db.DateTime(timezone=True))
 
     memberships = db.relationship(
@@ -36,3 +39,7 @@ class Organization(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
             "slug": self.slug,
             "status": self.status,
         }
+
+
+ACCENT_PRESETS = ("arc", "indigo", "emerald", "amber", "rose", "violet")
+ACCENT_CHOICES = ACCENT_PRESETS + ("brand",)
