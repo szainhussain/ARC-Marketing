@@ -1,6 +1,8 @@
-import { AGENT_META, type PublicAgent } from '../../lib/agentMeta'
+import { useState } from 'react'
+import { AGENT_META, agentVideo, type PublicAgent } from '../../lib/agentMeta'
 import { humanize } from '../../lib/labels'
-import { Dialog } from '../ui'
+import { Dialog, Tabs } from '../ui'
+import AgentVideo from './AgentVideo'
 
 const STATUS_LABEL: Record<string, string> = {
   manual_export_available: 'Available — manual export',
@@ -19,12 +21,38 @@ export default function AgentDetailDialog({
   onClose: () => void
 }) {
   if (!agent) return <Dialog open={false} onClose={onClose} title="">{null}</Dialog>
+  return (
+    <Dialog open={!!agent} onClose={onClose} title={`${String(agent.number).padStart(2, '0')} · ${agent.name}`} wide>
+      {/* keyed so each agent opens on the Read view */}
+      <AgentDetailBody key={agent.agent_id} agent={agent} all={all} />
+    </Dialog>
+  )
+}
+
+function AgentDetailBody({ agent, all }: { agent: PublicAgent; all: PublicAgent[] }) {
+  const [view, setView] = useState<'read' | 'watch'>('read')
+  const hasVideo = !!agentVideo(agent.agent_id)
   const meta = AGENT_META[agent.agent_id]
   const name = (id: string) => all.find((a) => a.agent_id === id)?.name || humanize(id)
   const collaborators = all.filter((a) => a.depends_on.includes(agent.agent_id)).map((a) => a.name)
   return (
-    <Dialog open={!!agent} onClose={onClose} title={`${String(agent.number).padStart(2, '0')} · ${agent.name}`} wide>
+    <>
       <p style={{ marginTop: 0 }}>{agent.role}</p>
+      {hasVideo && (
+        <Tabs
+          label="How to learn about this agent"
+          value={view}
+          onChange={setView}
+          tabs={[
+            { value: 'read', label: 'Read' },
+            { value: 'watch', label: '▶ Watch (30s)' },
+          ]}
+        />
+      )}
+      {view === 'watch' && hasVideo ? (
+        <AgentVideo agentId={agent.agent_id} title={agent.name} />
+      ) : (
+        <>
       {meta && <p className="muted small">Example: {meta.example}</p>}
       <div className="form-grid">
         <Block title="What it does" items={agent.responsibilities} />
@@ -53,7 +81,9 @@ export default function AgentDetailDialog({
       <p className="muted small mono" style={{ marginBottom: 0 }}>
         agent_id: {agent.agent_id} · version {agent.version} · output: {agent.task_type}
       </p>
-    </Dialog>
+        </>
+      )}
+    </>
   )
 }
 

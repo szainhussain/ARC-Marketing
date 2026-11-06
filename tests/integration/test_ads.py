@@ -120,10 +120,14 @@ def test_stop_all_pauses_everything(app, client):
 def test_workspace_cap_breach_pauses_all_ads(app, client):
     org_id, base, did = _setup(app, client, cap=20)
     lid = _launch(app, client, base, did, 20)
-    app.config["ADS_SANDBOX_SPEED"] = 10_000_000  # a day of spend in an instant
     with app.app_context():
         from app.models.ads import AdLaunch, AdGuardrail
+        from app.models.base import utcnow
 
+        # A full day's budget already spent. Backdate the sandbox ad rather than relying on
+        # ADS_SANDBOX_SPEED alone: spend is (time since launch x speed), and on a fast machine
+        # launch-to-check can take under ~4 ms, leaving spend below the lowered cap (was flaky).
+        SandboxAdCampaign.query.one().active_since = utcnow() - timedelta(days=1)
         AdGuardrail.query.one().max_daily_budget = 10  # an admin lowered the cap below today's spend
         AdLaunch.query.one().last_checked_at = None
         db.session.commit()

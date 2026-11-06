@@ -25,8 +25,10 @@ async function step(name, fn) {
     results.push({ step: name, ok: true, ms: Date.now() - started })
     console.log(`PASS  ${name}`)
   } catch (err) {
-    results.push({ step: name, ok: false, error: String(err).split('\n')[0] })
-    console.log(`FAIL  ${name}: ${String(err).split('\n')[0]}`)
+    results.push({ step: name, ok: false, error: String(err).split('\n')[0], url: page.url() })
+    console.log(`FAIL  ${name}: ${String(err).split('\n')[0]} (at ${page.url()})`)
+    // what the page looked like when the step gave up; uploaded with the CI artifact
+    await page.screenshot({ path: path.join(SHOTS, 'FAILED.png'), fullPage: true }).catch(() => {})
     throw err
   }
 }
@@ -62,7 +64,7 @@ try {
       await page.locator('main h1, main h2').first().waitFor()
     }
     await page.goto(FRONTEND + '/', { waitUntil: 'networkidle' })
-    await page.getByRole('heading', { name: /A full marketing team/ }).waitFor()
+    await page.getByRole('heading', { name: /Your whole marketing department/ }).waitFor()
     await shot(page, 'home')
     await page.getByRole('button', { name: 'Agent Operations Center' }).click()
     await page.getByRole('button', { name: 'Start' }).click()
@@ -165,7 +167,8 @@ try {
     await page.goto(FRONTEND + '/app/dashboard')
     await page.getByRole('heading', { name: 'Business Command Center' }).waitFor()
     await page.locator('.kpi-tile', { hasText: 'Agent tasks completed' }).getByText('12').waitFor()
-    await page.getByText('Not connected').first().waitFor()
+    // unconnected sources are named, never estimated
+    await page.getByText(/Needs a connected source/).first().waitFor()
     await shot(page, 'command-center', true)
   })
 

@@ -14,7 +14,8 @@ log = logging.getLogger(__name__)
 _started = False
 
 
-def start_embedded_worker(app, poll_interval: float = 2.0) -> threading.Thread | None:
+def start_embedded_worker(app, poll_interval: float = 2.0, stop: threading.Event | None = None) -> threading.Thread | None:
+    """`stop` lets tests end the loop; the web process never sets it."""
     global _started
     if _started:
         return None
@@ -25,7 +26,7 @@ def start_embedded_worker(app, poll_interval: float = 2.0) -> threading.Thread |
         from app.workflows.engine import work_once
 
         log.warning("Embedded agent worker started (poll=%ss)", poll_interval)
-        while True:
+        while not (stop and stop.is_set()):
             did_work = False
             with app.app_context():
                 try:

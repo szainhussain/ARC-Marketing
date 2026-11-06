@@ -50,3 +50,12 @@ export type PublicAgent = {
   approval_policy: { external_actions: string }
   evaluation_checks: string[]
 }
+
+/** 30-second explainer video per agent, served from public/videos/agents/.
+ * Source project and re-render steps: ARC_Demo_Video/Agent_Explainers (outside the repo). */
+const AGENTS_WITH_VIDEO = new Set(Object.keys(AGENT_META))
+export function agentVideo(agentId: string): { src: string; poster: string; captions: string } | null {
+  if (!AGENTS_WITH_VIDEO.has(agentId)) return null
+  const base = `/videos/agents/${agentId}`
+  return { src: `${base}.mp4`, poster: `${base}.jpg`, captions: `${base}.vtt` }
+}

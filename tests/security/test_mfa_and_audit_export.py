@@ -22,7 +22,11 @@ def test_mfa_enrolment_login_replay_recovery_and_disable(client):
     setup = client.post("/api/v1/auth/mfa/setup").get_json()
     assert setup["otpauth_uri"].startswith("otpauth://totp/ARC:")
     assert client.post("/api/v1/auth/mfa/enable", json={"code": "000000"}).status_code == 400
-    enabled = client.post("/api/v1/auth/mfa/enable", json={"code": totp_now(setup["secret"])}).get_json()
+    # Pin one clock reading: codes roll every 30s, so calling totp_now() twice could straddle a
+    # boundary and turn the "replayed" code below into a fresh, valid one (seen flaking in CI).
+    t0 = time.time()
+    enrol_code = totp_now(setup["secret"], t0)
+    enabled = client.post("/api/v1/auth/mfa/enable", json={"code": enrol_code}).get_json()
     codes = enabled["recovery_codes"]
     assert len(codes) == 8 and client.get("/api/v1/me").get_json()["user"]["mfa_enabled"] is True
 
@@ -31,8 +35,8 @@ def test_mfa_enrolment_login_replay_recovery_and_disable(client):
     assert need.status_code == 401 and need.get_json()["error"]["code"] == "MFA_REQUIRED"
     assert client.get("/api/v1/me").status_code == 401  # password alone did not sign in
     # The code used for enrolment can't be replayed.
-    assert client.post(LOGIN, json={**CREDS, "mfa_code": totp_now(setup["secret"])}).get_json()["error"]["code"] == "MFA_INVALID"
-    nxt = totp_now(setup["secret"], time.time() + 30)
+    assert client.post(LOGIN, json={**CREDS, "mfa_code": enrol_code}).get_json()["error"]["code"] == "MFA_INVALID"
+    nxt = totp_now(setup["secret"], t0 + 30)
     assert client.post(LOGIN, json={**CREDS, "mfa_code": nxt}).status_code == 200
 
     client.post("/api/v1/auth/logout")

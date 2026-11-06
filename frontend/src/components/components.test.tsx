@@ -5,6 +5,8 @@ import { useState } from 'react'
 import { ConfirmDialog, DataTable, ErrorState, KpiCard, Tabs } from './ui'
 import WorkflowGraph from './WorkflowGraph'
 import WorkflowDemo from './marketing/WorkflowDemo'
+import AgentDetailDialog from './marketing/AgentDetailDialog'
+import type { PublicAgent } from '../lib/agentMeta'
 import type { Task } from '../api/types'
 
 function task(id: string, agent: string, status: string, deps: string[] = [], seq = 0): Task {
@@ -96,5 +98,29 @@ describe('WorkflowDemo', () => {
     fireEvent.click(screen.getByRole('button', { name: /Reset/ }))
     expect(screen.getByRole('button', { name: /Start/ })).toBeTruthy()
     vi.useRealTimers()
+  })
+})
+
+describe('AgentDetailDialog video', () => {
+  const agent: PublicAgent = {
+    agent_id: 'social_media', number: 3, name: 'Social Media & Community Manager', version: '1.1.0', role: 'Organic calendars.',
+    responsibilities: ['Build a calendar'], task_type: 'social_calendar', depends_on: [], reads: [], outputs: ['Social calendar'],
+    kpis: [], escalates: [], allowed_tools: [], allowed_integrations: [], approval_policy: { external_actions: 'approval_required' }, evaluation_checks: [],
+  }
+
+  it('opens on Read and switches to the 30s video on Watch', () => {
+    render(<AgentDetailDialog agent={agent} all={[agent]} onClose={() => {}} />)
+    expect(screen.getByText('What it does')).toBeTruthy()
+    expect(document.querySelector('video')).toBeNull()
+    fireEvent.click(screen.getByRole('tab', { name: /Watch/ }))
+    const video = document.querySelector('video')!
+    expect(video.getAttribute('poster')).toBe('/videos/agents/social_media.jpg')
+    expect(video.querySelector('source')!.getAttribute('src')).toBe('/videos/agents/social_media.mp4')
+    expect(screen.queryByText('What it does')).toBeNull()
+  })
+
+  it('shows no Watch tab for an agent without a video', () => {
+    render(<AgentDetailDialog agent={{ ...agent, agent_id: 'unknown_agent' }} all={[]} onClose={() => {}} />)
+    expect(screen.queryByRole('tab', { name: /Watch/ })).toBeNull()
   })
 })

@@ -14,5 +14,9 @@ marshmallow==3.23.1
 python-dotenv==1.0.1
 anthropic==0.40.0
 groq==1.7.0
+openpyxl==3.1.5
+python-pptx==1.0.2
+reportlab==4.4.4
+cryptography==44.0.3
 pytest==8.3.4
 pytest-cov==6.0.0

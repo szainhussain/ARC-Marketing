@@ -75,7 +75,7 @@ export function AgentsPage() {
     <section className="section">
       <SectionHead
         title="Twelve specialists. One department."
-        lede="Every agent below is a real, versioned component with its own instructions, output schema, permissions, budget and checks. The details come straight from the running system."
+        lede="Every agent below is a real, versioned component with its own instructions, output schema, permissions, budget and checks. The details come straight from the running system. Prefer to watch? Open any agent for a 30-second video."
       />
       <AgentGrid />
     </section>
