@@ -5,8 +5,6 @@ import { AlertTriangle, ArrowRight, Info, Sparkles } from 'lucide-react'
 import {
   Area,
   AreaChart,
-  Bar,
-  BarChart,
   CartesianGrid,
   Legend,
   ResponsiveContainer,
@@ -19,6 +17,7 @@ import { useResource } from '../hooks/useResource'
 import { humanize, money, relativeTime } from '../lib/labels'
 import { EmptyState, ErrorState, KpiCard, PageHeader, PageSkeleton, StatusPill } from '../components/ui'
 import GettingStarted from '../components/GettingStarted'
+import CostByAgentChart from '../components/CostByAgentChart'
 
 type Kpi = {
   key: string
@@ -215,19 +214,7 @@ export default function DashboardPage() {
             </div>
             <div className="card chart-card">
               <h2>Estimated cost by agent</h2>
-              {data.cost_by_agent.length === 0 ? (
-                <EmptyState title="No agent activity in this period" />
-              ) : (
-                <ResponsiveContainer width="100%" height={240}>
-                  <BarChart data={data.cost_by_agent} layout="vertical" margin={{ left: 10, right: 12 }}>
-                    <CartesianGrid stroke={CHART.grid} horizontal={false} />
-                    <XAxis type="number" {...AXIS} tickFormatter={(v) => `$${v}`} />
-                    <YAxis type="category" dataKey="number" {...AXIS} width={24} tickFormatter={(v) => String(v).padStart(2, '0')} />
-                    <Tooltip {...TOOLTIP} formatter={(v: number) => money(v)} labelFormatter={(n) => data.cost_by_agent.find((a) => a.number === n)?.agent_name || n} />
-                    <Bar name="Est. cost" dataKey="cost_usd" fill={CHART.accent} radius={[0, 4, 4, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
+              <CostByAgentChart rows={data.cost_by_agent} />
             </div>
           </div>
 
