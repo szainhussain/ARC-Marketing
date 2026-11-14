@@ -12,13 +12,13 @@ import { usePageMeta } from '../../lib/seo'
 import { API_BASE_URL as API } from '../../lib/apiBase'
 
 export function ProductPage() {
-  usePageMeta("Product", "How ARC works as an AI marketing department: twelve agents, two control rooms and an approval system.")
+  usePageMeta("Product", "How ARC plans, creates, checks and tracks your marketing, with an approval step that keeps you in charge.")
   return (
     <>
       <section className="section">
         <SectionHead
-          title="An AI-operated marketing department, not another content tool."
-          lede="ARC coordinates twelve specialist agents through one durable workflow, two control rooms and an approval system that keeps people in charge of the decisions that matter."
+          title="Your marketing gets done every month, not just written."
+          lede="ARC turns one brief into a strategy, a dated plan and finished content for each channel, checks it against your brand rules, and tracks the results. You approve what goes out."
         />
         <div className="grid-3">
           <div className="card">
@@ -70,12 +70,12 @@ export function ProductPage() {
 }
 
 export function AgentsPage() {
-  usePageMeta("The 12 agents", "Meet ARC's twelve specialist marketing agents and what each one does.")
+  usePageMeta("Your team", "The AI specialists behind your marketing in ARC, and exactly what each one can and cannot do.")
   return (
     <section className="section">
       <SectionHead
-        title="Twelve specialists. One department."
-        lede="Every agent below is a real, versioned component with its own instructions, output schema, permissions, budget and checks. The details come straight from the running system. Prefer to watch? Open any agent for a 30-second video."
+        title="The team behind your marketing."
+        lede="You brief ARC once; these specialists do the work, and only the ones your campaign needs are used. Every agent below is a real, versioned component with its own instructions, output schema, permissions, budget and checks. The details come straight from the running system. Prefer to watch? Open any agent for a 30-second video."
       />
       <AgentGrid />
     </section>
@@ -193,13 +193,13 @@ export function SecurityPage() {
 }
 
 export function PricingPage() {
-  usePageMeta('Pricing', 'ARC plans from $149/month with all twelve agents. 14-day free trial, no card needed, cancel any time.')
+  usePageMeta('Pricing', 'ARC plans from $149/month. 14-day free trial, no card needed, cancel any time.')
   return (
     <>
       <section className="section">
         <SectionHead
           title="A marketing department for less than one hire."
-          lede="Every plan includes all twelve agents, approvals and exports. Start with a 14-day free trial — no card needed — and cancel any time."
+          lede="Every plan includes strategy, planning, content for your channels, approvals and exports. Start with a 14-day free trial — no card needed — and cancel any time."
         />
         <PricingTable />
         <p style={{ marginTop: 18 }}>
@@ -334,7 +334,7 @@ export function DocsPage() {
       <div className="cap-grid">
         {[
           ['Getting started', 'Create a workspace, complete onboarding, write a brief, and run the department.', '/signup'],
-          ['The 12 agents', 'What each agent does, what it reads, what it produces and when it asks you.', '/agents'],
+          ['Your AI team', 'What each agent does, what it reads, what it produces and when it asks you.', '/agents'],
           ['How runs work', 'Dependencies, retries, pausing, approvals and the knowledge loop.', '/how-it-works'],
           ['Security model', 'Isolation, roles, approvals, data export and deletion.', '/security'],
         ].map(([t, b, to]) => (

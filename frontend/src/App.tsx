@@ -48,6 +48,7 @@ import {
   VerifyEmailPage,
 } from './pages/public/AuthPages'
 import HomePage from './pages/public/HomePage'
+const GrowthAuditPage = lazy(() => import('./pages/public/GrowthAuditPage'))
 import { AgencyComparePage, DemoPage, ScorecardPage, SolutionPage, SolutionsPage } from './pages/public/GrowthPages'
 import {
   AboutPage,
@@ -87,6 +88,7 @@ export default function App() {
         <Route path="/review/:token" element={<ReviewPage />} />
         <Route path="/unsubscribe/:token" element={<UnsubscribePage />} />
         <Route path="/marketing-scorecard" element={<ScorecardPage />} />
+        <Route path="/growth-audit" element={<GrowthAuditPage />} />
         <Route path="/compare/agency" element={<AgencyComparePage />} />
         <Route path="/agents" element={<AgentsPage />} />
         <Route path="/how-it-works" element={<HowItWorksPage />} />

@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { SEGMENTS } from '../lib/segments'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { apiRequest, ApiError } from '../api/client'
 import { ErrorState, Field, PageHeader } from '../components/ui'
@@ -21,7 +22,9 @@ const FIELDS: { key: string; label: string; area?: boolean; type?: string; hint?
 ]
 
 // Starting points; every field stays editable and nothing is sent until saved.
+// Playbooks for the business types ARC serves first come before the generic ones.
 const TEMPLATES: { id: string; label: string; values: Record<string, string> }[] = [
+  ...SEGMENTS.map((s) => ({ id: `playbook-${s.key}`, label: s.label, values: { ...s.playbook } })),
   { id: 'launch', label: 'Product launch', values: { name: 'Product launch', objective: 'Launch [product] and reach [number] sign-ups or sales in the first [weeks] weeks.', offer: 'Launch offer or early-access price', channels: 'Instagram, LinkedIn, email, Google Ads', success_metrics: 'Sign-ups or sales, cost per acquisition, launch-week reach' } },
   { id: 'monthly', label: 'Monthly always-on', values: { name: 'Monthly marketing — [month]', objective: 'Keep a steady flow of enquiries this month with consistent posting and one featured offer.', channels: 'Instagram, Facebook, Google Business Profile', success_metrics: 'Enquiries or bookings, posting consistency, engagement rate' } },
   { id: 'promo', label: 'Seasonal promotion', values: { name: 'Seasonal promotion', objective: 'Drive [revenue/orders] during [season or event] with a time-limited offer.', offer: '[Discount or bundle] until [end date]', channels: 'Instagram, email, Meta ads', success_metrics: 'Orders, revenue, return on ad spend', constraints: 'State the end date clearly; no misleading urgency.' } },

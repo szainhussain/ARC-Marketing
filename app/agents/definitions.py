@@ -37,6 +37,7 @@ def _cmo_input(ctx: StageContext) -> dict:
         "constraints": ctx.campaign.get("constraints"),
         "success_metrics_requested": ctx.campaign.get("success_metrics"),
         "approved_knowledge": ctx.knowledge,
+        **ctx.performance,
     }
 
 
@@ -109,6 +110,7 @@ def _paid_input(ctx: StageContext) -> dict:
         "campaign_plan": _up(ctx, "marketing_manager", "summary", "channels", "success_metrics"),
         "creative_variants": _up(ctx, "creative_studio", "variants"),
         "budget_guidance": ctx.campaign.get("budget_guidance"),
+        **ctx.performance,
         "rule": (
             "All budget figures are recommendations for a human to approve; you cannot "
             "authorize or change spend. Express allocation as percentages of whatever "
@@ -183,8 +185,11 @@ AGENTS: tuple[AgentSpec, ...] = (
         agent_id="cmo",
         number=1,
         name="Chief Marketing Officer",
-        version="1.2.0",  # 1.1: approved knowledge-library entries; 1.2: Brand Kit in the profile
-        role="Strategic owner: objectives, positioning, KPIs, budget envelope.",
+        # 1.1: approved knowledge-library entries; 1.2: Brand Kit in the profile;
+        # 1.3: evidence-led process, unit economics and verified results as input,
+        #      prioritised initiatives, risks and KPIs in the output
+        version="1.3.0",
+        role="Growth orchestrator: objectives, positioning, priorities, KPIs, budget envelope.",
         responsibilities=(
             "Translate company goals into marketing objectives",
             "Define positioning, messaging priorities, and KPIs",
@@ -192,8 +197,15 @@ AGENTS: tuple[AgentSpec, ...] = (
         ),
         task_type="strategy",
         instructions=(
-            "Set strategic direction and measurable objectives. Separate measured facts "
-            "from assumptions and forecasts. Recommend; never authorize spend."
+            "Set strategic direction and measurable objectives. Work in this order: "
+            "(1) read the business profile and the campaign objective; "
+            "(2) if verified_results is present, start from what those numbers show and say which channels "
+            "made or lost money; (3) if unit_economics is present, keep every budget and target inside "
+            "break_even_roas and the max cost per customer; (4) name the customer segments and why they buy; "
+            "(5) weigh each channel against the budget; (6) list prioritised_initiatives, highest expected "
+            "impact for least effort first, each with the evidence it rests on; (7) list risks and kpis. "
+            "Separate measured facts from assumptions and forecasts: anything not in the inputs is an "
+            "assumption. Never invent results, benchmarks or statistics. Recommend; never authorize spend."
         ),
         depends_on=(),
         reads=(),
@@ -297,7 +309,8 @@ AGENTS: tuple[AgentSpec, ...] = (
         agent_id="paid_media",
         number=5,
         name="Performance Marketing Manager",
-        version="1.1.0",  # 1.1: Brand Kit (persona, colours, fonts, visual rules) in the profile
+        # 1.1: Brand Kit in the profile; 1.2: unit economics and verified results as input
+        version="1.2.0",
         role="Paid search/social structure and budget recommendations — never spend.",
         responsibilities=(
             "Propose campaign structure, audiences, and experiments",
@@ -306,7 +319,10 @@ AGENTS: tuple[AgentSpec, ...] = (
         task_type="paid_media_plan",
         instructions=(
             "Recommendations only. You cannot launch, change, or authorize spend; any "
-            "spend change is a human-only decision."
+            "spend change is a human-only decision. If unit_economics is present, state kpi_targets "
+            "against break_even_roas and the max cost per customer, and do not recommend a split that "
+            "cannot meet them. If verified_results is present, move share toward channels marked "
+            "profitable and away from channels marked losing, and say so in assumptions."
         ),
         depends_on=("creative_studio",),
         reads=("marketing_manager", "creative_studio"),
@@ -398,6 +414,7 @@ AGENTS: tuple[AgentSpec, ...] = (
         escalates=("Refunds, complaints, legal, safety, personal-data requests",),
         allowed_integrations=({"name": "Helpdesk / reviews", "status": PLANNED},),
         priority=90,
+        model_tier="light",
     ),
     AgentSpec(
         agent_id="key_accounts",
@@ -419,6 +436,7 @@ AGENTS: tuple[AgentSpec, ...] = (
         escalates=("Trade terms, discounts, contractual commitments",),
         allowed_integrations=({"name": "CRM", "status": PLANNED},),
         priority=95,
+        model_tier="light",
     ),
     AgentSpec(
         agent_id="marketing_ops",
@@ -474,5 +492,6 @@ AGENTS: tuple[AgentSpec, ...] = (
         kpis=("Every action item has an owner",),
         escalates=("Conflicting decisions between deliverables",),
         priority=120,
+        model_tier="light",
     ),
 )

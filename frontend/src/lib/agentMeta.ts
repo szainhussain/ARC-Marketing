@@ -32,7 +32,10 @@ export const AGENT_META: Record<string, { icon: LucideIcon; short: string; examp
   record_keeper: { icon: Archive, short: 'Record Keeper', example: 'Records decisions and action items, and proposes learnings for the knowledge library.' },
 }
 
+export type AgentTeam = { key: string; name: string; responsibility: string }
+
 export type PublicAgent = {
+  team?: AgentTeam
   agent_id: string
   number: number
   name: string

@@ -59,7 +59,9 @@ def public_plans_route():
 
 @api_v1.route("/public/agents", methods=["GET"])
 def public_agents_route():
-    return jsonify({"agents": [a.to_public_dict() for a in agents_in_department_order()]}), 200
+    from app.agents.teams import TEAMS
+
+    return jsonify({"agents": [a.to_public_dict() for a in agents_in_department_order()], "teams": list(TEAMS)}), 200
 
 
 @api_v1.route("/public/integrations", methods=["GET"])
@@ -94,7 +96,62 @@ def public_contact_route():
                     "message": "Thanks — your message was received. We'll reply by email."}), 201
 
 
-# ---- Command Center & analytics --------------------------------------------
+@api_v1.route("/public/growth-audit", methods=["POST"])
+@csrf.exempt  # public form, no session; protected by rate limit + SSRF-safe fetch
+@limiter.limit("10 per hour")
+def public_growth_audit_route():
+    """Free website check. Reads one public page; no AI and no account needed."""
+    from app.services.growth_audit import run_audit
+
+    p = request.get_json(silent=True) or {}
+    email = (p.get("email") or "").strip().lower()
+    if email and ("@" not in email or len(email) > 255):
+        raise ValidationError("Please correct the highlighted fields.",
+                              details=[{"field": "email", "issue": "Enter a valid email or leave it empty"}])
+    report = run_audit(p.get("url") or "")
+    if email:
+        top = "; ".join(f["check"] for f in report["priorities"][:5]) or "No failed checks"
+        db.session.add(ContactEnquiry(
+            name=(p.get("name") or "Growth audit visitor").strip()[:255], email=email,
+            company=(p.get("company") or "")[:255], topic="growth_audit",
+            message=(f"Growth audit of {report['url']}: {report['checks_passed']}/{report['checks_total']} checks passed. "
+                     f"Industry: {(p.get('industry') or 'not given')[:80]}. Goal: {(p.get('goal') or 'not given')[:120]}. "
+                     f"Top gaps: {top}")[:5000]))
+        db.session.commit()
+    return jsonify({"audit": report}), 200
+
+
+@api_v1.route("/public/growth-audit/speed", methods=["POST"])
+@csrf.exempt
+@limiter.limit("6 per hour")
+def public_growth_audit_speed_route():
+    from app.services.growth_audit import SpeedUnavailable, page_speed
+
+    try:
+        return jsonify({"speed": page_speed((request.get_json(silent=True) or {}).get("url") or "")}), 200
+    except SpeedUnavailable as exc:
+        return jsonify({"speed": None, "unavailable": str(exc)}), 200
+
+
+# ---- Command Center & analytics
+
+@api_v1.route("/organizations/<organization_id>/growth-score", methods=["GET"])
+@login_required
+def growth_score_route(organization_id):
+    from app.services.growth_score import growth_score
+
+    get_membership_or_403(organization_id)
+    return jsonify(growth_score(organization_id)), 200
+
+
+@api_v1.route("/organizations/<organization_id>/cost-report", methods=["GET"])
+@login_required
+def cost_report_route(organization_id):
+    from app.services.cost_service import cost_report
+
+    get_membership_or_403(organization_id)
+    return jsonify(cost_report(organization_id, request.args.get("days", default=30, type=int))), 200
+
 
 @api_v1.route("/organizations/<organization_id>/dashboard", methods=["GET"])
 @login_required

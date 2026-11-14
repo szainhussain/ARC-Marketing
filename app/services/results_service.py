@@ -8,6 +8,7 @@ from app.models.campaign import Campaign
 from app.models.results import METRIC_FIELDS, CampaignResult
 from app.services.audit_service import record_audit_event
 from app.services.errors import NotFound, ValidationError
+from app.services.unit_economics import economics, targets
 
 
 def _invalid(details):
@@ -141,8 +142,17 @@ def summarize(organization_id: str, start: date | None = None, end: date | None 
     by_campaign = [{"campaign_id": k, "campaign_name": names.get(k), **derive(_sum(v))}
                    for k, v in group(lambda r: r.campaign_id).items()]
     by_channel.sort(key=lambda x: -(x.get("revenue") or x.get("leads") or 0))
+    from app.models.business_profile import BusinessProfile
+
+    profile = BusinessProfile.query.filter_by(organization_id=organization_id).first()
+    margin = profile.gross_margin_pct if profile else None
+    repeat = profile.orders_per_customer if profile else None
+    for row in by_channel + by_campaign:
+        row["economics"] = economics(row, margin, repeat)
     return {
         "source": "manual",
+        "currency": (profile.currency if profile else None),
+        "economics": economics(_sum(rows), margin, repeat),
         "totals": derive(_sum(rows)),
         "by_channel": by_channel,
         "by_campaign": by_campaign,
@@ -212,3 +222,37 @@ def monthly_report(organization_id: str, month: str) -> dict:
                       .order_by(KnowledgeEntry.created_at.asc()).limit(20)],
         "highlights": highlights,
     }
+
+
+def performance_for_agents(organization_id: str, days: int = 90) -> dict:
+    """The verified numbers a strategy should start from: what the business can
+    afford (from its margins) and what recorded results show per channel. This
+    is how past results reach the next plan without replaying old conversations."""
+
+    from datetime import timedelta
+
+    from app.models.business_profile import BusinessProfile
+
+    profile = BusinessProfile.query.filter_by(organization_id=organization_id).first()
+    out = {}
+    if profile:
+        afford = targets(profile.gross_margin_pct, profile.average_order_value, profile.orders_per_customer)
+        if profile.monthly_marketing_budget:
+            afford["monthly_marketing_budget"] = profile.monthly_marketing_budget
+        if afford:
+            out["unit_economics"] = {**afford, "currency": profile.currency,
+                                     "source": "entered by the business in its profile"}
+    summary = summarize(organization_id, start=date.today() - timedelta(days=days))
+    channels = []
+    for row in summary["by_channel"][:8]:
+        e = row["economics"]
+        channels.append({k: v for k, v in {
+            "channel": row["channel"], "spend": row.get("spend"), "leads": row.get("leads"),
+            "customers": row.get("conversions"), "revenue": row.get("revenue"), "roas": e["roas"],
+            "cost_per_lead": e["cost_per_lead"], "customer_acquisition_cost": e["customer_acquisition_cost"],
+            "contribution_profit": e["contribution_profit"], "verdict": e["verdict"],
+        }.items() if v is not None})
+    if channels:
+        out["verified_results"] = {"period_days": days, "source": "results recorded by the business in ARC",
+                                   "by_channel": channels}
+    return out

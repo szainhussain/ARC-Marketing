@@ -247,7 +247,7 @@ export default function CampaignWorkspacePage({ section = 'overview' }: { sectio
         </div>
         {!run && (
           <p className="muted">
-            Starting a run queues work for all 12 agents. Each waits for the agents it depends on, then
+            Starting a run queues work for the agents this campaign needs. Each waits for the agents it depends on, then
             produces a draft deliverable for you to review. The worker process must be running (
             <code>flask worker</code>).
           </p>

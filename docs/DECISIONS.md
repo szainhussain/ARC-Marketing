@@ -461,3 +461,77 @@ only and is not part of the business profile, so it never reaches agent prompts.
 Charts read the same tokens via `var()` (`src/lib/chartTheme.ts`). Public pages always use
 ARC Blue unless the visitor picked their own preset; a workspace's brand colour only
 applies inside that workspace. The logo keeps ARC's own colours in every accent.
+
+## D21 — Sell outcomes to UAE SMEs; run only the agents a campaign needs
+
+**Decision (2026-11-14):** ARC's public and in-app copy leads with what a customer
+receives each month (a plan, posts, ads, pages, emails, a report), aimed at growing
+businesses in the UAE. It no longer counts or leads with "12 agents"; the agents remain
+as internal machinery and are still described on `/agents`.
+
+**Why:** an idea-scorecard review put ARC in the "validate" band. Evidence and path to
+the buyer were the weak criteria, and both reviews found customers pay for outcomes, not
+agent headcount. The same review found every run paid for specialists the campaign had
+no use for.
+
+**Details:**
+- `app/agents/selection.py` picks agents from the campaign's `channels`. Six core agents
+  always run (strategy, research, plan, creative, quality gate, record); the six channel
+  specialists run only when a channel calls for them. Empty or unrecognised channels fall
+  back to all twelve. The quality gate depends only on specialists that were queued.
+- `AgentSpec.model_tier`: `record_keeper`, `customer_insights` and `key_accounts` are
+  `light` and use `AI_MODEL_LIGHT` when it is set; otherwise nothing changes.
+- Cost estimates use `AI_PRICE_INPUT_PER_MTOK` / `AI_PRICE_OUTPUT_PER_MTOK` (and the
+  `LIGHT` pair). Unset, they stay on the old placeholder rate.
+- `_build_prompt` puts the business/campaign context first, identical for every agent
+  in a run, so a provider that caches a shared prompt prefix can reuse it. The saving
+  is not measured yet; explicit Anthropic `cache_control` is not added.
+- Password-reset links are emailed by `app/services/system_email.py` from a
+  platform-level Resend or Brevo account (`SYSTEM_EMAIL_*`). Without it no email is
+  sent, which is the state production was in before.
+- `SENTRY_DSN` turns on error tracking (no request bodies or user details are sent).
+- Frontend: a top-level `ErrorBoundary`, and `apiRequest` rejects a 200 that is not
+  JSON. Before this, one malformed API response left the whole site blank.
+- CI also applies migrations to PostgreSQL 16, which is what production runs.
+
+## D22 — Profit maths, Growth Score and Growth Audit are calculations, not model output
+
+**Decision (2026-11-14):** the features that tell a customer how their business is doing
+are plain code over data ARC holds. No model call produces a score, a profit figure or an
+audit finding.
+
+**Why:** these numbers are what a customer acts on and what the free audit is judged by.
+They must be repeatable, explainable and cheap. Anything ARC cannot work out is shown as
+"not measured" or "not connected" (rule 5 applied to analytics, not only to agents).
+
+**Details:**
+- `unit_economics.py`: ROAS, break-even ROAS, profit after ad spend, cost per lead and per
+  customer, lifetime value, payback. Gross margin, average sale value and repeat orders are
+  entered by the customer on the business profile (five new columns, migration
+  `da0bd4c6a403`). Every results summary carries an `economics` block.
+- `growth_score.py`: six dimensions. Brand readiness, website conversion, lead generation
+  and campaign performance are scored from the profile and recorded results on ARC's own
+  disclosed scales. Retention and advocacy stay "not measured" until order and review data
+  can be connected.
+- `growth_audit.py`: the public free audit. Fifteen repeatable checks on one page's source
+  through the existing SSRF-safe fetch; impact and effort are fixed labels per check. An
+  email is optional and, when given, lands in the admin inbox as a `growth_audit` enquiry.
+  The speed test calls Google PageSpeed Insights only when `PAGESPEED_API_KEY` is set (the
+  keyless quota was exhausted when tried); otherwise it reports "not connected".
+- `cost_service.py`: cost by model and campaign, failed and repeated calls, and the month's
+  spend against the plan's AI budget with a warning from 80%. Cached tokens are not
+  recorded yet. ARC's own revenue and margin per customer are not shown to customers and
+  are not built for the platform admin yet.
+- Agents: `app/agents/teams.py` groups the twelve specs into one orchestrator, six teams
+  and on-demand skills. They stay separate small calls. The CMO (1.3.0) follows an
+  evidence-first process and returns prioritised initiatives, risks and KPIs; it and the
+  paid media agent (1.2.0) receive `performance_for_agents()`: what the business can
+  afford from its margins, and recorded results per channel with a made/lost-money verdict.
+  That is how results reach the next plan.
+- Onboarding: a business-type picker for the five UAE segments pre-fills empty fields, most
+  questions have one-tap answers, and a "Your numbers" step collects the commercial facts.
+  The same segments supply campaign playbooks.
+- Integrations: Search Console, Meta Ads read, TikTok, Shopify/WooCommerce, WhatsApp,
+  scheduling tools and review platforms are listed as planned. None is built: each needs a
+  developer app, platform approval and the customer's consent, which the user has not yet
+  provided (see "What NOT to do without asking first" in CLAUDE.md).

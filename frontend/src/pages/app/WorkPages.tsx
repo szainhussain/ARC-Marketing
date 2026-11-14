@@ -69,7 +69,7 @@ export function AgentsDirectoryPage() {
   if (loading && !data) return <PageSkeleton />
   return (
     <div className="page page-wide">
-      <PageHeader title="Your marketing team" description="Twelve specialists with distinct jobs, permissions and budgets. Open one to see its history, configuration and controls."
+      <PageHeader title="Your marketing team" description="Specialists with distinct jobs, permissions and budgets. Open one to see its history, configuration and controls."
         actions={<Link to="/app/operations" className="btn secondary">Operations Center</Link>} />
       {error && <ErrorState message={error} onRetry={reload} />}
       <div className="agent-grid">

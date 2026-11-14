@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 
 const SITE = 'ARC'
 const DEFAULT_DESCRIPTION =
-  'ARC is your AI marketing department: twelve specialist agents plan, create and publish campaigns, with your approval on every step.'
+  'ARC plans your month of marketing, writes the posts, ads, emails and articles, and tracks what each channel brings in. Built for growing businesses in the UAE. Nothing goes out until you approve it.'
 
 function setMeta(name: string, content: string, attr: 'name' | 'property' = 'name') {
   let el = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${name}"]`)
@@ -23,6 +23,9 @@ export function usePageMeta(title: string, description: string = DEFAULT_DESCRIP
     setMeta('og:title', full, 'property')
     setMeta('og:description', description, 'property')
     setMeta('og:type', 'website', 'property')
+    setMeta('og:url', window.location.origin + window.location.pathname, 'property')
+    setMeta('twitter:title', full)
+    setMeta('twitter:description', description)
   }, [title, description])
 }
 

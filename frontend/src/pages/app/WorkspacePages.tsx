@@ -1,4 +1,5 @@
 import TwoFactorCard from '../../components/TwoFactorCard'
+import { CostPanel } from '../../components/GrowthPanels'
 import RetentionCard from '../../components/RetentionCard'
 import AppearanceSettings from '../../components/AppearanceSettings'
 import type { WorkspaceAccent } from '../../lib/theme'
@@ -585,6 +586,7 @@ export function UsagePage() {
       <PageHeader title="Usage" description="Limits come from your plan and are enforced before any agent runs. Costs are estimates from token counts, not invoices."
         actions={<Link to="/app/billing" className="btn secondary">Change plan</Link>} />
       <div className="card"><h2>{billing.data.subscription.plan.name} plan · this month</h2><UsageBars usage={billing.data.usage} /></div>
+      {orgId && <CostPanel orgId={orgId} />}
       <div className="card">
         <h2>AI calls</h2>
         <DataTable rows={(usage.data?.usage || []).slice(0, 100)} rowKey={(r) => r.id} caption="AI usage records"

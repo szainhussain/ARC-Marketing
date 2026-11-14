@@ -18,6 +18,7 @@ import { humanize, money, relativeTime } from '../lib/labels'
 import { EmptyState, ErrorState, KpiCard, PageHeader, PageSkeleton, StatusPill } from '../components/ui'
 import GettingStarted from '../components/GettingStarted'
 import CostByAgentChart from '../components/CostByAgentChart'
+import { GrowthScoreCard } from '../components/GrowthPanels'
 
 type Kpi = {
   key: string
@@ -108,6 +109,7 @@ export default function DashboardPage() {
       />
       {error && <ErrorState message={error} onRetry={reload} />}
       <GettingStarted orgId={orgId} />
+      <GrowthScoreCard orgId={orgId} />
       {data && (
         <>
           <div className="kpi-grid">
@@ -169,7 +171,7 @@ export default function DashboardPage() {
           <h2 className="section-title">Campaigns</h2>
           {data.campaigns.length === 0 ? (
             <div className="card">
-              <EmptyState title="No campaigns yet" body="Write a brief and your 12 agents take it from there."
+              <EmptyState title="No campaigns yet" body="Write a brief and ARC plans, writes and checks the campaign for you."
                 action={<Link to="/app/campaigns/new" className="btn">Create campaign</Link>} />
             </div>
           ) : (

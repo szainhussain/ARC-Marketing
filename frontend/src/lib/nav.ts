@@ -47,7 +47,7 @@ export const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     items: [
       { to: '/app/campaigns', label: 'Campaigns', icon: Megaphone, keywords: 'briefs runs' },
       { to: '/app/tasks', label: 'Tasks', icon: ListChecks, keywords: 'queue retry' },
-      { to: '/app/agents', label: 'Agents', icon: Bot, keywords: 'team twelve' },
+      { to: '/app/agents', label: 'Agents', icon: Bot, keywords: 'team specialists' },
       { to: '/app/calendar', label: 'Calendar', icon: CalendarDays, keywords: 'schedule posts' },
       { to: '/app/outreach', label: 'Outreach', icon: Mail, keywords: 'email contacts lists unsubscribe brevo resend' },
       { to: '/app/ads', label: 'Ads', icon: BadgeDollarSign, keywords: 'launch spend budget cap meta google kill switch' },

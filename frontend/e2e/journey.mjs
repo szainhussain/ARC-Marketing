@@ -64,7 +64,7 @@ try {
       await page.locator('main h1, main h2').first().waitFor()
     }
     await page.goto(FRONTEND + '/', { waitUntil: 'networkidle' })
-    await page.getByRole('heading', { name: /Your whole marketing department/ }).waitFor()
+    await page.getByRole('heading', { name: /A month of marketing, done/ }).waitFor()
     await shot(page, 'home')
     await page.getByRole('button', { name: 'Agent Operations Center' }).click()
     await page.getByRole('button', { name: 'Start' }).click()
@@ -98,7 +98,9 @@ try {
     await page.getByRole('button', { name: 'Save and continue' }).click()
     await page.getByLabel('Prohibited phrases').fill('guaranteed results')
     await page.getByRole('button', { name: 'Save and continue' }).click()
-    await page.getByLabel('Primary campaign goal').fill('Increase first purchases')
+    await page.getByLabel('Main goal').fill('Increase first purchases')
+    await page.getByRole('button', { name: 'Save and continue' }).click()
+    // "Your numbers" is optional; continue without filling it in.
     await page.getByRole('button', { name: 'Save and continue' }).click()
     await page.getByRole('button', { name: 'Save and continue' }).click()
     await shot(page, 'onboarding-review')

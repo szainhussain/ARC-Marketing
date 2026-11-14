@@ -34,6 +34,7 @@ from app.ai.errors import (
     ProviderUnavailable,
     RateLimited,
 )
+from app.agents.selection import agents_for_channels
 from app.ai.provider_adapter import get_provider
 from app.extensions import db
 from app.models.agent_execution import (
@@ -84,6 +85,7 @@ from app.services.platform_service import (
     notify,
     propose_knowledge_from_record,
 )
+from app.services.results_service import performance_for_agents
 from app.services.usage_service import check_monthly_workflow_limit, record_usage
 from app.services.webhook_service import emit
 from app.workflows.evaluation import evaluate_output
@@ -140,8 +142,10 @@ def enqueue_campaign_run(
     db.session.add(run)
     db.session.flush()
 
+    # Only the agents this campaign's channels call for (D21).
+    selected = agents_for_channels(campaign.channels)
     tasks_by_agent: dict[str, Task] = {}
-    for index, agent in enumerate(_topological_order()):
+    for index, agent in enumerate(a for a in _topological_order() if a.agent_id in selected):
         task = Task(
             organization_id=organization_id,
             campaign_id=campaign_id,
@@ -153,14 +157,18 @@ def enqueue_campaign_run(
             priority=agent.priority,
             sequence_index=index,
             max_attempts=agent.max_attempts,
-            status=STATUS_READY if not agent.depends_on else STATUS_WAITING_FOR_DEPENDENCY,
+            status=STATUS_READY if not any(d in selected for d in agent.depends_on) else STATUS_WAITING_FOR_DEPENDENCY,
         )
         db.session.add(task)
         tasks_by_agent[agent.agent_id] = task
     db.session.flush()
 
     for agent in AGENTS:
+        if agent.agent_id not in selected:
+            continue
         for dep in agent.depends_on:
+            if dep not in selected:
+                continue  # a specialist this campaign does not need
             db.session.add(
                 TaskDependency(
                     task_id=tasks_by_agent[agent.agent_id].id,
@@ -437,9 +445,11 @@ def execute_task(task: Task) -> None:
         knowledge=approved_knowledge_for_agents(task.organization_id)
         if agent.agent_id in ("cmo", "marketing_manager") else [],
         web_sources=_research_sources(campaign) if agent.agent_id == "research_analyst" else [],
+        performance=performance_for_agents(task.organization_id)
+        if agent.agent_id in ("cmo", "paid_media") else {},
     )
 
-    provider = get_provider(current_app.config)
+    provider = get_provider(_provider_config(agent))
     try:
         result = agent.run(provider, ctx)
     except ProviderUnavailable as exc:
@@ -659,6 +669,21 @@ def _close_open_executions(task: Task, code: str, summary: str) -> None:
         execution.finished_at = utcnow()
 
 
+def _provider_config(agent):
+    """Routine agents use the cheaper AI_MODEL_LIGHT when one is configured;
+    strategy, planning, creative and QA always use AI_MODEL (D21)."""
+
+    config = current_app.config
+    light = config.get("AI_MODEL_LIGHT")
+    if agent.model_tier == "light" and light:
+        override = {**config, "AI_MODEL": light}
+        if config.get("AI_PRICE_LIGHT_INPUT_PER_MTOK") or config.get("AI_PRICE_LIGHT_OUTPUT_PER_MTOK"):
+            override["AI_PRICE_INPUT_PER_MTOK"] = config.get("AI_PRICE_LIGHT_INPUT_PER_MTOK")
+            override["AI_PRICE_OUTPUT_PER_MTOK"] = config.get("AI_PRICE_LIGHT_OUTPUT_PER_MTOK")
+        return override
+    return config
+
+
 def _compact(data: dict) -> dict:
     return {k: v for k, v in data.items() if v not in (None, "", [], {})}
 
@@ -708,7 +733,7 @@ def _refresh_run_status(run: WorkflowRun) -> None:
         run.error_summary = None
         record_audit_event(run.organization_id, "workflow.completed", target_type="workflow_run", target_id=run.id)
         notify(run.organization_id, "run.completed", "Your marketing team finished a campaign run",
-               "All 12 agents delivered drafts. Review them and request approval for anything you want to use.",
+               "Your drafts are ready. Review them and request approval for anything you want to use.",
                link=f"/app/campaigns/{run.campaign_id}", severity="success")
         emit(run.organization_id, "run.completed", {"run_id": run.id, "campaign_id": run.campaign_id,
                                                     "estimated_cost_usd": round(run.estimated_cost_usd or 0, 4)})

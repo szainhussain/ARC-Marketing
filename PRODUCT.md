@@ -14,7 +14,7 @@ web
 
 ## Product Purpose
 
-ARC ("Strategy. Plan. Execution.") is a marketing department as a service. Twelve specialist AI agents (CMO, Marketing Manager, Social, PR & Partnerships, Paid Media, Creative, Research, Customer Insights, SEO & Growth, Key Accounts, Ops & Governance, Record Keeper) run each campaign through one coordinated workflow and produce versioned deliverables: strategy, plan, content, channel calendars, ad structure, reports.
+ARC ("Strategy. Plan. Execution.") is a marketing department as a service. Specialist AI agents (six core, plus six channel specialists used only when a campaign needs them) run each campaign through one coordinated workflow and produce versioned deliverables: strategy, plan, content, channel calendars, ad structure, reports.
 
 Success: a customer gets agency-level coordinated marketing every month, approves it in minutes rather than managing it, and can see what ran and what it produced.
 

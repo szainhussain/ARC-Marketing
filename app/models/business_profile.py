@@ -53,6 +53,13 @@ class BusinessProfile(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
     brand_fonts = db.Column(db.String(255))
     visual_guidelines = db.Column(db.Text)
     logo_document_id = db.Column(db.String(36), db.ForeignKey("documents.id"))
+    # Commercial facts for the profit maths (app/services/unit_economics.py).
+    # Entered by the customer; ARC never infers them.
+    currency = db.Column(db.String(3))
+    gross_margin_pct = db.Column(db.Float)
+    average_order_value = db.Column(db.Float)
+    orders_per_customer = db.Column(db.Float)
+    monthly_marketing_budget = db.Column(db.Float)
     onboarding_step = db.Column(db.Integer, default=0, nullable=False)
 
     onboarding_completed = db.Column(db.Boolean, default=False, nullable=False)
@@ -105,6 +112,11 @@ class BusinessProfile(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
             "brand_fonts": self.brand_fonts,
             "visual_guidelines": self.visual_guidelines,
             "logo_document_id": self.logo_document_id,
+            "currency": self.currency,
+            "gross_margin_pct": self.gross_margin_pct,
+            "average_order_value": self.average_order_value,
+            "orders_per_customer": self.orders_per_customer,
+            "monthly_marketing_budget": self.monthly_marketing_budget,
             "onboarding_step": self.onboarding_step,
             "completeness_warnings": self.completeness_warnings(),
             "onboarding_completed": self.onboarding_completed,

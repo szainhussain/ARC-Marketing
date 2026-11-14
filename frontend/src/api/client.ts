@@ -53,7 +53,14 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 
   if (res.status === 204) return undefined as T
 
-  const data = await res.json().catch(() => ({}))
+  const isJson = (res.headers.get('content-type') || '').includes('json')
+  const data = isJson ? await res.json().catch(() => ({})) : {}
+
+  // A 200 that isn't JSON (a proxy error page, a host's "waking up" page) must
+  // fail like any other error; returning {} made pages crash on missing fields.
+  if (res.ok && !isJson) {
+    throw new ApiError(502, 'BAD_RESPONSE', 'The ARC service returned an unexpected response. Try again in a minute.', [])
+  }
 
   if (!res.ok) {
     const err = data?.error || {}

@@ -19,6 +19,27 @@ EDITABLE_FIELDS = (
 )
 
 
+# field -> (lowest, highest) accepted value
+NUMERIC_FIELDS = {
+    "gross_margin_pct": (0.1, 100), "average_order_value": (0.01, 10_000_000),
+    "orders_per_customer": (1, 1000), "monthly_marketing_budget": (0, 100_000_000),
+}
+
+
+def _numeric(field: str, raw):
+    if raw in (None, ""):
+        return None
+    low, high = NUMERIC_FIELDS[field]
+    try:
+        value = float(raw)
+    except (TypeError, ValueError):
+        value = None
+    if value is None or value != value or not low <= value <= high:
+        raise ValidationError("Please correct the highlighted fields.", details=[
+            {"field": field, "issue": f"Enter a number between {low:g} and {high:g}"}])
+    return value
+
+
 def normalise_brand_colors(raw) -> str | None:
     """'#0A2540, 635bff' -> '#0A2540,#635BFF'. Rejects anything that isn't a 6-digit hex."""
 
@@ -53,6 +74,15 @@ def update_profile(organization_id: str, user_id: str, payload: dict) -> Busines
     for field in EDITABLE_FIELDS:
         if field in payload:
             setattr(profile, field, payload[field])
+    for field in NUMERIC_FIELDS:
+        if field in payload:
+            setattr(profile, field, _numeric(field, payload[field]))
+    if "currency" in payload:
+        code = (payload["currency"] or "").strip().upper()
+        if code and not (len(code) == 3 and code.isalpha()):
+            raise ValidationError("Please correct the highlighted fields.", details=[
+                {"field": "currency", "issue": "Use a 3-letter currency code such as AED"}])
+        profile.currency = code or None
     if "brand_colors" in payload:
         profile.brand_colors = normalise_brand_colors(payload["brand_colors"])
     if "logo_document_id" in payload:
