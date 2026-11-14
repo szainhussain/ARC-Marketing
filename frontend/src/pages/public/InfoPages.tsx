@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import HowItWorksStory from '../../components/motion/HowItWorksStory'
 import { Link } from 'react-router-dom'
 import { apiRequest, ApiError } from '../../api/client'
 import WorkflowDemo from '../../components/marketing/WorkflowDemo'
@@ -85,31 +86,19 @@ export function AgentsPage() {
 export function HowItWorksPage() {
   usePageMeta("How it works", "From brief to approved, published work: how ARC's agents, approvals and exports fit together.")
   const steps = [
-    ['Set up your workspace', 'Business profile, brand voice, prohibited phrases, goals, channels, budgets and approval policies.'],
-    ['Write a brief', 'Objective, audience, channels, dates and budget guidance for a campaign.'],
-    ['Agents run in order', 'CMO → Research → Marketing Manager → specialists in parallel → Ops quality gate → Record Keeper. Each waits for its inputs.'],
-    ['Problems are handled, not hidden', 'Rate limits and timeouts retry with backoff. Anything that truly fails stops, says why, and waits for you.'],
-    ['You review and approve', 'Approvals lock to the exact version. You, or your client, through a secure review link, approve each piece.'],
-    ['Publish', 'Export approved work in each platform’s format, or send it automatically to Zapier or Make to post. ARC never spends money.'],
-    ['It learns', 'The Record Keeper proposes learnings; once approved they inform future strategy and planning.'],
+    { title: 'Set up your workspace', body: 'Pick your kind of business and ARC fills in the usual answers. Add your brand voice, goals, channels and a few numbers such as your margin.' },
+    { title: 'Write a brief', body: 'One short brief: the objective, the audience, the channels, the dates and the budget.' },
+    { title: 'The team works in order', body: 'Research first, then strategy, then a dated plan, then the content for the channels you chose, a quality check and a record. Each waits for what it needs.' },
+    { title: 'Problems are handled, not hidden', body: 'If the AI service is busy, ARC waits and tries again. Anything that truly fails stops, says why, and waits for you.' },
+    { title: 'You review and approve', body: 'Approvals lock to the exact version. You, or your client through a secure review link, approve each piece.' },
+    { title: 'Publish', body: 'Export approved work in each platform’s format, publish a blog article, or send it to Zapier or Make to post. ARC never spends money.' },
+    { title: 'It learns', body: 'Record your results and ARC shows which channels made or lost money. Those numbers shape next month’s strategy.' },
   ]
   return (
     <>
       <section className="section">
         <SectionHead title="From brief to approved work, step by step." />
-        <ol className="timeline" style={{ maxWidth: 760 }}>
-          {steps.map(([t, b], i) => (
-            <li key={t} className="info">
-              <span className="timeline-dot" aria-hidden="true" />
-              <div>
-                <div style={{ fontWeight: 700 }}>
-                  {i + 1}. {t}
-                </div>
-                <div className="muted">{b}</div>
-              </div>
-            </li>
-          ))}
-        </ol>
+        <HowItWorksStory steps={steps} />
       </section>
       <section className="section tight">
         <WorkflowDemo />
