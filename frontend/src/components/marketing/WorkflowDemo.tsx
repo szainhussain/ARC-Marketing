@@ -9,8 +9,8 @@ type NodeState = 'waiting' | 'running' | 'done' | 'approval'
 type DemoNode = { id: string; n: string; title: string; deps: string[]; note: string }
 
 const NODES: DemoNode[] = [
-  { id: 'cmo', n: '01', title: 'CMO', deps: [], note: 'Objectives & KPIs' },
-  { id: 'research', n: '07', title: 'Research', deps: ['cmo'], note: 'Audience evidence' },
+  { id: 'research', n: '07', title: 'Research', deps: [], note: 'Audience evidence' },
+  { id: 'cmo', n: '01', title: 'CMO', deps: ['research'], note: 'Objectives & KPIs' },
   { id: 'manager', n: '02', title: 'Marketing Manager', deps: ['cmo', 'research'], note: 'Phased plan' },
   { id: 'insights', n: '08', title: 'Customer Insights', deps: ['research'], note: 'Themes & templates' },
   { id: 'creative', n: '06', title: 'Creative', deps: ['manager'], note: 'Copy variants' },

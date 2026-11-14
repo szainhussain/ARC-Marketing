@@ -29,13 +29,13 @@ def _task(run_id, agent_id) -> Task:
 
 
 def test_rate_limited_task_retries_then_succeeds(app, client, monkeypatch):
-    use_provider(monkeypatch, FakeProvider(fail_for={"strategy": [RateLimited("429", 0)]}))
+    use_provider(monkeypatch, FakeProvider(fail_for={"research_notes": [RateLimited("429", 0)]}))
     _org, run = _setup(client)
     drain()
-    cmo = _task(run["id"], "cmo")
-    assert cmo.status == "succeeded"
-    assert cmo.attempt_count == 1  # rate limits don't use up attempts
-    execs = AgentExecution.query.filter_by(task_id=cmo.id).order_by(AgentExecution.attempt_number).all()
+    first = _task(run["id"], "research_analyst")
+    assert first.status == "succeeded"
+    assert first.attempt_count == 1  # rate limits don't use up attempts
+    execs = AgentExecution.query.filter_by(task_id=first.id).order_by(AgentExecution.attempt_number).all()
     assert [e.status for e in execs] == ["failed", "succeeded"]
     assert execs[0].error_code == "rate_limited"
     # Raw provider text (account ids, JSON) never reaches users.
@@ -45,27 +45,27 @@ def test_rate_limited_task_retries_then_succeeds(app, client, monkeypatch):
 
 def test_rate_limits_do_not_exhaust_attempts(app, client, monkeypatch):
     # More rate limits than max_attempts (5), then success.
-    use_provider(monkeypatch, FakeProvider(fail_for={"strategy": [RateLimited("429", 0)] * 8}))
+    use_provider(monkeypatch, FakeProvider(fail_for={"research_notes": [RateLimited("429", 0)] * 8}))
     _org, run = _setup(client)
     drain()
-    cmo = _task(run["id"], "cmo")
-    assert cmo.status == "succeeded"
-    assert AgentExecution.query.filter_by(task_id=cmo.id, error_code="rate_limited").count() == 8
+    first = _task(run["id"], "research_analyst")
+    assert first.status == "succeeded"
+    assert AgentExecution.query.filter_by(task_id=first.id, error_code="rate_limited").count() == 8
 
 
 def test_persistent_rate_limit_eventually_fails(app, client, monkeypatch):
     from app.workflows.engine import MAX_CONSECUTIVE_RATE_LIMITS
 
-    use_provider(monkeypatch, FakeProvider(fail_for={"strategy": [RateLimited("429", 0)] * 50}))
+    use_provider(monkeypatch, FakeProvider(fail_for={"research_notes": [RateLimited("429", 0)] * 50}))
     _org, run = _setup(client)
     drain()
-    cmo = _task(run["id"], "cmo")
-    assert cmo.status == "failed"
-    assert AgentExecution.query.filter_by(task_id=cmo.id).count() == MAX_CONSECUTIVE_RATE_LIMITS
+    first = _task(run["id"], "research_analyst")
+    assert first.status == "failed"
+    assert AgentExecution.query.filter_by(task_id=first.id).count() == MAX_CONSECUTIVE_RATE_LIMITS
 
 
 def test_retry_after_pauses_the_worker(app, client, monkeypatch):
-    use_provider(monkeypatch, FakeProvider(fail_for={"strategy": [RateLimited("429", 30)]}))
+    use_provider(monkeypatch, FakeProvider(fail_for={"research_notes": [RateLimited("429", 30)]}))
     _setup(client)
     assert work_once() is True
     # Cooldown: the worker claims nothing, even if other tasks were ready.
@@ -73,12 +73,12 @@ def test_retry_after_pauses_the_worker(app, client, monkeypatch):
 
 
 def test_retry_after_from_provider_delays_next_attempt(app, client, monkeypatch):
-    use_provider(monkeypatch, FakeProvider(fail_for={"strategy": [RateLimited("429", 30)]}))
+    use_provider(monkeypatch, FakeProvider(fail_for={"research_notes": [RateLimited("429", 30)]}))
     _org, run = _setup(client)
     assert work_once() is True
-    cmo = _task(run["id"], "cmo")
-    assert cmo.status == "retrying"
-    assert cmo.next_attempt_at is not None
+    first = _task(run["id"], "research_analyst")
+    assert first.status == "retrying"
+    assert first.next_attempt_at is not None
     # Not claimable until the provider's retry-after has passed.
     assert claim_next_task() is None
     assert claim_next_task(now=utcnow() + timedelta(seconds=60)) is not None
@@ -86,35 +86,35 @@ def test_retry_after_from_provider_delays_next_attempt(app, client, monkeypatch)
 
 def test_retries_stop_at_max_attempts(app, client, monkeypatch):
     errors = [InvalidOutput("bad json")] * 10
-    use_provider(monkeypatch, FakeProvider(fail_for={"strategy": errors}))
+    use_provider(monkeypatch, FakeProvider(fail_for={"research_notes": errors}))
     _org, run = _setup(client)
     drain()
-    cmo = _task(run["id"], "cmo")
-    assert cmo.status == "failed"
-    assert cmo.attempt_count == cmo.max_attempts == 5
+    first = _task(run["id"], "research_analyst")
+    assert first.status == "failed"
+    assert first.attempt_count == first.max_attempts == 5
     stored = db.session.get(WorkflowRun, run["id"])
     assert stored.status == "failed"
     # Dependents never ran and are still waiting, not silently skipped.
-    assert _task(run["id"], "research_analyst").status == "waiting_for_dependency"
+    assert _task(run["id"], "cmo").status == "waiting_for_dependency"
 
 
 def test_provider_unavailable_fails_without_retry(app, client, monkeypatch):
-    use_provider(monkeypatch, FakeProvider(fail_for={"strategy": [ProviderUnavailable("no key")]}))
+    use_provider(monkeypatch, FakeProvider(fail_for={"research_notes": [ProviderUnavailable("no key")]}))
     _org, run = _setup(client)
     drain()
-    cmo = _task(run["id"], "cmo")
-    assert cmo.status == "failed"
-    assert cmo.attempt_count == 1
-    assert cmo.error_summary.startswith("capability_unavailable:")
+    first = _task(run["id"], "research_analyst")
+    assert first.status == "failed"
+    assert first.attempt_count == 1
+    assert first.error_summary.startswith("capability_unavailable:")
     assert db.session.get(WorkflowRun, run["id"]).error_summary.startswith("capability_unavailable:")
 
 
 def test_manual_retry_reopens_failed_run(app, client, monkeypatch):
-    use_provider(monkeypatch, FakeProvider(fail_for={"strategy": [ProviderUnavailable("no key")]}))
+    use_provider(monkeypatch, FakeProvider(fail_for={"research_notes": [ProviderUnavailable("no key")]}))
     org, run = _setup(client)
     drain()
-    cmo = _task(run["id"], "cmo")
-    resp = client.post(f"/api/v1/organizations/{org['id']}/tasks/{cmo.id}/retry")
+    first = _task(run["id"], "research_analyst")
+    resp = client.post(f"/api/v1/organizations/{org['id']}/tasks/{first.id}/retry")
     assert resp.status_code == 200, resp.get_json()
     assert resp.get_json()["task"]["status"] == "ready"
     drain()
@@ -135,13 +135,13 @@ def test_independent_branch_continues_after_sibling_fails(app, client, monkeypat
 def test_paused_agent_is_skipped_until_resumed(app, client, monkeypatch):
     use_provider(monkeypatch, FakeProvider())
     org, run = _setup(client)
-    assert client.post(f"/api/v1/organizations/{org['id']}/agents/cmo/pause").status_code == 200
+    assert client.post(f"/api/v1/organizations/{org['id']}/agents/research_analyst/pause").status_code == 200
     assert drain() == 0
-    assert _task(run["id"], "cmo").status == "ready"
+    assert _task(run["id"], "research_analyst").status == "ready"
     agents = client.get(f"/api/v1/organizations/{org['id']}/agents").get_json()["agents"]
-    assert next(a for a in agents if a["agent_id"] == "cmo")["status"] == "paused"
+    assert next(a for a in agents if a["agent_id"] == "research_analyst")["status"] == "paused"
 
-    client.post(f"/api/v1/organizations/{org['id']}/agents/cmo/resume")
+    client.post(f"/api/v1/organizations/{org['id']}/agents/research_analyst/resume")
     assert drain() == 12
 
 
@@ -160,7 +160,7 @@ def test_workspace_automation_pause_stops_all_work(app, client, monkeypatch):
 def test_pause_and_resume_run(app, client, monkeypatch):
     use_provider(monkeypatch, FakeProvider())
     org, run = _setup(client)
-    work_once()  # cmo
+    work_once()  # first
     resp = client.post(f"/api/v1/organizations/{org['id']}/runs/{run['id']}/pause")
     assert resp.get_json()["workflow_run"]["status"] == "paused"
     assert drain() == 0
@@ -198,8 +198,8 @@ def test_task_cannot_be_claimed_twice(app, client, monkeypatch):
     use_provider(monkeypatch, FakeProvider())
     _setup(client)
     first = claim_next_task()
-    assert first is not None and first.agent_id == "cmo"
-    # cmo is the only ready task and it's already claimed.
+    assert first is not None and first.agent_id == "research_analyst"
+    # first is the only ready task and it's already claimed.
     assert claim_next_task() is None
 
 
@@ -210,8 +210,8 @@ def test_run_budget_exhaustion_fails_without_calling_model(app, client, monkeypa
     stored.budget_usd = 0.0
     db.session.commit()
     drain()
-    cmo = _task(run["id"], "cmo")
-    assert cmo.status == "failed" and cmo.last_error_code == "budget_exceeded"
+    first = _task(run["id"], "research_analyst")
+    assert first.status == "failed" and first.last_error_code == "budget_exceeded"
     assert provider.calls == []
 
 
@@ -240,6 +240,6 @@ def test_viewer_cannot_control_runs(app, client, monkeypatch):
     membership.role = "viewer"
     db.session.commit()
     assert client.post(f"/api/v1/organizations/{org['id']}/runs/{run['id']}/pause").status_code == 403
-    assert client.post(f"/api/v1/organizations/{org['id']}/agents/cmo/pause").status_code == 403
+    assert client.post(f"/api/v1/organizations/{org['id']}/agents/research_analyst/pause").status_code == 403
     assert client.patch(f"/api/v1/organizations/{org['id']}/operations/controls",
                         json={"automation_paused": True}).status_code == 403

@@ -456,3 +456,23 @@ return values from the page fetch, and an icon's SVG title read as the page titl
 **Not executed:** a real PageSpeed call (no key), a real agent run with the new CMO and
 paid-media prompts against a live model, the E2E journey, and the PostgreSQL migration
 (CI applies it on the next push).
+
+**Follow-up, same day:** CI on PR #6 passed all lanes including the E2E journey and the
+PostgreSQL migration step (after adding the driver to that step). Merged as `cc34133` and
+confirmed live: the homepage footer shows build `cc34133`, `/api/v1/health/ready` returns
+200, and the production Growth Audit returned 10 of 15 for a real site.
+
+## Research-first strategy, roadmap, cached tokens, budget alerts, margin view (2026-11-14)
+
+`pytest`: 213 passed (8 new: `tests/integration/test_strategy_loop.py`). Covered: only
+research is ready at the start and the strategy call receives its notes; the strategy
+context is empty with nothing recorded, then carries margins, a losing-channel verdict and
+at most six website gaps, and drops the website part when the site is unreachable; a second
+run receives the first strategy's KPIs; the plan schema accepts the roadmap and tracking
+fields and defaults them to empty; cached tokens are stored, reported and read from a
+Groq-shaped usage object (zero when absent); the budget notification fires once per
+threshold; the margin view returns 403 to a workspace owner, 401 signed out, and counts a
+trial as zero revenue. Ten existing engine tests were updated because they named the CMO
+as the first agent. Frontend: build, lint (0 errors) and 44 tests pass.
+**Not executed:** a live model run of the new prompts, and a browser check of the admin
+margin table and the roadmap renderer (covered by typecheck only).

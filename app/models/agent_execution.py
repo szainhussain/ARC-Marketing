@@ -28,6 +28,7 @@ class AgentExecution(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
     model = db.Column(db.String(128))
     input_tokens = db.Column(db.Integer, default=0, nullable=False)
     output_tokens = db.Column(db.Integer, default=0, nullable=False)
+    cached_input_tokens = db.Column(db.Integer, default=0, server_default="0", nullable=False)
     estimated_cost_usd = db.Column(db.Float, default=0.0, nullable=False)
     error_code = db.Column(db.String(64))
     error_summary = db.Column(db.Text)

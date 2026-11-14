@@ -113,6 +113,7 @@ class AnthropicProvider(AIProvider):
             )
             input_tokens = getattr(response.usage, "input_tokens", 0) or 0
             output_tokens = getattr(response.usage, "output_tokens", 0) or 0
+            cached_tokens = getattr(response.usage, "cache_read_input_tokens", 0) or 0
             estimated_cost = _estimate_cost(input_tokens, output_tokens, self.price_in, self.price_out)
             if estimated_cost > budget_usd:
                 raise BudgetExceeded(
@@ -133,6 +134,7 @@ class AnthropicProvider(AIProvider):
                 model=self.model,
                 input_tokens=input_tokens,
                 output_tokens=output_tokens,
+                cached_input_tokens=int(cached_tokens) if isinstance(cached_tokens, (int, float)) else 0,
                 estimated_cost_usd=round(estimated_cost, 6),
             )
 
@@ -305,6 +307,7 @@ class GroqProvider(AIProvider):
             usage = getattr(response, "usage", None)
             input_tokens = getattr(usage, "prompt_tokens", 0) or 0
             output_tokens = getattr(usage, "completion_tokens", 0) or 0
+            cached_tokens = getattr(getattr(usage, "prompt_tokens_details", None), "cached_tokens", 0) or 0
             estimated_cost = _estimate_cost(input_tokens, output_tokens, self.price_in, self.price_out)
             if estimated_cost > budget_usd:
                 raise BudgetExceeded(
@@ -325,6 +328,7 @@ class GroqProvider(AIProvider):
                 model=self.model,
                 input_tokens=input_tokens,
                 output_tokens=output_tokens,
+                cached_input_tokens=int(cached_tokens) if isinstance(cached_tokens, (int, float)) else 0,
                 estimated_cost_usd=round(estimated_cost, 6),
             )
 

@@ -535,3 +535,36 @@ They must be repeatable, explainable and cheap. Anything ARC cannot work out is 
   scheduling tools and review platforms are listed as planned. None is built: each needs a
   developer app, platform approval and the customer's consent, which the user has not yet
   provided (see "What NOT to do without asking first" in CLAUDE.md).
+
+## D23 — Research runs first; the strategy starts from verified context
+
+**Decision (2026-11-14):** the research agent now runs before the CMO, and the CMO is given
+everything verifiable that ARC can gather in code before the model is called.
+
+**Why:** a strategy written before any research, with no view of the business's own
+website or of how its last plan turned out, is a generic one. The dependency order was the
+cause, not the prompt.
+
+**Details:**
+- `research_analyst` 1.3.0 has no dependencies and works from the brief. `cmo` 1.4.0 depends
+  on and reads it. Everything else is unchanged, so runs take no extra calls.
+- `strategy_context.py` adds three things to the CMO's input, each only when real:
+  margins and recorded results (D22); the top gaps from the Growth Audit of the business's
+  own website, fetched once in the worker (`STRATEGY_WEBSITE_AUDIT`, off in tests, and an
+  unreachable site is simply left out); and the objectives and KPIs of the previous
+  strategy. The CMO returns `previous_kpi_review` with a met / missed / not_measured status
+  per KPI, judged from recorded results only.
+- `marketing_manager` 1.3.0 returns `roadmap_90_day` (three 30-day periods with focus,
+  activities, owner, budget share, forecast outcome and KPI) and `tracking_requirements`,
+  inside the existing campaign plan rather than as a thirteenth agent.
+- Cached input tokens are read from the provider's usage figures when present
+  (`AIResult.cached_input_tokens`, stored on usage records and executions, migration
+  `6f26a0de5734`) and shown in the cost view. Explicit Anthropic `cache_control` is still
+  not added: production runs on Groq and it could not be tested live.
+- `notify_budget_if_crossed()` raises one workspace notification at 80% of the month's AI
+  budget and one at 100%.
+- `/admin/unit-economics` (platform owner only): revenue, AI cost and gross margin per
+  workspace. Trials count as zero revenue.
+- Not done, on purpose: batch processing (provider batch APIs answer within hours, which
+  does not fit a run a customer is waiting on) and a separate "skills" store (each agent
+  already receives only its own instructions, so nothing unneeded is loaded).

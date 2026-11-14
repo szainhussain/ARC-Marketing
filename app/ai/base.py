@@ -9,6 +9,8 @@ class AIResult:
     model: str
     input_tokens: int = 0
     output_tokens: int = 0
+    # Input tokens the provider served from its prompt cache (0 when it reports none).
+    cached_input_tokens: int = 0
     estimated_cost_usd: float = 0.0
     warnings: list[str] = field(default_factory=list)
 

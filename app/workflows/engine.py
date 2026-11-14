@@ -85,7 +85,9 @@ from app.services.platform_service import (
     notify,
     propose_knowledge_from_record,
 )
+from app.services.cost_service import notify_budget_if_crossed
 from app.services.results_service import performance_for_agents
+from app.services.strategy_context import strategy_context
 from app.services.usage_service import check_monthly_workflow_limit, record_usage
 from app.services.webhook_service import emit
 from app.workflows.evaluation import evaluate_output
@@ -445,8 +447,8 @@ def execute_task(task: Task) -> None:
         knowledge=approved_knowledge_for_agents(task.organization_id)
         if agent.agent_id in ("cmo", "marketing_manager") else [],
         web_sources=_research_sources(campaign) if agent.agent_id == "research_analyst" else [],
-        performance=performance_for_agents(task.organization_id)
-        if agent.agent_id in ("cmo", "paid_media") else {},
+        performance=strategy_context(task.organization_id, run.id) if agent.agent_id == "cmo"
+        else performance_for_agents(task.organization_id) if agent.agent_id == "paid_media" else {},
     )
 
     provider = get_provider(_provider_config(agent))
@@ -502,7 +504,9 @@ def execute_task(task: Task) -> None:
         input_tokens=result.input_tokens,
         output_tokens=result.output_tokens,
         estimated_cost_usd=result.estimated_cost_usd,
+        cached_input_tokens=result.cached_input_tokens,
     )
+    notify_budget_if_crossed(task.organization_id)
     run.estimated_cost_usd = (run.estimated_cost_usd or 0.0) + result.estimated_cost_usd
     emit(task.organization_id, "deliverable.created",
          {"deliverable_id": deliverable.id, "deliverable_type": agent.task_type, "campaign_id": task.campaign_id,
@@ -514,6 +518,7 @@ def execute_task(task: Task) -> None:
     execution.model = result.model
     execution.input_tokens = result.input_tokens
     execution.output_tokens = result.output_tokens
+    execution.cached_input_tokens = result.cached_input_tokens
     execution.estimated_cost_usd = result.estimated_cost_usd
     execution.evaluation_json = json.dumps(evaluation)
     failed_checks = [e["check"] for e in evaluation if not e["passed"]]

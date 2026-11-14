@@ -8,12 +8,19 @@ class InitiativeSchema(Schema):
     evidence = fields.String(load_default="")
 
 
+class KpiReviewSchema(Schema):
+    kpi = fields.String(required=True)
+    status = fields.String(required=True)  # met | missed | not_measured
+    evidence = fields.String(load_default="")
+
+
 class StrategySchema(Schema):
     strategic_direction = fields.String(required=True)
     key_objectives = fields.List(fields.String(), required=True)
     prioritised_initiatives = fields.List(fields.Nested(InitiativeSchema), load_default=list)
     risks = fields.List(fields.String(), load_default=list)
     kpis = fields.List(fields.String(), load_default=list)
+    previous_kpi_review = fields.List(fields.Nested(KpiReviewSchema), load_default=list)
     assumptions = fields.List(fields.String(), load_default=list)
     sources = fields.List(fields.String(), load_default=list)
 
@@ -31,10 +38,22 @@ class TimelinePhaseSchema(Schema):
     activities = fields.List(fields.String(), load_default=list)
 
 
+class RoadmapPeriodSchema(Schema):
+    period = fields.String(required=True)  # Days 1-30 | Days 31-60 | Days 61-90
+    focus = fields.String(required=True)
+    activities = fields.List(fields.String(), load_default=list)
+    owner = fields.String(load_default="")
+    budget_share = fields.String(load_default="")
+    expected_outcome = fields.String(load_default="")
+    kpi = fields.String(load_default="")
+
+
 class CampaignPlanSchema(Schema):
     summary = fields.String(required=True)
     channels = fields.List(fields.String(), required=True)
     timeline = fields.List(fields.Nested(TimelinePhaseSchema), load_default=list)
+    roadmap_90_day = fields.List(fields.Nested(RoadmapPeriodSchema), load_default=list)
+    tracking_requirements = fields.List(fields.String(), load_default=list)
     success_metrics = fields.List(fields.String(), load_default=list)
     assumptions = fields.List(fields.String(), load_default=list)
 
