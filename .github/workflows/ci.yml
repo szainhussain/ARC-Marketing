@@ -34,7 +34,7 @@ jobs:
         env:
           FLASK_APP: wsgi.py
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/arc_ci
-        run: flask db upgrade && flask seed-plans
+        run: pip install psycopg2-binary==2.9.10 && flask db upgrade && flask seed-plans
       - name: Dependency audit
         run: pip-audit -r requirements-dev.txt || true  # report-only until triaged
 
