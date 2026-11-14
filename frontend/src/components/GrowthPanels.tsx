@@ -132,12 +132,12 @@ export function GrowthScoreCard({ orgId }: { orgId: string }) {
 
 type CostReport = {
   basis: string
-  totals: { calls: number; input_tokens: number; output_tokens: number; cost_usd: number }
-  by_model: { provider: string; model: string; calls: number; input_tokens: number; output_tokens: number; cost_usd: number }[]
+  totals: { calls: number; input_tokens: number; cached_input_tokens: number; output_tokens: number; cost_usd: number }
+  by_model: { provider: string; model: string; calls: number; input_tokens: number; cached_input_tokens: number; output_tokens: number; cost_usd: number }[]
   by_campaign: { campaign_id: string | null; campaign_name: string; calls: number; cost_usd: number; failed_calls: number }[]
   reliability: { agent_calls: number; failed_calls: number; repeated_calls: number; calls_per_task: number | null; failures_by_reason: Record<string, number> }
   budget: { month_cost_usd: number; monthly_allowance_usd: number | null; used_pct: number | null; level: 'ok' | 'warning' | 'over' | 'none'; message: string }
-  not_tracked: string[]
+  cache_note: string
 }
 
 const usd = (v: number) => `$${v.toFixed(v > 0 && v < 1 ? 4 : 2)}`
@@ -165,6 +165,7 @@ export function CostPanel({ orgId }: { orgId: string }) {
               <th scope="col">Model</th>
               <th scope="col">Calls</th>
               <th scope="col">Tokens in</th>
+              <th scope="col">Of which cached</th>
               <th scope="col">Tokens out</th>
               <th scope="col">Est. cost</th>
             </tr>
@@ -172,7 +173,7 @@ export function CostPanel({ orgId }: { orgId: string }) {
           <tbody>
             {data.by_model.length === 0 && (
               <tr>
-                <td colSpan={5} className="muted">No AI calls in this period.</td>
+                <td colSpan={6} className="muted">No AI calls in this period.</td>
               </tr>
             )}
             {data.by_model.map((m) => (
@@ -180,6 +181,7 @@ export function CostPanel({ orgId }: { orgId: string }) {
                 <th scope="row" className="mono small">{m.provider} · {m.model}</th>
                 <td>{m.calls}</td>
                 <td>{m.input_tokens.toLocaleString()}</td>
+                <td>{m.cached_input_tokens.toLocaleString()}</td>
                 <td>{m.output_tokens.toLocaleString()}</td>
                 <td>{usd(m.cost_usd)}</td>
               </tr>
@@ -214,7 +216,7 @@ export function CostPanel({ orgId }: { orgId: string }) {
       )}
       <p className="muted small" style={{ marginTop: 12 }}>
         {data.reliability.failed_calls} failed and {data.reliability.repeated_calls} repeated agent calls out of {data.reliability.agent_calls}
-        {data.reliability.calls_per_task != null ? ` (${data.reliability.calls_per_task} calls per task)` : ''}. Not tracked yet: {data.not_tracked.join(' ')}
+        {data.reliability.calls_per_task != null ? ` (${data.reliability.calls_per_task} calls per task)` : ''}. {data.cache_note}
       </p>
     </div>
   )

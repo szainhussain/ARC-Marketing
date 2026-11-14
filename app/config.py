@@ -99,6 +99,8 @@ class BaseConfig:
     SYSTEM_EMAIL_FROM_NAME = os.environ.get("SYSTEM_EMAIL_FROM_NAME", "ARC").strip()
     # Google PageSpeed Insights key for the Growth Audit's speed test. Without
     # it the audit simply reports speed as not connected.
+    # Check the business's own website before each strategy (one page fetch in the worker).
+    STRATEGY_WEBSITE_AUDIT = _bool_env("STRATEGY_WEBSITE_AUDIT", True)
     PAGESPEED_API_KEY = os.environ.get("PAGESPEED_API_KEY", "").strip()
     # Error tracking; off when empty.
     SENTRY_DSN = os.environ.get("SENTRY_DSN", "").strip()
@@ -154,6 +156,7 @@ class DevelopmentConfig(BaseConfig):
 
 class TestingConfig(BaseConfig):
     TESTING = True
+    STRATEGY_WEBSITE_AUDIT = False  # no network from tests; the feature's own tests switch it on
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     WTF_CSRF_ENABLED = False
     WORKER_RETRY_BASE_SECONDS = 0.0

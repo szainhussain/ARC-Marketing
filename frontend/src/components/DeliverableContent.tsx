@@ -67,6 +67,19 @@ function Strategy({ content }: { content: Json }) {
       <Section label="KPIs">
         <BulletList items={asStringList(content.kpis)} />
       </Section>
+      {Array.isArray(content.previous_kpi_review) && content.previous_kpi_review.length > 0 && (
+        <Section label="How the last strategy's KPIs turned out">
+          <ul className="deliverable-list">
+            {(content.previous_kpi_review as Json[]).map((k, i) => (
+              <li key={i}>
+                <strong>{String(k.kpi ?? '')}</strong>
+                <span className="muted"> · {String(k.status ?? '').replace(/_/g, ' ')}</span>
+                {k.evidence ? <div className="muted small">{String(k.evidence)}</div> : null}
+              </li>
+            ))}
+          </ul>
+        </Section>
+      )}
       <Section label="Risks">
         <BulletList items={asStringList(content.risks)} />
       </Section>
@@ -128,6 +141,27 @@ function CampaignPlan({ content }: { content: Json }) {
           ))}
         </Section>
       )}
+      {Array.isArray(content.roadmap_90_day) && content.roadmap_90_day.length > 0 && (
+        <Section label="90-day roadmap">
+          {(content.roadmap_90_day as Json[]).map((p, i) => (
+            <div className="timeline-phase" key={i}>
+              <div className="phase-title">
+                {String(p.period ?? `Period ${i + 1}`)}: {String(p.focus ?? '')}
+              </div>
+              <BulletList items={asStringList(p.activities)} />
+              <div className="muted small">
+                {[p.owner && `Owner: ${String(p.owner)}`, p.budget_share && `Budget: ${String(p.budget_share)}`, p.kpi && `KPI: ${String(p.kpi)}`]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </div>
+              {p.expected_outcome ? <div className="muted small">Expected (forecast): {String(p.expected_outcome)}</div> : null}
+            </div>
+          ))}
+        </Section>
+      )}
+      <Section label="What to set up so results can be measured">
+        <BulletList items={asStringList(content.tracking_requirements)} />
+      </Section>
       <Section label="Success metrics">
         <BulletList items={asStringList(content.success_metrics)} />
       </Section>

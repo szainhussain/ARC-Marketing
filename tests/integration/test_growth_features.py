@@ -179,4 +179,4 @@ def test_every_agent_belongs_to_a_team(client):
     assert all(a["team"]["key"] for a in body["agents"])
     assert {a["agent_id"] for a in body["agents"] if a["team"]["key"] == "skills"} == {"pr_partnerships", "key_accounts"}
     cmo = next(a for a in body["agents"] if a["agent_id"] == "cmo")
-    assert cmo["team"]["name"] == "Growth Orchestrator" and cmo["version"] == "1.3.0"
+    assert cmo["team"]["name"] == "Growth Orchestrator" and cmo["version"] == "1.4.0"

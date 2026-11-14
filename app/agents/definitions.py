@@ -37,6 +37,7 @@ def _cmo_input(ctx: StageContext) -> dict:
         "constraints": ctx.campaign.get("constraints"),
         "success_metrics_requested": ctx.campaign.get("success_metrics"),
         "approved_knowledge": ctx.knowledge,
+        "research": _up(ctx, "research_analyst", "audience_hypotheses", "competitor_notes", "sources", "scope_note"),
         **ctx.performance,
     }
 
@@ -44,7 +45,8 @@ def _cmo_input(ctx: StageContext) -> dict:
 def _research_input(ctx: StageContext) -> dict:
     read = [s for s in ctx.web_sources if s.get("text")]
     data = {
-        "strategy": _up(ctx, "cmo", "strategic_direction", "key_objectives"),
+        "objective": ctx.campaign.get("objective"),
+        "audience": ctx.campaign.get("audience"),
         "geography": ctx.campaign.get("geography"),
     }
     if read:
@@ -187,8 +189,10 @@ AGENTS: tuple[AgentSpec, ...] = (
         name="Chief Marketing Officer",
         # 1.1: approved knowledge-library entries; 1.2: Brand Kit in the profile;
         # 1.3: evidence-led process, unit economics and verified results as input,
-        #      prioritised initiatives, risks and KPIs in the output
-        version="1.3.0",
+        #      prioritised initiatives, risks and KPIs in the output;
+        # 1.4: runs after research and reads it; website audit and the previous
+        #      strategy's KPIs as input; previous_kpi_review in the output
+        version="1.4.0",
         role="Growth orchestrator: objectives, positioning, priorities, KPIs, budget envelope.",
         responsibilities=(
             "Translate company goals into marketing objectives",
@@ -198,7 +202,11 @@ AGENTS: tuple[AgentSpec, ...] = (
         task_type="strategy",
         instructions=(
             "Set strategic direction and measurable objectives. Work in this order: "
-            "(1) read the business profile and the campaign objective; "
+            "(1) read the business profile, the campaign objective and the research notes, and keep the "
+            "research's distinction between sourced observations and assumptions; "
+            "(1a) if website_audit is present, treat its high-impact gaps as candidate initiatives; "
+            "(1b) if previous_strategy is present, fill previous_kpi_review with one entry per earlier KPI: "
+            "status is met, missed or not_measured, judged only from verified_results, never guessed; "
             "(2) if verified_results is present, start from what those numbers show and say which channels "
             "made or lost money; (3) if unit_economics is present, keep every budget and target inside "
             "break_even_roas and the max cost per customer; (4) name the customer segments and why they buy; "
@@ -207,8 +215,8 @@ AGENTS: tuple[AgentSpec, ...] = (
             "Separate measured facts from assumptions and forecasts: anything not in the inputs is an "
             "assumption. Never invent results, benchmarks or statistics. Recommend; never authorize spend."
         ),
-        depends_on=(),
-        reads=(),
+        depends_on=("research_analyst",),
+        reads=("research_analyst",),
         build_input=_cmo_input,
         outputs=("Strategy brief", "Key objectives", "Assumptions"),
         kpis=("Objectives with measurable targets", "Assumptions explicitly labeled"),
@@ -219,7 +227,9 @@ AGENTS: tuple[AgentSpec, ...] = (
         agent_id="research_analyst",
         number=7,
         name="Market Intelligence & Research Analyst",
-        version="1.2.0",  # 1.1: Brand Kit in the profile; 1.2: reads public pages listed on the brief
+        # 1.1: Brand Kit in the profile; 1.2: reads public pages listed on the brief;
+        # 1.3: runs first, from the brief, so the strategy can be built on it
+        version="1.3.0",
         role="Evidence: audience, competitors, trends — facts separated from inference.",
         responsibilities=(
             "Synthesize audience and competitor hypotheses",
@@ -228,21 +238,23 @@ AGENTS: tuple[AgentSpec, ...] = (
         ),
         task_type="research_notes",
         instructions="Separate source-backed observations from inference. Never fabricate a source.",
-        depends_on=("cmo",),
-        reads=("cmo",),
+        depends_on=(),
+        reads=(),
         build_input=_research_input,
         outputs=("Audience hypotheses", "Competitor notes", "Scope note"),
         kpis=("Every claim sourced or labeled an assumption",),
         escalates=("Objective needs data no connected source can provide",),
         allowed_integrations=({"name": "Public pages listed on the brief (robots.txt respected)", "status": "available_tested"},
                               {"name": "Web research / search API", "status": PLANNED}),
-        priority=20,
+        priority=5,
     ),
     AgentSpec(
         agent_id="marketing_manager",
         number=2,
         name="Marketing Manager",
-        version="1.2.0",  # 1.1: approved knowledge-library entries; 1.2: Brand Kit in the profile
+        # 1.1: approved knowledge-library entries; 1.2: Brand Kit in the profile;
+        # 1.3: 90-day roadmap and tracking requirements in the output
+        version="1.3.0",
         role="Execution orchestrator: converts strategy into a phased, owned plan.",
         responsibilities=(
             "Build a dependency-aware campaign plan and timeline",
@@ -250,7 +262,13 @@ AGENTS: tuple[AgentSpec, ...] = (
             "Route specialist work",
         ),
         task_type="campaign_plan",
-        instructions="Every phase must be actionable and tied to the strategy's objectives.",
+        instructions=(
+            "Every phase must be actionable and tied to the strategy's objectives. Also fill "
+            "roadmap_90_day with exactly three periods (Days 1-30, Days 31-60, Days 61-90): for each give "
+            "the focus, up to four activities, who owns it on the client side, the share of budget as text, "
+            "the expected outcome and the KPI that shows it. Mark every expected outcome as a forecast. "
+            "Fill tracking_requirements with what must be set up so results can be measured per channel."
+        ),
         depends_on=("cmo", "research_analyst"),
         reads=("cmo", "research_analyst"),
         build_input=_manager_input,

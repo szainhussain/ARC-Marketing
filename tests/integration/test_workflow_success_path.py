@@ -30,7 +30,7 @@ def test_start_run_only_enqueues(app, client, monkeypatch):
     assert run["status"] == "queued"
     assert len(run["tasks"]) == 12
     ready = [t["agent_id"] for t in run["tasks"] if t["status"] == "ready"]
-    assert ready == ["cmo"]
+    assert ready == ["research_analyst"]  # research runs first (D23)
     assert provider.calls == []  # the web request never calls the model
 
 
@@ -64,7 +64,7 @@ def test_full_department_run_creates_twelve_deliverables(app, client, monkeypatc
 
     # Dependency order respected: every agent ran after all its dependencies.
     order = [c["task_type"] for c in provider.calls]
-    assert order.index("strategy") < order.index("research_notes") < order.index("campaign_plan")
+    assert order.index("research_notes") < order.index("strategy") < order.index("campaign_plan")
     assert order.index("content_pack") < order.index("social_calendar")
     assert order.index("qa_report") < order.index("campaign_record")
     assert order[-1] == "campaign_record"

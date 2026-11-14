@@ -14,11 +14,14 @@ type Overview = {
 }
 const STATUSES = ['new', 'contacted', 'closed'] as const
 
+type Margin = { organization_id: string; name: string; plan: string | null; status: string; revenue_usd: number; ai_cost_usd: number; gross_margin_usd: number; gross_margin_pct: number | null }
+
 export default function AdminPage() {
   const { user } = useAuth()
   const toast = useToast()
   const [filter, setFilter] = useState<string>('')
   const overview = useResource<Overview>(user?.is_platform_admin ? '/admin/overview' : null)
+  const margins = useResource<{ workspaces: Margin[]; basis: string }>(user?.is_platform_admin ? '/admin/unit-economics' : null)
   const list = useResource<{ enquiries: Enquiry[]; counts: Record<string, number> }>(
     user?.is_platform_admin ? `/admin/enquiries${filter ? `?status=${filter}` : ''}` : null,
   )
@@ -36,6 +39,7 @@ export default function AdminPage() {
   }
 
   const o = overview.data
+  const money = (v: number | null) => (v == null ? '—' : `$${v.toFixed(2)}`)
   return (
     <div className="page page-wide">
       <PageHeader title="Admin" description="Sign-ups, usage across ARC, and every demo request and contact message from the website." />
@@ -47,6 +51,47 @@ export default function AdminPage() {
           <KpiCard label="Workspaces" value={o.workspaces.total} sub={`${o.workspaces.last_30_days} new in 30 days`} />
           <KpiCard label="Campaign runs (30 days)" value={o.runs_last_30_days} />
           <KpiCard label="New enquiries" value={o.new_enquiries} />
+        </div>
+      )}
+      {margins.data && (
+        <div className="card">
+          <h2>Revenue and AI cost per workspace · this month</h2>
+          <p className="muted small" style={{ marginTop: -8 }}>{margins.data.basis}</p>
+          <div className="table-wrap">
+            <table className="compare-table">
+              <caption className="sr-only">Revenue, AI cost and gross margin per workspace</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Workspace</th>
+                  <th scope="col">Plan</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Revenue</th>
+                  <th scope="col">AI cost (est.)</th>
+                  <th scope="col">Gross margin</th>
+                </tr>
+              </thead>
+              <tbody>
+                {margins.data.workspaces.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="muted">No workspaces yet.</td>
+                  </tr>
+                )}
+                {margins.data.workspaces.map((w) => (
+                  <tr key={w.organization_id}>
+                    <th scope="row">{w.name}</th>
+                    <td>{w.plan || '—'}</td>
+                    <td>{w.status}</td>
+                    <td>{money(w.revenue_usd)}</td>
+                    <td>{money(w.ai_cost_usd)}</td>
+                    <td>
+                      {money(w.gross_margin_usd)}
+                      {w.gross_margin_pct != null ? ` (${w.gross_margin_pct}%)` : ''}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
       <div className="card">

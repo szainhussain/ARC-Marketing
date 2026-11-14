@@ -40,7 +40,7 @@ def test_run_reports_capability_unavailable_without_ai_key(app, client, monkeypa
     )
     # The failure must be on the first agent, with no retry and no output.
     first_task = run["tasks"][0]
-    assert first_task["agent_id"] == "cmo"
+    assert first_task["agent_id"] == "research_analyst"  # research runs first (D23)
     assert first_task["attempt_count"] == 1
     assert "capability_unavailable" in first_task["error_summary"]
     assert first_task["deliverable_id"] is None

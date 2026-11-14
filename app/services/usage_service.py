@@ -30,6 +30,7 @@ def record_usage(
     input_tokens: int,
     output_tokens: int,
     estimated_cost_usd: float,
+    cached_input_tokens: int = 0,
 ) -> UsageRecord:
     record = UsageRecord(
         organization_id=organization_id,
@@ -39,6 +40,7 @@ def record_usage(
         input_tokens=input_tokens,
         output_tokens=output_tokens,
         estimated_cost_usd=estimated_cost_usd,
+        cached_input_tokens=cached_input_tokens or 0,
         is_actual=False,
     )
     db.session.add(record)

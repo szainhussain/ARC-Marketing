@@ -13,6 +13,7 @@ class UsageRecord(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
     model = db.Column(db.String(128))
     input_tokens = db.Column(db.Integer, default=0, nullable=False)
     output_tokens = db.Column(db.Integer, default=0, nullable=False)
+    cached_input_tokens = db.Column(db.Integer, default=0, server_default="0", nullable=False)
     estimated_cost_usd = db.Column(db.Float, default=0.0, nullable=False)
     is_actual = db.Column(db.Boolean, default=False, nullable=False)
 
@@ -24,6 +25,7 @@ class UsageRecord(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
             "model": self.model,
             "input_tokens": self.input_tokens,
             "output_tokens": self.output_tokens,
+            "cached_input_tokens": self.cached_input_tokens,
             "estimated_cost_usd": self.estimated_cost_usd,
             "is_actual": self.is_actual,
             "created_at": self.created_at.isoformat(),

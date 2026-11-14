@@ -10,7 +10,8 @@ from app.models.base import utcnow
 from app.models.campaign import Campaign
 from app.models.task import Task
 from app.models.usage_record import UsageRecord
-from app.services.platform_service import entitlements
+from app.models.platform import Notification
+from app.services.platform_service import entitlements, notify
 
 WARN_AT_PCT = 80
 
@@ -22,11 +23,12 @@ def cost_report(organization_id: str, days: int = 30) -> dict:
 
     usage = UsageRecord.query.filter(UsageRecord.organization_id == organization_id,
                                      UsageRecord.created_at >= start).all()
-    by_model = defaultdict(lambda: {"calls": 0, "input_tokens": 0, "output_tokens": 0, "cost_usd": 0.0})
+    by_model = defaultdict(lambda: {"calls": 0, "input_tokens": 0, "cached_input_tokens": 0, "output_tokens": 0, "cost_usd": 0.0})
     for u in usage:
         m = by_model[(u.provider or "unknown", u.model or "unknown")]
         m["calls"] += 1
         m["input_tokens"] += u.input_tokens or 0
+        m["cached_input_tokens"] += u.cached_input_tokens or 0
         m["output_tokens"] += u.output_tokens or 0
         m["cost_usd"] += u.estimated_cost_usd or 0.0
 
@@ -60,6 +62,7 @@ def cost_report(organization_id: str, days: int = 30) -> dict:
         "totals": {
             "calls": sum(m["calls"] for m in by_model.values()),
             "input_tokens": sum(m["input_tokens"] for m in by_model.values()),
+            "cached_input_tokens": sum(m["cached_input_tokens"] for m in by_model.values()),
             "output_tokens": sum(m["output_tokens"] for m in by_model.values()),
             "cost_usd": round(total_cost, 4),
         },
@@ -87,5 +90,59 @@ def cost_report(organization_id: str, days: int = 30) -> dict:
                 "none": "Your plan has no fixed monthly AI budget.",
             }[level],
         },
-        "not_tracked": ["Cached versus uncached tokens (the provider figures are not recorded yet)."],
+        "cache_note": "Cached tokens are counted when the AI provider reports them; zero can mean the provider "
+                      "did not cache or does not report it.",
     }
+
+
+def _month_cost(organization_id: str, month_start) -> float:
+    return sum(u.estimated_cost_usd or 0.0 for u in UsageRecord.query.filter(
+        UsageRecord.organization_id == organization_id, UsageRecord.created_at >= month_start))
+
+
+def notify_budget_if_crossed(organization_id: str) -> str | None:
+    """One workspace notification the first time a month's AI spend passes 80%,
+    and one when it reaches the plan's allowance. Returns the kind it raised."""
+
+    allowance = entitlements(organization_id).get("monthly_ai_budget_usd")
+    if not allowance:
+        return None
+    month_start = utcnow().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    used_pct = _month_cost(organization_id, month_start) / allowance * 100
+    if used_pct >= 100:
+        kind, title, severity = "ai_budget.reached", "This month's AI budget is used up", "error"
+        body = "New runs stop until next month or a plan change."
+    elif used_pct >= WARN_AT_PCT:
+        kind, title, severity = "ai_budget.warning", f"{used_pct:.0f}% of this month's AI budget is used", "warning"
+        body = "Runs continue until the budget is reached."
+    else:
+        return None
+    already = Notification.query.filter(Notification.organization_id == organization_id, Notification.kind == kind,
+                                        Notification.created_at >= month_start).first()
+    if already:
+        return None
+    notify(organization_id, kind, title, body, link="/app/settings/usage", severity=severity)
+    return kind
+
+
+def platform_unit_economics() -> list[dict]:
+    """For the platform owner only: what each workspace pays against what its AI
+    work cost this month. Revenue counts only for active (paying) subscriptions."""
+
+    from app.models.organization import Organization
+    from app.services.platform_service import get_subscription
+
+    month_start = utcnow().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    rows = []
+    for org in Organization.query.order_by(Organization.created_at.desc()).limit(500):
+        sub = get_subscription(org.id)
+        price = sub.plan.monthly_price_usd if sub.plan else None
+        revenue = price if sub.status == "active" and price else 0.0
+        cost = round(_month_cost(org.id, month_start), 4)
+        rows.append({
+            "organization_id": org.id, "name": org.name, "plan": sub.plan.name if sub.plan else None,
+            "status": sub.status, "list_price_usd": price, "revenue_usd": revenue, "ai_cost_usd": cost,
+            "gross_margin_usd": round(revenue - cost, 2),
+            "gross_margin_pct": round((revenue - cost) / revenue * 100, 1) if revenue else None,
+        })
+    return rows

@@ -65,6 +65,18 @@ def admin_update_enquiry_route(enquiry_id):
     return jsonify({"enquiry": _enquiry_dict(e)}), 200
 
 
+@api_v1.route("/admin/unit-economics", methods=["GET"])
+@login_required
+def admin_unit_economics_route():
+    from app.services.cost_service import platform_unit_economics
+
+    _require_admin()
+    rows = platform_unit_economics()
+    db.session.commit()  # get_subscription may create a trial row for a workspace that had none
+    return jsonify({"workspaces": rows, "basis": "AI cost is an estimate from token counts. Revenue counts active "
+                                                 "subscriptions at list price; trials count as zero."}), 200
+
+
 @api_v1.route("/admin/overview", methods=["GET"])
 @login_required
 def admin_overview_route():
