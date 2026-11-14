@@ -10,8 +10,8 @@ from app.services.ads_service import process_ads
 from app.services.deliverable_service import create_deliverable_with_first_version
 from tests.conftest import create_campaign, create_org, register_and_login
 
-PLAN = {"campaign_structure": [{"name": "Autumn bulbs — Instagram", "channel": "meta", "objective": "traffic", "audience": "Local gardeners"},
-                               {"name": "Search — bulbs near me", "channel": "google_ads", "objective": "leads", "audience": "Bristol"}]}
+PLAN = {"campaign_structure": [{"name": "Autumn bulbs: Instagram", "channel": "meta", "objective": "traffic", "audience": "Local gardeners"},
+                               {"name": "Search, bulbs near me", "channel": "google_ads", "objective": "leads", "audience": "Bristol"}]}
 
 
 def _plan(app, client, org_id, approve=True):

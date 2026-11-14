@@ -164,7 +164,7 @@ export function KpiCard({
         {label}
         {basis === 'estimate' && <span className="basis-tag">est.</span>}
       </div>
-      <div className="kpi-value">{unavailable ? '—' : value == null ? '—' : format(value)}</div>
+      <div className="kpi-value">{unavailable ? '-' : value == null ? '-' : format(value)}</div>
       {unavailable ? (
         <div className="kpi-sub">{unavailable}</div>
       ) : (

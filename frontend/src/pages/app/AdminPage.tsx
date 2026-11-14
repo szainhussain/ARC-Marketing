@@ -39,7 +39,7 @@ export default function AdminPage() {
   }
 
   const o = overview.data
-  const money = (v: number | null) => (v == null ? '—' : `$${v.toFixed(2)}`)
+  const money = (v: number | null) => (v == null ? '-' : `$${v.toFixed(2)}`)
   return (
     <div className="page page-wide">
       <PageHeader title="Admin" description="Sign-ups, usage across ARC, and every demo request and contact message from the website." />
@@ -79,7 +79,7 @@ export default function AdminPage() {
                 {margins.data.workspaces.map((w) => (
                   <tr key={w.organization_id}>
                     <th scope="row">{w.name}</th>
-                    <td>{w.plan || '—'}</td>
+                    <td>{w.plan || '-'}</td>
                     <td>{w.status}</td>
                     <td>{money(w.revenue_usd)}</td>
                     <td>{money(w.ai_cost_usd)}</td>

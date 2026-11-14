@@ -558,3 +558,33 @@ kbd { font-family: var(--font-mono); font-size: 0.75rem; padding: 1px 6px; borde
 .swatch-dot { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-fg) 20%, transparent); }
 .swatch-dot.workspace { background: conic-gradient(var(--color-accent) 0 50%, var(--color-accent-2) 50%); }
 .swatch-dot.empty { background: repeating-linear-gradient(45deg, var(--color-border-strong) 0 3px, transparent 3px 6px) !important; }
+
+/* Display type in Plus Jakarta Sans: heavier and tighter than the old serif, a step smaller (D24). */
+.display, .section h2.display-h, .hero2 h1, .final-cta h2, .auth-card h1, .display-page { font-weight: 800; letter-spacing: -0.035em; }
+.hero2 h1 { font-size: clamp(2.4rem, 6vw, 4.6rem); line-height: 1.05; }
+.section h2.display-h { font-size: clamp(1.85rem, 3.7vw, 2.85rem); line-height: 1.12; }
+.final-cta h2, .display-page { font-size: clamp(1.95rem, 4.2vw, 3.2rem); line-height: 1.1; }
+.auth-card h1 { font-size: 2rem; }
+
+/* Animated monthly loop (components/motion/FlowLoop.tsx) */
+.flowloop { position: relative; margin: 0 0 32px; padding: 26px 22px 18px; border: 1px solid var(--color-border); border-radius: 18px; background: var(--color-bg-elevated); }
+.flowloop-track { position: absolute; left: calc(22px + 8.33%); right: calc(22px + 8.33%); top: 51px; height: 3px; border-radius: 3px; background: var(--color-border); overflow: hidden; }
+.flowloop-fill { height: 100%; background: var(--color-accent); transform-origin: left center; }
+.flowloop-steps { position: relative; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.flowloop-step button { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; background: none; border: none; box-shadow: none; padding: 0 2px; color: var(--color-muted-fg); cursor: pointer; }
+.flowloop-node { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--color-border-strong); background: var(--color-bg-elevated); color: var(--color-muted-fg); }
+.flowloop-step.done .flowloop-node { border-color: var(--color-accent); color: var(--color-accent); }
+.flowloop-step.active .flowloop-node { border-color: var(--color-accent); background: var(--color-accent); color: var(--color-on-accent); }
+.flowloop-step.gate.active .flowloop-node { border-color: var(--color-success); background: var(--color-success); }
+.flowloop-label { font-size: 0.86rem; font-weight: 700; text-align: center; }
+.flowloop-step.active .flowloop-label { color: var(--color-fg); }
+.flowloop-caption { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--color-border); min-height: 62px; }
+.flowloop-caption p { margin: 0; font-size: 1.02rem; }
+.flowloop-static { list-style: none; margin: 0 0 32px; padding: 0; display: grid; gap: 10px; }
+.flowloop-static li { display: flex; gap: 10px; align-items: flex-start; }
+@media (max-width: 640px) {
+  .flowloop { padding: 20px 10px 14px; }
+  .flowloop-track { left: calc(10px + 8.33%); right: calc(10px + 8.33%); top: 41px; }
+  .flowloop-node { width: 40px; height: 40px; }
+  .flowloop-label { font-size: 0.7rem; }
+}

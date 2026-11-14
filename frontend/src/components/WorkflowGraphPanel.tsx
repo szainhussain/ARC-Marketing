@@ -125,7 +125,7 @@ export function TaskDrawer({
             <p className="small">
               {task.depends_on.length
                 ? task.depends_on.map((id) => byId?.get(id)?.agent_name || id).join(', ')
-                : 'None — starts first.'}
+                : 'None, starts first.'}
             </p>
           </div>
           <div className="deliverable-section">
@@ -145,7 +145,7 @@ export function TaskDrawer({
                   <div>
                     <div>
                       #{e.attempt_number} {statusLabel(e.status)}
-                      {e.error_code ? ` — ${humanize(e.error_code)}` : ''}
+                      {e.error_code ? `: ${humanize(e.error_code)}` : ''}
                     </div>
                     <div className="muted small">{e.error_summary || e.summary}</div>
                     {e.evaluation.filter((c) => !c.passed).map((c) => (

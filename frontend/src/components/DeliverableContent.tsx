@@ -57,7 +57,7 @@ function Strategy({ content }: { content: Json }) {
             {(content.prioritised_initiatives as Json[]).map((it, i) => (
               <li key={i}>
                 <strong>{String(it.initiative ?? '')}</strong>
-                <span className="muted"> · Impact: {String(it.expected_impact ?? '—')} · Effort: {String(it.effort ?? '—')}</span>
+                <span className="muted"> · Impact: {String(it.expected_impact ?? '-')} · Effort: {String(it.effort ?? '-')}</span>
                 {it.evidence ? <div className="muted small">Based on: {String(it.evidence)}</div> : null}
               </li>
             ))}
@@ -327,7 +327,7 @@ const SocialCalendar = fieldRenderer([
 
 const OutreachPlan = fieldRenderer([
   { key: 'target_profiles', label: 'Target profiles (no specific people or contacts)' },
-  { key: 'outreach_drafts', label: 'Outreach drafts — for your review' },
+  { key: 'outreach_drafts', label: 'Outreach drafts, for your review' },
   { key: 'event_ideas', label: 'Event ideas' },
   { key: 'assumptions', label: 'Assumptions' },
 ])

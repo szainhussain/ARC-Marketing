@@ -6,7 +6,7 @@ Two kinds of metric are kept apart (brief §20):
   "estimate" (placeholder per-token prices).
 - Business metrics (spend, leads, conversions, revenue, CPA, ROAS, traffic,
   engagement): need a connected source. None is connected yet, so each is
-  returned with `available: false` and the source it would need — never a
+  returned with `available: false` and the source it would need, never a
   made-up number.
 """
 
@@ -49,7 +49,7 @@ _MANUAL_METRIC = {"marketing_spend": ("spend", "usd"), "leads": ("leads", None),
 
 def _business_metrics(organization_id, start, end, campaign_id):
     """Business numbers come only from results the team entered (labelled
-    "manual") until a data source is connected — never estimated."""
+    "manual") until a data source is connected, never estimated."""
 
     from app.services.results_service import summarize
 

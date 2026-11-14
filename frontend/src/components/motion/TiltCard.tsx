@@ -5,7 +5,7 @@ import { useRef, type ReactNode } from 'react'
  * (--rx/--ry, consumed by the .tilt-card class in index.css) rather than
  * animating transform directly in JS, so the actual motion still goes
  * through CSS transitions (and respects prefers-reduced-motion via the
- * existing global guard — see index.css's .tilt-card media query).
+ * existing global guard, see index.css's .tilt-card media query).
  * No mouse tracking at all on touch devices (no hover capability).
  */
 export default function TiltCard({

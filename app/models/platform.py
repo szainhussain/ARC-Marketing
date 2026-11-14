@@ -233,7 +233,7 @@ CALENDAR_STATUSES = ("planned", "ready", "published_confirmed", "skipped")
 
 class CalendarEntry(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
     """A scheduled piece of content. `published_confirmed` is only ever set
-    by a person saying they posted it — nothing here posts anything."""
+    by a person saying they posted it, nothing here posts anything."""
 
     __tablename__ = "calendar_entries"
 

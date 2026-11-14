@@ -1,8 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* ARC design tokens (docs/DECISIONS.md D13). Dark-first: near-black
-   surfaces, warm-white text, restrained ice-blue accent. Fonts: Inter (UI,
-   SIL OFL), Instrument Serif (display headlines, SIL OFL), JetBrains Mono
+   surfaces, warm-white text, restrained ice-blue accent. Fonts: Plus Jakarta Sans (UI and headlines,
+   SIL OFL), JetBrains Mono
    (technical metadata, SIL OFL). */
 :root {
   --color-bg: #08090b;
@@ -58,8 +58,9 @@
   --logo-to: #c7b8ff;
   --logo-dot: #9fd8ff;
 
-  --font-ui: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --font-display: 'Instrument Serif', 'Times New Roman', serif;
+  /* One family for text and headlines (UI/UX Pro Max "Friendly SaaS" pairing, D24). */
+  --font-ui: 'Plus Jakarta Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-display: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
@@ -301,7 +302,7 @@ table.simple tr:hover td { background: var(--color-muted); }
 
 
 
-/* 3D tilt wrapper — mouse-tracked via JS setting --rx/--ry custom props */
+/* 3D tilt wrapper, mouse-tracked via JS setting --rx/--ry custom props */
 .tilt-card {
   transform: perspective(900px) rotateX(var(--ry, 0deg)) rotateY(var(--rx, 0deg));
   transition: transform 120ms ease-out, box-shadow var(--transition), border-color var(--transition);

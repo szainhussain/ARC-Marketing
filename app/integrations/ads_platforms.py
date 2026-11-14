@@ -80,4 +80,4 @@ class SandboxAdsPlatform:
 
 
 PLATFORMS = {"sandbox": SandboxAdsPlatform}
-PLANNED = {"meta": "Meta Ads (Facebook & Instagram) — needs Marketing API access", "google": "Google Ads — needs an approved developer token"}
+PLANNED = {"meta": "Meta Ads (Facebook & Instagram), needs Marketing API access", "google": "Google Ads, needs an approved developer token"}

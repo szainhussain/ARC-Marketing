@@ -20,7 +20,7 @@ def get_membership_or_403(organization_id: str) -> Membership:
         (m for m in user.memberships if m.organization_id == organization_id), None
     )
     if membership is None:
-        # Deliberately identical to a generic 403 — do not reveal whether
+        # Deliberately identical to a generic 403, do not reveal whether
         # the organization exists.
         raise PermissionDenied("You do not have access to this organization.")
     return membership

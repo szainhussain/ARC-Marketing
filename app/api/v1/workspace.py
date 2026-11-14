@@ -262,7 +262,7 @@ def create_invitation_route(organization_id):
     # themselves. It's shown once; only its hash is stored.
     link = f"{current_app.config['FRONTEND_ORIGIN']}/accept-invite?token={token}"
     return jsonify({"invitation": invite.to_dict(), "invite_link": link,
-                    "delivery": "manual — share this link; email sending is not configured"}), 201
+                    "delivery": "manual, share this link; email sending is not configured"}), 201
 
 
 @api_v1.route("/organizations/<organization_id>/invitations/<invitation_id>", methods=["DELETE"])

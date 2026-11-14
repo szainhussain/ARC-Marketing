@@ -8,7 +8,7 @@ import type { Campaign } from '../api/types'
 
 const FIELDS: { key: string; label: string; area?: boolean; type?: string; hint?: string; required?: boolean }[] = [
   { key: 'name', label: 'Campaign name', required: true },
-  { key: 'objective', label: 'Objective', area: true, required: true, hint: 'What should this campaign achieve? Be specific — e.g. “500 trial sign-ups from UK hikers by June”.' },
+  { key: 'objective', label: 'Objective', area: true, required: true, hint: 'What should this campaign achieve? Be specific, e.g. “500 trial sign-ups from UK hikers by June”.' },
   { key: 'audience', label: 'Audience', area: true, hint: 'Leave blank to use your brand profile’s audience.' },
   { key: 'offer', label: 'Offer', hint: 'Product, promotion or message to lead with.' },
   { key: 'channels', label: 'Channels', hint: 'Comma separated, e.g. Instagram, TikTok, Google Ads, email' },
@@ -18,7 +18,7 @@ const FIELDS: { key: string; label: string; area?: boolean; type?: string; hint?
   { key: 'budget_guidance', label: 'Budget guidance', hint: 'A range is fine. Agents recommend splits; you decide spend.' },
   { key: 'success_metrics', label: 'How you’ll judge success', area: true },
   { key: 'constraints', label: 'Constraints', area: true, hint: 'Claims to avoid, legal notes, dates to avoid…' },
-  { key: 'research_urls', label: 'Pages to research (optional)', area: true, hint: 'Up to 5 public links, one per line — competitor sites, review pages, market reports. Your research agent reads them (sites that block automated reading are skipped) and cites them.' },
+  { key: 'research_urls', label: 'Pages to research (optional)', area: true, hint: 'Up to 5 public links, one per line, competitor sites, review pages, market reports. Your research agent reads them (sites that block automated reading are skipped) and cites them.' },
 ]
 
 // Starting points; every field stays editable and nothing is sent until saved.
@@ -26,7 +26,7 @@ const FIELDS: { key: string; label: string; area?: boolean; type?: string; hint?
 const TEMPLATES: { id: string; label: string; values: Record<string, string> }[] = [
   ...SEGMENTS.map((s) => ({ id: `playbook-${s.key}`, label: s.label, values: { ...s.playbook } })),
   { id: 'launch', label: 'Product launch', values: { name: 'Product launch', objective: 'Launch [product] and reach [number] sign-ups or sales in the first [weeks] weeks.', offer: 'Launch offer or early-access price', channels: 'Instagram, LinkedIn, email, Google Ads', success_metrics: 'Sign-ups or sales, cost per acquisition, launch-week reach' } },
-  { id: 'monthly', label: 'Monthly always-on', values: { name: 'Monthly marketing — [month]', objective: 'Keep a steady flow of enquiries this month with consistent posting and one featured offer.', channels: 'Instagram, Facebook, Google Business Profile', success_metrics: 'Enquiries or bookings, posting consistency, engagement rate' } },
+  { id: 'monthly', label: 'Monthly always-on', values: { name: 'Monthly marketing: [month]', objective: 'Keep a steady flow of enquiries this month with consistent posting and one featured offer.', channels: 'Instagram, Facebook, Google Business Profile', success_metrics: 'Enquiries or bookings, posting consistency, engagement rate' } },
   { id: 'promo', label: 'Seasonal promotion', values: { name: 'Seasonal promotion', objective: 'Drive [revenue/orders] during [season or event] with a time-limited offer.', offer: '[Discount or bundle] until [end date]', channels: 'Instagram, email, Meta ads', success_metrics: 'Orders, revenue, return on ad spend', constraints: 'State the end date clearly; no misleading urgency.' } },
   { id: 'leads', label: 'B2B lead generation', values: { name: 'Lead generation', objective: 'Generate [number] qualified leads from [segment] this quarter.', offer: 'Free consultation, demo or guide', channels: 'LinkedIn, email, website', success_metrics: 'Qualified leads, cost per lead, meetings booked' } },
   { id: 'event', label: 'Event or webinar', values: { name: 'Event promotion', objective: 'Get [number] registrations for [event] on [date].', channels: 'LinkedIn, email, Instagram', success_metrics: 'Registrations, attendance rate, follow-up meetings' } },

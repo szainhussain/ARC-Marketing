@@ -568,3 +568,18 @@ cause, not the prompt.
 - Not done, on purpose: batch processing (provider batch APIs answer within hours, which
   does not fit a run a customer is waiting on) and a separate "skills" store (each agent
   already receives only its own instructions, so nothing unneeded is loaded).
+
+## D24 — One type family, no em-dashes, an animated loop on the home page
+
+**Decision (2026-11-14, at the user's request):** Plus Jakarta Sans replaces Inter (text)
+and Instrument Serif (headlines); it is the "Friendly SaaS" pairing from the
+`ui-ux-pro-max` typography data. Spaced em-dashes are removed from all user-facing text
+and empty table cells show a hyphen. The home page's seven-box text loop is replaced by
+`components/motion/FlowLoop.tsx`: six icon steps, a moving marker and one sentence at a
+time.
+
+**Details:** display headings are weight 800 with tighter tracking and a step smaller than
+the serif was. `FlowLoop` pauses on hover and focus, has a pause button, and under
+`prefers-reduced-motion` renders a static list instead. The model prompt in
+`provider_adapter.py` was deliberately left untouched, so no agent version changes. The
+text-based `LoopDiagram` remains on the How it works page.

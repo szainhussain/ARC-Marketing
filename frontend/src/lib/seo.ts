@@ -17,7 +17,7 @@ function setMeta(name: string, content: string, attr: 'name' | 'property' = 'nam
 /** Sets the tab title, meta description and Open Graph tags for a public page. */
 export function usePageMeta(title: string, description: string = DEFAULT_DESCRIPTION) {
   useEffect(() => {
-    const full = title ? `${title} · ${SITE}` : `${SITE} — Strategy. Plan. Execution.`
+    const full = title ? `${title} · ${SITE}` : `${SITE}: Strategy. Plan. Execution.`
     document.title = full
     setMeta('description', description)
     setMeta('og:title', full, 'property')

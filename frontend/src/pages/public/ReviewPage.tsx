@@ -56,7 +56,7 @@ export default function ReviewPage() {
     setFailure(null)
     try {
       await apiRequest(`/public/review/${encodeURIComponent(token)}/decision`, { method: 'POST', body: { decision, ...form } })
-      setMessage(decision === 'approved' ? 'Thank you — you approved this version.' : 'Thank you — your feedback was sent to the team.')
+      setMessage(decision === 'approved' ? 'Thank you, you approved this version.' : 'Thank you, your feedback was sent to the team.')
       reload()
     } catch (err) {
       setFailure(err instanceof ApiError ? err.message : 'Could not send your decision. Please try again.')

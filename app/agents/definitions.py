@@ -1,7 +1,7 @@
 """The 12-agent marketing department.
 
 Each agent sees only (a) the campaign, (b) the business profile, and (c)
-the outputs of agents named in its `reads` allowlist — the engine filters
+the outputs of agents named in its `reads` allowlist, the engine filters
 upstream outputs to that set before an input builder ever runs. Builders
 then pick the specific fields they need, keeping each model call small
 (this matters both for cost and for free-tier provider rate limits).
@@ -230,7 +230,7 @@ AGENTS: tuple[AgentSpec, ...] = (
         # 1.1: Brand Kit in the profile; 1.2: reads public pages listed on the brief;
         # 1.3: runs first, from the brief, so the strategy can be built on it
         version="1.3.0",
-        role="Evidence: audience, competitors, trends — facts separated from inference.",
+        role="Evidence: audience, competitors, trends, facts separated from inference.",
         responsibilities=(
             "Synthesize audience and competitor hypotheses",
             "Track sources and assumptions explicitly",
@@ -329,7 +329,7 @@ AGENTS: tuple[AgentSpec, ...] = (
         name="Performance Marketing Manager",
         # 1.1: Brand Kit in the profile; 1.2: unit economics and verified results as input
         version="1.2.0",
-        role="Paid search/social structure and budget recommendations — never spend.",
+        role="Paid search/social structure and budget recommendations, never spend.",
         responsibilities=(
             "Propose campaign structure, audiences, and experiments",
             "Recommend budget allocation as percentages",
@@ -393,7 +393,7 @@ AGENTS: tuple[AgentSpec, ...] = (
         number=4,
         name="PR, Influencer, Partnerships & Events Manager",
         version="1.1.0",  # 1.1: Brand Kit (persona, colours, fonts, visual rules) in the profile
-        role="Target profiles, outreach drafts, event ideas — never commitments.",
+        role="Target profiles, outreach drafts, event ideas, never commitments.",
         responsibilities=(
             "Define creator/media/partner target profiles",
             "Draft outreach messages for human review",

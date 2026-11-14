@@ -595,8 +595,8 @@ export function CookiesPage() {
       id: 'storage',
       heading: 'Preferences stored in your browser',
       body: ul([
-        <><code>activeOrganizationId</code> — remembers which workspace you last opened.</>,
-        <><code>arc-legal-region</code> — remembers the region you chose on our legal pages.</>,
+        <><code>activeOrganizationId</code>, remembers which workspace you last opened.</>,
+        <><code>arc-legal-region</code>, remembers the region you chose on our legal pages.</>,
         'These stay on your device, are never sent to advertisers, and you can clear them in your browser settings at any time.',
       ]),
     },
@@ -714,7 +714,7 @@ export function DpaPage() {
       id: 'details',
       heading: 'Details of processing',
       body: ul([
-        <><strong>Subject matter and purpose:</strong> providing the Service — running AI agents that research, plan and draft marketing work, managing approvals and exports.</>,
+        <><strong>Subject matter and purpose:</strong> providing the Service, running AI agents that research, plan and draft marketing work, managing approvals and exports.</>,
         <><strong>Duration:</strong> the term of the subscription, plus the deletion grace period.</>,
         <><strong>Data subjects:</strong> the customer’s users, and people mentioned in content the customer uploads (for example customers, prospects or contacts).</>,
         <><strong>Categories of data:</strong> names, contact details, business information and any personal data the customer chooses to include. The customer should not upload special-category, health, payment card or children’s data.</>,
@@ -753,7 +753,7 @@ export function DpaPage() {
         'Server-side tenant isolation on every request, tested for every workspace-scoped endpoint.',
         'Role-based access with least privilege; only approvers can approve, only owners manage billing and deletion.',
         'Hashed passwords, optional two-factor sign-in (TOTP) with hashed recovery codes, rate-limited authentication, HttpOnly session cookies and CSRF protection; password reset revokes other sessions.',
-        'Agents can only produce schema-validated drafts — no code execution, database access or arbitrary web requests.',
+        'Agents can only produce schema-validated drafts, no code execution, database access or arbitrary web requests.',
         'Approvals bound to an exact version and payload hash, re-checked immediately before any export or outbound action.',
         'Append-only audit log of consequential actions; signed webhooks with replay protection.',
         'Provider keys and secrets kept on the server only.',
@@ -776,8 +776,8 @@ export function DpaPage() {
       body: (
         <p>
           Customer Personal Data is processed mainly in the United States. Where the law of the customer’s country
-          requires a transfer mechanism, the parties agree that the applicable one applies — for example the EU Standard
-          Contractual Clauses (module two or three), the UK Addendum or IDTA, or the Swiss amendments — and that it is
+          requires a transfer mechanism, the parties agree that the applicable one applies, for example the EU Standard
+          Contractual Clauses (module two or three), the UK Addendum or IDTA, or the Swiss amendments, and that it is
           incorporated by reference.
         </p>
       ),
@@ -834,7 +834,7 @@ export function AcceptableUsePage() {
         'Anything illegal, or that promotes illegal activity.',
         'False, misleading or deceptive advertising, including fake reviews, testimonials or endorsements, and undisclosed paid promotion.',
         'Content that impersonates a person or organisation, or implies an endorsement that does not exist.',
-        'Hate speech, harassment, threats, or content that discriminates unlawfully — including discriminatory targeting of housing, employment or credit ads.',
+        'Hate speech, harassment, threats, or content that discriminates unlawfully, including discriminatory targeting of housing, employment or credit ads.',
         'Sexual content involving minors, or any content that exploits children.',
         'Misleading health, financial or legal claims, and political or election content designed to deceive voters.',
         'Content that infringes copyright, trademarks or other intellectual property.',
@@ -886,7 +886,7 @@ export function AiPolicyPage() {
       heading: 'How ARC uses AI',
       body: (
         <p>
-          ARC runs specialist agents — from the CMO to the Record Keeper — that each produce one kind of
+          ARC runs specialist agents, from the CMO to the Record Keeper, that each produce one kind of
           structured draft: a strategy, research notes, a plan, a content pack and so on. Every draft is checked against a
           schema and code-level quality checks before it is saved. Agents work in a fixed order and only see the outputs
           they depend on.
@@ -899,7 +899,7 @@ export function AiPolicyPage() {
       body: ul([
         'Anything that leaves your workspace needs an explicit approval from an authorised person.',
         'An approval applies to one exact version. Any edit creates a new version and needs a new approval.',
-        'Agents cannot change ad spend, make payments, sign contracts or reply publicly on sensitive issues — these are locked platform rules.',
+        'Agents cannot change ad spend, make payments, sign contracts or reply publicly on sensitive issues, these are locked platform rules.',
         'Owners and admins can pause every agent or engage a kill switch at any time.',
       ]),
     },
@@ -988,7 +988,7 @@ export function RefundsPage() {
       heading: 'Refunds',
       body: ul([
         'Subscription fees are not refunded for partially used periods, except as described here or where the law requires.',
-        'If you were charged in error — for example twice, or after you cancelled — we will refund the charge in full.',
+        'If you were charged in error, for example twice, or after you cancelled, we will refund the charge in full.',
         'If the Service was unavailable for a significant part of a billing period because of a problem on our side, contact us and we will credit or refund that period fairly.',
         'If you object to a new sub-processor under our DPA and we cannot resolve it, we refund prepaid fees for the remaining period.',
         'Statutory rights in your country, including any cooling-off period that applies to consumers, are not affected.',

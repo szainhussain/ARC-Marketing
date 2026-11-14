@@ -89,7 +89,7 @@ export function HowItWorksPage() {
     ['Write a brief', 'Objective, audience, channels, dates and budget guidance for a campaign.'],
     ['Agents run in order', 'CMO → Research → Marketing Manager → specialists in parallel → Ops quality gate → Record Keeper. Each waits for its inputs.'],
     ['Problems are handled, not hidden', 'Rate limits and timeouts retry with backoff. Anything that truly fails stops, says why, and waits for you.'],
-    ['You review and approve', 'Approvals lock to the exact version. You — or your client, through a secure review link — approve each piece.'],
+    ['You review and approve', 'Approvals lock to the exact version. You, or your client, through a secure review link, approve each piece.'],
     ['Publish', 'Export approved work in each platform’s format, or send it automatically to Zapier or Make to post. ARC never spends money.'],
     ['It learns', 'The Record Keeper proposes learnings; once approved they inform future strategy and planning.'],
   ]
@@ -129,10 +129,10 @@ export function HowItWorksPage() {
           <div className="card">
             <h3>Always needs a person</h3>
             <ul className="deliverable-list">
-              <li>Anything leaving the workspace — approved first, every time</li>
+              <li>Anything leaving the workspace, approved first, every time</li>
               <li>Public replies on sensitive issues</li>
               <li>Payments, contracts and commitments</li>
-              <li>Any ad spend change — agents can’t do this at all</li>
+              <li>Any ad spend change, agents can’t do this at all</li>
             </ul>
           </div>
         </div>
@@ -199,7 +199,7 @@ export function PricingPage() {
       <section className="section">
         <SectionHead
           title="A marketing department for less than one hire."
-          lede="Every plan includes strategy, planning, content for your channels, approvals and exports. Start with a 14-day free trial — no card needed — and cancel any time."
+          lede="Every plan includes strategy, planning, content for your channels, approvals and exports. Start with a 14-day free trial, no card needed, and cancel any time."
         />
         <PricingTable />
         <p style={{ marginTop: 18 }}>
@@ -248,7 +248,7 @@ export function AboutPage() {
         </p>
         <p>
           Our goal is not to make marketing look autonomous. It's to make it operate autonomously, measurably,
-          recoverably and safely — with people controlling the decisions that matter.
+          recoverably and safely, with people controlling the decisions that matter.
         </p>
         <p>
           We're honest about limits: outcomes depend on your business, data, channels and budget, and we label every
@@ -290,9 +290,9 @@ export function ContactPage() {
 
   return (
     <section className="section" style={{ maxWidth: 640 }}>
-      <SectionHead title="Talk to us." lede="Sales, support, partnerships or security — we reply by email." />
+      <SectionHead title="Talk to us." lede="Sales, support, partnerships or security, we reply by email." />
       {status === 'sent' ? (
-        <div className="banner success">Thanks — your message was received. We'll reply by email.</div>
+        <div className="banner success">Thanks, your message was received. We'll reply by email.</div>
       ) : (
         <form className="card" onSubmit={submit} noValidate>
           {error && <div className="banner error">{error}</div>}

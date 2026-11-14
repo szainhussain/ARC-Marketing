@@ -1,6 +1,6 @@
 """Deterministic, code-level checks run on every agent output after schema
 validation. These are cheap, auditable, and can't be talked out of by a
-model — unlike asking the QA agent to notice the same thing. Results are
+model, unlike asking the QA agent to notice the same thing. Results are
 stored on the AgentExecution and failures are passed to Marketing Ops
 (agent 11) as confirmed issues."""
 
@@ -39,7 +39,7 @@ def _check_contacts(text: str) -> dict:
     return {
         "check": "no_contact_details",
         "passed": not found,
-        "detail": f"Output contains a {', '.join(found)} — agents must not invent contacts."
+        "detail": f"Output contains a {', '.join(found)}, agents must not invent contacts."
         if found
         else None,
     }

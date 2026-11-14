@@ -12,7 +12,7 @@ STATUS_FAILED = "failed"
 STATUS_VERIFICATION_REQUIRED = "verification_required"
 STATUS_CANCELLED = "cancelled"
 
-# Publication is tracked separately from handoff/export status — exporting
+# Publication is tracked separately from handoff/export status, exporting
 # or copying content must never be reported as "published".
 PUBLICATION_NOT_APPLICABLE = "not_applicable"
 PUBLICATION_UNVERIFIED = "unverified"

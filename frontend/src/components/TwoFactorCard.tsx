@@ -79,7 +79,7 @@ export default function TwoFactorCard() {
 
       {codes && (
         <div className="banner success">
-          <strong>Two-factor sign-in is on.</strong> Save these recovery codes somewhere safe — each one signs you in once if you
+          <strong>Two-factor sign-in is on.</strong> Save these recovery codes somewhere safe, each one signs you in once if you
           lose your phone. They won't be shown again.
           <ul className="recovery-codes">
             {codes.map((c) => (

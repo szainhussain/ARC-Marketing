@@ -93,7 +93,7 @@ def public_contact_route():
                                   topic=topic, message=message[:5000]))
     db.session.commit()
     return jsonify({"status": "received",
-                    "message": "Thanks — your message was received. We'll reply by email."}), 201
+                    "message": "Thanks, your message was received. We'll reply by email."}), 201
 
 
 @api_v1.route("/public/growth-audit", methods=["POST"])

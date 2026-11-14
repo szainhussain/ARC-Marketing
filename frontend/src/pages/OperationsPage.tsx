@@ -92,7 +92,7 @@ export default function OperationsPage() {
         <div>
           <h1>Marketing Operations Center</h1>
           <p className="muted">
-            Your agents, their task queue, and the controls that stop them. Agents only produce drafts —
+            Your agents, their task queue, and the controls that stop them. Agents only produce drafts,
             nothing leaves this workspace without a person's approval.
           </p>
         </div>
@@ -106,8 +106,8 @@ export default function OperationsPage() {
             <div className="control-title">Automation</div>
             <div className="muted small">
               {summary.controls.automation_paused
-                ? 'Paused — the worker will not start any new agent task.'
-                : 'Running — agents pick up ready tasks automatically.'}
+                ? 'Paused, the worker will not start any new agent task.'
+                : 'Running, agents pick up ready tasks automatically.'}
             </div>
           </div>
           <button
@@ -123,8 +123,8 @@ export default function OperationsPage() {
             <div className="control-title">External-action kill switch</div>
             <div className="muted small">
               {summary.controls.kill_switch_enabled
-                ? 'On — exports and handoffs are blocked.'
-                : 'Off — approved deliverables can be exported for manual handoff.'}
+                ? 'On, exports and handoffs are blocked.'
+                : 'Off, approved deliverables can be exported for manual handoff.'}
             </div>
           </div>
           <button
@@ -152,7 +152,7 @@ export default function OperationsPage() {
         </div>
         <div className="kpi-tile">
           <div className="kpi-label">Execution success (month)</div>
-          <div className="kpi-value">{successRate == null ? '—' : `${successRate}%`}</div>
+          <div className="kpi-value">{successRate == null ? '-' : `${successRate}%`}</div>
           <div className="kpi-sub">
             <Link to="/app/settings/automation">Budgets & concurrency →</Link>
           </div>

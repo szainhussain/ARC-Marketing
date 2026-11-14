@@ -94,14 +94,14 @@ def monthly_report_to_blocks(report: dict) -> list[Block]:
     from app.services.results_service import METRIC_FIELDS  # noqa: F401 (documents the fields used)
 
     t = report["results"]["totals"]
-    money = lambda v: "—" if v is None else f"${v:,.2f}"  # noqa: E731
-    num = lambda v: "—" if v is None else f"{v:,.0f}"  # noqa: E731
+    money = lambda v: "-" if v is None else f"${v:,.2f}"  # noqa: E731
+    num = lambda v: "-" if v is None else f"{v:,.0f}"  # noqa: E731
     blocks = [Block("heading", text="Results"),
               Block("table", columns=["Metric", "Value"], rows=[
                   ["Spend", money(t.get("spend"))], ["Leads", num(t.get("leads"))],
                   ["Cost per lead", money(t.get("cost_per_lead"))], ["Conversions", num(t.get("conversions"))],
                   ["Revenue", money(t.get("revenue"))],
-                  ["Return on ad spend", "—" if t.get("roas") is None else f"{t['roas']:.2f}x"]])]
+                  ["Return on ad spend", "-" if t.get("roas") is None else f"{t['roas']:.2f}x"]])]
     if report.get("highlights"):
         blocks += [Block("heading", text="Highlights"), Block("bullets", items=report["highlights"])]
     by_campaign = report["results"].get("by_campaign") or []
@@ -110,7 +110,7 @@ def monthly_report_to_blocks(report: dict) -> list[Block]:
                    columns=["Campaign", "Spend", "Leads", "Cost / lead", "Revenue", "ROAS"],
                    rows=[[c.get("campaign_name") or "", money(c.get("spend")), num(c.get("leads")),
                           money(c.get("cost_per_lead")), money(c.get("revenue")),
-                          "—" if c.get("roas") is None else f"{c['roas']:.2f}x"] for c in by_campaign])]
+                          "-" if c.get("roas") is None else f"{c['roas']:.2f}x"] for c in by_campaign])]
     a = report["activity"]
     blocks += [Block("heading", text="What your marketing department did"),
                Block("table", columns=["Activity", "Count"], rows=[

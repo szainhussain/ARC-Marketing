@@ -255,7 +255,7 @@ export function KnowledgePage() {
 
   return (
     <div className="page page-wide">
-      <PageHeader title="Knowledge library" description="Approved facts, FAQs and learnings. The CMO and Marketing Manager receive the most recent approved entries as context — always as data, never as instructions."
+      <PageHeader title="Knowledge library" description="Approved facts, FAQs and learnings. The CMO and Marketing Manager receive the most recent approved entries as context, always as data, never as instructions."
         actions={<button onClick={() => setEditing({ kind: 'note' })}><Plus size={15} aria-hidden="true" /> Add knowledge</button>} />
       {error && <ErrorState message={error} onRetry={reload} />}
       {action.error && <ErrorState message={action.error} />}
@@ -426,7 +426,7 @@ export function IntegrationsPage() {
                     { key: 'e', header: 'Event', render: (r) => <span className="mono small">{r.event_type}</span> },
                     { key: 's', header: 'Status', render: (r) => <StatusPill status={r.status === 'delivered' ? 'succeeded' : r.status === 'failed' ? 'failed' : 'retrying'} label={humanize(r.status)} /> },
                     { key: 'a', header: 'Attempts', render: (r) => r.attempts },
-                    { key: 'r', header: 'Result', render: (r) => <span className="small">{r.last_error || (r.last_response_code ? `HTTP ${r.last_response_code}` : '—')}</span> },
+                    { key: 'r', header: 'Result', render: (r) => <span className="small">{r.last_error || (r.last_response_code ? `HTTP ${r.last_response_code}` : '-')}</span> },
                     { key: 'w', header: 'When', render: (r) => <span className="muted small">{relativeTime(r.created_at)}</span> },
                   ]} />
               </>
@@ -453,7 +453,7 @@ export function IntegrationsPage() {
         <Field id="wh-desc" label="Description (optional)"><input id="wh-desc" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Field>
       </Dialog>
       <Dialog open={!!secret} onClose={() => setSecret(null)} title="Signing secret" footer={<button onClick={() => setSecret(null)}>I've stored it</button>}>
-        <p className="muted small">Store this now — it isn't shown again.</p>
+        <p className="muted small">Store this now, it isn't shown again.</p>
         <pre className="content-json">{secret}</pre>
       </Dialog>
     </div>

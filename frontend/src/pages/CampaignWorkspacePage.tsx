@@ -482,7 +482,7 @@ function CampaignBrief({ campaign }: { campaign: Campaign }) {
     ['Offer', campaign.offer],
     ['Channels', campaign.channels],
     ['Geography', campaign.geography],
-    ['Dates', campaign.start_date || campaign.end_date ? `${campaign.start_date || '—'} → ${campaign.end_date || '—'}` : null],
+    ['Dates', campaign.start_date || campaign.end_date ? `${campaign.start_date || '-'} → ${campaign.end_date || '-'}` : null],
     ['Budget guidance', campaign.budget_guidance],
     ['Success metrics', campaign.success_metrics],
     ['Constraints', campaign.constraints],

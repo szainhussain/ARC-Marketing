@@ -203,7 +203,7 @@ def monthly_report(organization_id: str, month: str) -> dict:
     if ranked:
         highlights.append(f"Lowest cost per lead: {ranked[0]['channel']} (${ranked[0]['cost_per_lead']:.2f}).")
         if len(ranked) > 1:
-            highlights.append(f"Highest cost per lead: {ranked[-1]['channel']} (${ranked[-1]['cost_per_lead']:.2f}) — review targeting or creative.")
+            highlights.append(f"Highest cost per lead: {ranked[-1]['channel']} (${ranked[-1]['cost_per_lead']:.2f}), review targeting or creative.")
     return {
         "month": f"{year:04d}-{mon:02d}",
         "period": {"start": first.isoformat(), "end": last.isoformat()},

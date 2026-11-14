@@ -22,7 +22,7 @@ export const AGENT_META: Record<string, { icon: LucideIcon; short: string; examp
   marketing_manager: { icon: ClipboardList, short: 'Marketing Manager', example: 'Builds a phased 6-week plan and routes work to the right specialists.' },
   social_media: { icon: MessageCircle, short: 'Social', example: 'Turns approved copy into a dated Instagram and TikTok calendar with escalation rules.' },
   pr_partnerships: { icon: Handshake, short: 'PR & Partnerships', example: 'Defines creator and media profiles to target and drafts outreach for you to approve.' },
-  paid_media: { icon: Target, short: 'Paid Media', example: 'Proposes campaign structure and a budget split — you decide the spend.' },
+  paid_media: { icon: Target, short: 'Paid Media', example: 'Proposes campaign structure and a budget split, you decide the spend.' },
   creative_studio: { icon: PenTool, short: 'Creative', example: 'Writes the creative brief and channel-ready copy variants in your brand voice.' },
   research_analyst: { icon: Microscope, short: 'Research', example: 'Separates what your profile states from what it infers about audience and competitors.' },
   customer_insights: { icon: Headphones, short: 'Customer Insights', example: 'Drafts response templates and flags which ones must go to a person.' },

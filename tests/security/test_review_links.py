@@ -36,7 +36,7 @@ def _link(client, org, approval, **body):
 def test_client_can_view_and_approve_once(app, client):
     org, did, approval = _setup(app, client)
     client.post(f"/api/v1/organizations/{org['id']}/deliverables/{did}/comments", json={"body": "Internal: check pricing"})
-    token, _ = _link(client, org, approval, label="Client — Sara", days=5)
+    token, _ = _link(client, org, approval, label="Client: Sara", days=5)
     client.post("/api/v1/auth/logout")
 
     view = client.get(f"/api/v1/public/review/{token}").get_json()
