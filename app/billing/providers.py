@@ -11,7 +11,7 @@ documented `Stripe-Signature: t=<unix>,v1=<hex hmac-sha256("t.payload")>`):
   It is implemented but has NOT been exercised against Stripe (no
   credentials supplied); see docs/BILLING_AND_PLANS.md for enablement.
 
-Subscription state only ever changes in response to a verified event —
+Subscription state only ever changes in response to a verified event,
 never because a user clicked "upgrade".
 """
 

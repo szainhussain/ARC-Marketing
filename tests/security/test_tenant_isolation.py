@@ -19,7 +19,7 @@ def test_user_cannot_read_another_organizations_campaign(client):
     resp = client.get(f"/api/v1/organizations/{org_a['id']}/campaigns")
     assert resp.status_code == 403
 
-    # Org B's own data is still reachable — this isn't a blanket auth failure.
+    # Org B's own data is still reachable, this isn't a blanket auth failure.
     resp = client.get(f"/api/v1/organizations/{org_b['id']}/campaigns")
     assert resp.status_code == 200
 

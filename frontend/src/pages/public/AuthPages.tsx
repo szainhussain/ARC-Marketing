@@ -33,7 +33,7 @@ export function LoginPage() {
       if (err instanceof ApiError && err.code === 'MFA_REQUIRED') {
         setMfaStep(true)
         setError(null)
-      } else setError(err instanceof ApiError ? err.message : 'Could not reach the ARC service. It may be waking up — try again in a minute.')
+      } else setError(err instanceof ApiError ? err.message : 'Could not reach the ARC service. It may be waking up, try again in a minute.')
     } finally {
       setBusy(false)
     }
@@ -126,7 +126,7 @@ export function SignupPage() {
       navigate(next && next.startsWith('/accept-invite') ? next : '/create-workspace')
     } catch (err) {
       setErrors(fieldErrors(err))
-      setError(err instanceof ApiError ? err.message : 'Could not reach the ARC service. It may be waking up — try again in a minute.')
+      setError(err instanceof ApiError ? err.message : 'Could not reach the ARC service. It may be waking up, try again in a minute.')
     } finally {
       setBusy(false)
     }

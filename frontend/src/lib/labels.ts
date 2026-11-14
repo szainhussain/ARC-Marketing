@@ -34,7 +34,7 @@ export function humanize(value: string): string {
 }
 
 export function relativeTime(iso: string | null | undefined): string {
-  if (!iso) return '—'
+  if (!iso) return '-'
   const then = new Date(iso.endsWith('Z') || iso.includes('+') ? iso : `${iso}Z`).getTime()
   const seconds = Math.round((Date.now() - then) / 1000)
   if (seconds < 0) {

@@ -3,9 +3,10 @@ import { motion, useReducedMotion } from 'motion/react'
 import { Repeat } from 'lucide-react'
 import ProductPreview from '../../components/marketing/ProductPreview'
 import WorkflowDemo from '../../components/marketing/WorkflowDemo'
+import FlowLoop from '../../components/motion/FlowLoop'
 import Reveal from '../../components/motion/Reveal'
 import { IntegrationList, PricingTable, SectionHead } from './sections'
-import { CtaPair, FaqList, LoopDiagram } from './GrowthPages'
+import { CtaPair, FaqList } from './GrowthPages'
 import { HOME_FAQS, MONTHLY_OUTCOMES, SOLUTIONS } from '../../lib/growth'
 import { usePageMeta } from '../../lib/seo'
 
@@ -32,11 +33,11 @@ export default function HomePage() {
           <span className="dot" aria-hidden="true" /> Built for growing businesses in the UAE
         </motion.span>
         <motion.h1 {...enter(0.05)}>
-          A month of marketing, done. <em>Approved by you.</em>
+          Know which marketing drives growth. <em>We&rsquo;ll do the rest.</em>
         </motion.h1>
         <motion.p className="lede" {...enter(0.12)}>
-          ARC plans your month, writes the posts, ads, emails and articles, and tracks what each channel brings in —
-          for less than a part-time hire. Nothing goes out until you approve it.
+          ARC plans your month, writes every post, ad, email and article, and shows which channels grew your
+          business and which did not. Nothing goes out until you approve it.
         </motion.p>
         <motion.div {...enter(0.18)}>
           <CtaPair center />
@@ -73,10 +74,10 @@ export default function HomePage() {
       <section className="section">
         <SectionHead
           title="Strategy to results, every month. You stay in control."
-          lede="One brief becomes a strategy, a dated plan and finished content, checked against your brand rules — and nothing leaves the workspace until you approve it."
+          lede="One brief becomes a strategy, a dated plan and finished content, checked against your brand rules, and nothing leaves the workspace until you approve it."
         />
         <Reveal>
-          <LoopDiagram />
+          <FlowLoop />
         </Reveal>
         <Reveal>
           <WorkflowDemo />
@@ -145,7 +146,7 @@ export default function HomePage() {
             ['Scoped agent permissions', 'Agents only see the outputs they need, and have no tools beyond structured drafting.'],
             ['Approval controls', 'Version-locked approvals, expiry, revocation and one pending decision per version.'],
             ['Budget limits', 'Per-run, per-agent and per-plan budgets, enforced before any model call.'],
-            ['Audit trail', 'Append-only log of who did what, when — exportable with all your data.'],
+            ['Audit trail', 'Append-only log of who did what, when, exportable with all your data.'],
             ['Stop everything', 'Pause all agents or engage the kill switch instantly; the backend enforces it.'],
           ].map(([t, b]) => (
             <div key={t}>

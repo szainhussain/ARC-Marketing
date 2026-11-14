@@ -6,7 +6,7 @@ class ManualHandoffConnector(Connector):
     third-party API: it only packages approved content for the user to
     copy/download and post themselves. It is always "connected" and
     always succeeds at producing the export package, but it must never
-    report the content as published — only the user's own confirmation
+    report the content as published, only the user's own confirmation
     (a separate, explicit step) can set publication_status to
     'manually_confirmed_published'."""
 

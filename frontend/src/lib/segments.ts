@@ -21,7 +21,7 @@ export const SEGMENTS: Segment[] = [
     channels: ['Google Ads', 'Google Business Profile', 'WhatsApp', 'Instagram'],
     goals: ['More booked jobs', 'More repeat and contract customers', 'More reviews'],
     playbook: {
-      name: 'Booked jobs — [month]',
+      name: 'Booked jobs: [month]',
       objective: 'Get [number] booked jobs this month from people searching for [service] in [areas].',
       offer: 'Fixed-price [service] with same-day or next-day slots',
       channels: 'Google Ads, Google Business Profile, WhatsApp, Instagram',
@@ -36,7 +36,7 @@ export const SEGMENTS: Segment[] = [
     channels: ['Instagram', 'TikTok', 'WhatsApp', 'Google Business Profile'],
     goals: ['Fill quiet days', 'More repeat bookings', 'Launch a new treatment'],
     playbook: {
-      name: 'Fill weekday bookings — [month]',
+      name: 'Fill weekday bookings: [month]',
       objective: 'Fill [number] weekday appointments this month and bring back clients who have not visited in [weeks] weeks.',
       offer: 'Weekday package or add-on for [treatment]',
       channels: 'Instagram, TikTok, WhatsApp, Google Business Profile',
@@ -51,7 +51,7 @@ export const SEGMENTS: Segment[] = [
     channels: ['Instagram', 'Meta ads', 'Google Ads', 'Email', 'Website'],
     goals: ['More online orders', 'Higher order value', 'More repeat purchases'],
     playbook: {
-      name: 'Online sales — [month or season]',
+      name: 'Online sales: [month or season]',
       objective: 'Reach [amount] in online sales this month while staying above break-even return on ad spend.',
       offer: '[Bundle or seasonal offer] until [end date]',
       channels: 'Instagram, Meta ads, Google Ads, email, website',
@@ -66,7 +66,7 @@ export const SEGMENTS: Segment[] = [
     channels: ['Instagram', 'LinkedIn', 'Google Ads', 'Email', 'Website'],
     goals: ['More enrolments', 'More enquiries for a new course', 'Fill an upcoming intake'],
     playbook: {
-      name: 'Enrolments — [intake]',
+      name: 'Enrolments: [intake]',
       objective: 'Get [number] enrolments for [course] before the [date] intake.',
       offer: 'Early enrolment price or free trial class',
       channels: 'Instagram, LinkedIn, Google Ads, email, website',
@@ -81,7 +81,7 @@ export const SEGMENTS: Segment[] = [
     channels: ['LinkedIn', 'Email', 'Website', 'Google Ads'],
     goals: ['More qualified enquiries', 'More consultations booked', 'Win larger clients'],
     playbook: {
-      name: 'Qualified enquiries — [quarter]',
+      name: 'Qualified enquiries: [quarter]',
       objective: 'Generate [number] qualified enquiries from [type of client] this quarter.',
       offer: 'Free consultation or short assessment',
       channels: 'LinkedIn, email, website, Google Ads',

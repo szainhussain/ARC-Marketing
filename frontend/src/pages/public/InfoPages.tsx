@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import HowItWorksStory from '../../components/motion/HowItWorksStory'
 import { Link } from 'react-router-dom'
 import { apiRequest, ApiError } from '../../api/client'
 import WorkflowDemo from '../../components/marketing/WorkflowDemo'
@@ -85,31 +86,19 @@ export function AgentsPage() {
 export function HowItWorksPage() {
   usePageMeta("How it works", "From brief to approved, published work: how ARC's agents, approvals and exports fit together.")
   const steps = [
-    ['Set up your workspace', 'Business profile, brand voice, prohibited phrases, goals, channels, budgets and approval policies.'],
-    ['Write a brief', 'Objective, audience, channels, dates and budget guidance for a campaign.'],
-    ['Agents run in order', 'CMO → Research → Marketing Manager → specialists in parallel → Ops quality gate → Record Keeper. Each waits for its inputs.'],
-    ['Problems are handled, not hidden', 'Rate limits and timeouts retry with backoff. Anything that truly fails stops, says why, and waits for you.'],
-    ['You review and approve', 'Approvals lock to the exact version. You — or your client, through a secure review link — approve each piece.'],
-    ['Publish', 'Export approved work in each platform’s format, or send it automatically to Zapier or Make to post. ARC never spends money.'],
-    ['It learns', 'The Record Keeper proposes learnings; once approved they inform future strategy and planning.'],
+    { title: 'Set up your workspace', body: 'Pick your kind of business and ARC fills in the usual answers. Add your brand voice, goals, channels and a few numbers such as your margin.' },
+    { title: 'Write a brief', body: 'One short brief: the objective, the audience, the channels, the dates and the budget.' },
+    { title: 'The team works in order', body: 'Research first, then strategy, then a dated plan, then the content for the channels you chose, a quality check and a record. Each waits for what it needs.' },
+    { title: 'Problems are handled, not hidden', body: 'If the AI service is busy, ARC waits and tries again. Anything that truly fails stops, says why, and waits for you.' },
+    { title: 'You review and approve', body: 'Approvals lock to the exact version. You, or your client through a secure review link, approve each piece.' },
+    { title: 'Publish', body: 'Export approved work in each platform’s format, publish a blog article, or send it to Zapier or Make to post. ARC never spends money.' },
+    { title: 'It learns', body: 'Record your results and ARC shows which channels made or lost money. Those numbers shape next month’s strategy.' },
   ]
   return (
     <>
       <section className="section">
         <SectionHead title="From brief to approved work, step by step." />
-        <ol className="timeline" style={{ maxWidth: 760 }}>
-          {steps.map(([t, b], i) => (
-            <li key={t} className="info">
-              <span className="timeline-dot" aria-hidden="true" />
-              <div>
-                <div style={{ fontWeight: 700 }}>
-                  {i + 1}. {t}
-                </div>
-                <div className="muted">{b}</div>
-              </div>
-            </li>
-          ))}
-        </ol>
+        <HowItWorksStory steps={steps} />
       </section>
       <section className="section tight">
         <WorkflowDemo />
@@ -129,10 +118,10 @@ export function HowItWorksPage() {
           <div className="card">
             <h3>Always needs a person</h3>
             <ul className="deliverable-list">
-              <li>Anything leaving the workspace — approved first, every time</li>
+              <li>Anything leaving the workspace, approved first, every time</li>
               <li>Public replies on sensitive issues</li>
               <li>Payments, contracts and commitments</li>
-              <li>Any ad spend change — agents can’t do this at all</li>
+              <li>Any ad spend change, agents can’t do this at all</li>
             </ul>
           </div>
         </div>
@@ -199,7 +188,7 @@ export function PricingPage() {
       <section className="section">
         <SectionHead
           title="A marketing department for less than one hire."
-          lede="Every plan includes strategy, planning, content for your channels, approvals and exports. Start with a 14-day free trial — no card needed — and cancel any time."
+          lede="Every plan includes strategy, planning, content for your channels, approvals and exports. Start with a 14-day free trial, no card needed, and cancel any time."
         />
         <PricingTable />
         <p style={{ marginTop: 18 }}>
@@ -248,7 +237,7 @@ export function AboutPage() {
         </p>
         <p>
           Our goal is not to make marketing look autonomous. It's to make it operate autonomously, measurably,
-          recoverably and safely — with people controlling the decisions that matter.
+          recoverably and safely, with people controlling the decisions that matter.
         </p>
         <p>
           We're honest about limits: outcomes depend on your business, data, channels and budget, and we label every
@@ -290,9 +279,9 @@ export function ContactPage() {
 
   return (
     <section className="section" style={{ maxWidth: 640 }}>
-      <SectionHead title="Talk to us." lede="Sales, support, partnerships or security — we reply by email." />
+      <SectionHead title="Talk to us." lede="Sales, support, partnerships or security, we reply by email." />
       {status === 'sent' ? (
-        <div className="banner success">Thanks — your message was received. We'll reply by email.</div>
+        <div className="banner success">Thanks, your message was received. We'll reply by email.</div>
       ) : (
         <form className="card" onSubmit={submit} noValidate>
           {error && <div className="banner error">{error}</div>}

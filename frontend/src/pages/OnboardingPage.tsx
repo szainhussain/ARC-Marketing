@@ -93,7 +93,7 @@ ${text}` : text })
           {(result.found.headings.length > 0 || result.found.paragraphs.length > 0) && (
             <>
               <p className="muted small" style={{ margin: '0 0 6px' }}>
-                Also found on your site — add anything useful:
+                Also found on your site, add anything useful:
               </p>
               <ul className="import-found">
                 {[...result.found.headings, ...result.found.paragraphs].map((t) => (

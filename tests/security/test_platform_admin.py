@@ -1,5 +1,5 @@
 """The platform-owner inbox holds every visitor's contact details, so only
-emails in PLATFORM_ADMIN_EMAILS may read it — not even workspace owners."""
+emails in PLATFORM_ADMIN_EMAILS may read it, not even workspace owners."""
 
 from tests.conftest import create_org, register_and_login
 

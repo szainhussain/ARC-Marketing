@@ -14,23 +14,23 @@ SUPPORTED = "architecture_supported"
 PLANNED = "planned"
 
 CATALOG = [
-    {"key": "manual_export:meta_instagram", "name": "Meta / Instagram — manual export", "category": "Social & publishing",
+    {"key": "manual_export:meta_instagram", "name": "Meta / Instagram, manual export", "category": "Social & publishing",
      "status": AVAILABLE, "agents": ["social_media", "creative_studio"],
      "detail": "Formats approved content to composer limits for copy-paste. Never posts.",
      "prerequisite": None},
-    {"key": "manual_export:google_ads", "name": "Google Ads — manual export", "category": "Paid media",
+    {"key": "manual_export:google_ads", "name": "Google Ads, manual export", "category": "Paid media",
      "status": AVAILABLE, "agents": ["paid_media"],
      "detail": "Responsive Search Ad field limits checked against Google's published limits. Never spends.",
      "prerequisite": None},
-    {"key": "manual_export:tiktok_ads", "name": "TikTok Ads — manual export", "category": "Paid media",
+    {"key": "manual_export:tiktok_ads", "name": "TikTok Ads, manual export", "category": "Paid media",
      "status": AVAILABLE, "agents": ["paid_media", "social_media"],
      "detail": "Formats ad text for manual entry. Never posts or spends.", "prerequisite": None},
-    {"key": "wordpress_com", "name": "WordPress.com — publish blog articles", "category": "Social & publishing",
+    {"key": "wordpress_com", "name": "WordPress.com, publish blog articles", "category": "Social & publishing",
      "status": AVAILABLE, "agents": ["seo_growth"],
      "detail": "Publishes an approved blog article to your WordPress.com site (or saves it as a draft), "
                "then reads it back from WordPress to confirm it is live. Nothing is posted before approval.",
      "prerequisite": "A WordPress.com site you can publish to. Connect it under Integrations."},
-    {"key": "outreach:email", "name": "Outreach email — Brevo or Resend", "category": "Outreach",
+    {"key": "outreach:email", "name": "Outreach email: Brevo or Resend", "category": "Outreach",
      "status": AVAILABLE, "agents": ["pr_partnerships", "key_accounts"],
      "detail": "Sends an approved email to a contact list you uploaded, from your own Brevo or Resend account, "
                "with a daily limit, one-click unsubscribe and a suppression list. Nothing is sent before approval.",
@@ -41,12 +41,12 @@ CATALOG = [
                "if you hit your daily cap or turn on the kill switch. Runs on ARC's test platform (no real money) "
                "until Meta or Google Ads API access is connected.",
      "prerequisite": "A daily spend cap set by an owner or admin. Real spend needs Meta Marketing API or Google Ads API access."},
-    {"key": "automation:zapier", "name": "Zapier — publish approved content", "category": "Automation",
+    {"key": "automation:zapier", "name": "Zapier, publish approved content", "category": "Automation",
      "status": AVAILABLE, "agents": ["social_media", "creative_studio", "paid_media"],
      "detail": "Approved content is sent to your Zap via a signed webhook (content.approved_for_publishing); "
                "your Zap posts it to any of thousands of apps. Nothing is sent before approval.",
-     "prerequisite": "A Zapier account and a Zap that starts with 'Webhooks by Zapier — Catch Hook'."},
-    {"key": "automation:make", "name": "Make — publish approved content", "category": "Automation",
+     "prerequisite": "A Zapier account and a Zap that starts with 'Webhooks by Zapier: Catch Hook'."},
+    {"key": "automation:make", "name": "Make, publish approved content", "category": "Automation",
      "status": AVAILABLE, "agents": ["social_media", "creative_studio", "paid_media"],
      "detail": "Approved content is sent to your Make scenario via a signed webhook "
                "(content.approved_for_publishing). Nothing is sent before approval.",
@@ -73,11 +73,11 @@ CATALOG = [
     {"key": "helpdesk", "name": "Helpdesk & reviews", "category": "Customer relationships", "status": PLANNED,
      "agents": ["customer_insights"], "detail": "Not built; the Customer Insights agent labels everything a hypothesis.",
      "prerequisite": "Per-platform API credentials."},
-    {"key": "email_delivery", "name": "Account email — Resend or Brevo", "category": "Internal infrastructure",
+    {"key": "email_delivery", "name": "Account email: Resend or Brevo", "category": "Internal infrastructure",
      "status": AVAILABLE, "agents": [],
      "detail": "Sends password-reset emails from ARC's own sending account.",
      "prerequisite": "The ARC operator sets an email provider key and a verified sending domain."},
-    {"key": "growth_audit", "name": "Growth Audit — website check", "category": "Analytics",
+    {"key": "growth_audit", "name": "Growth Audit, website check", "category": "Analytics",
      "status": AVAILABLE, "agents": [],
      "detail": "Reads one public page and reports repeatable checks for positioning, search, conversion, "
                "lead capture and tracking. No AI and no account needed.",
@@ -89,7 +89,7 @@ CATALOG = [
     {"key": "search_console", "name": "Google Search Console", "category": "Analytics", "status": PLANNED,
      "agents": ["seo_growth"], "detail": "Not built. Would read queries, clicks, impressions and position.",
      "prerequisite": "A verified Google OAuth app and the customer's consent for their property."},
-    {"key": "meta_ads_read", "name": "Meta Ads — read results", "category": "Paid media", "status": PLANNED,
+    {"key": "meta_ads_read", "name": "Meta Ads, read results", "category": "Paid media", "status": PLANNED,
      "agents": ["paid_media", "marketing_ops"], "detail": "Not built. Would import spend and results instead of manual entry.",
      "prerequisite": "Meta app review for ads_read and the customer's consent."},
     {"key": "tiktok_business", "name": "TikTok for Business", "category": "Paid media", "status": PLANNED,

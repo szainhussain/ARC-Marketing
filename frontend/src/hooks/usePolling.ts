@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
  * Calls `load` on mount and then every `intervalMs` while `active` is true.
  * `load` receives an `isCancelled` check so late responses from an
  * unmounted/re-run effect never overwrite newer state (React 19 StrictMode
- * double-invokes mount effects — see CLAUDE.md frontend conventions).
+ * double-invokes mount effects, see CLAUDE.md frontend conventions).
  */
 export function usePolling(
   load: (isCancelled: () => boolean) => Promise<void>,

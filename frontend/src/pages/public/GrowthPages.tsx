@@ -186,7 +186,7 @@ export function DemoPage() {
               </li>
             ))}
           </ul>
-          <p className="muted small">Prefer to try it yourself? <Link to="/signup">Start a free 14-day trial</Link> — no card needed.</p>
+          <p className="muted small">Prefer to try it yourself? <Link to="/signup">Start a free 14-day trial</Link>, no card needed.</p>
         </div>
         {status === 'sent' ? (
           <div className="card">
@@ -328,7 +328,7 @@ export function ScorecardPage() {
             <h2>Let ARC fix these for you</h2>
             <p className="muted">
               ARC writes your strategy, plans every month, drafts the content, checks it against your brand rules and
-              keeps a record of what worked — you just approve.
+              keeps a record of what worked, you just approve.
             </p>
             <CtaPair />
             <button type="button" className="link-btn" style={{ marginTop: 14 }} onClick={() => { setAnswers({}); setDone(false) }}>
@@ -373,7 +373,7 @@ export function AgencyComparePage() {
     <section className="section">
       <SectionHead
         title="ARC vs an agency or in-house time."
-        lede="Enter what marketing costs you today. The calculation uses only your numbers and the published plan price — it is an estimate, not a promise."
+        lede="Enter what marketing costs you today. The calculation uses only your numbers and the published plan price. It is an estimate, not a promise."
       />
       <div className="two-up">
         <form className="card" onSubmit={(e) => e.preventDefault()}>
@@ -395,7 +395,7 @@ export function AgencyComparePage() {
               <select id="cmp-plan" value={plan} onChange={(e) => setPlan(e.target.value)}>
                 {Object.entries(prices).map(([k, v]) => (
                   <option key={k} value={k}>
-                    {v.name} — {money(v.price)}/mo
+                    {v.name}: {money(v.price)}/mo
                   </option>
                 ))}
               </select>
@@ -444,9 +444,9 @@ export function AgencyComparePage() {
           </thead>
           <tbody>
             {[
-              ['Strategy, plan and content in one place', 'Often', 'Rarely', 'Yes — one brief, one workspace'],
+              ['Strategy, plan and content in one place', 'Often', 'Rarely', 'Yes, one brief, one workspace'],
               ['Start time', 'Weeks of onboarding', 'Days per freelancer', 'Same day'],
-              ['You approve every piece before it goes out', 'Depends on the agency', 'Depends', 'Always — version-locked approvals'],
+              ['You approve every piece before it goes out', 'Depends on the agency', 'Depends', 'Always, version-locked approvals'],
               ['Complete record of decisions and work', 'Reports', 'Rarely', 'Audit log and exportable data'],
               ['Cancel any time', 'Usually a notice period', 'Per project', 'Yes'],
             ].map(([k, a, f, arc]) => (

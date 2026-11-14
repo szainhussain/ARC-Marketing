@@ -30,7 +30,7 @@ const VERDICT: Record<Economics['verdict'], { label: string; cls: string }> = {
 }
 
 function num(v: number | null, opts: { currency?: string | null; suffix?: string; digits?: number } = {}) {
-  if (v == null) return '—'
+  if (v == null) return '-'
   const text = v.toLocaleString(undefined, { maximumFractionDigits: opts.digits ?? 2 })
   return `${opts.currency ? `${opts.currency} ` : ''}${text}${opts.suffix || ''}`
 }
@@ -89,7 +89,7 @@ export function GrowthScoreCard({ orgId }: { orgId: string }) {
     <div className="card" style={{ marginTop: 18 }}>
       <div style={{ display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap' }}>
         <div className="score-ring" style={{ ['--pct' as string]: `${data.overall ?? 0}%` }} aria-hidden="true">
-          <span>{data.overall ?? '—'}</span>
+          <span>{data.overall ?? '-'}</span>
         </div>
         <div style={{ flex: '1 1 260px' }}>
           <h2 style={{ margin: 0 }}>Growth Score{data.overall != null ? `: ${data.overall} out of 100` : ''}</h2>

@@ -103,7 +103,7 @@ export default function AgentDetailPage() {
         </div>
         <div className="card">
           <h2>Permissions & limits</h2>
-          <Spec label="Waits for" items={agent.depends_on.map(humanize)} empty="Nothing — starts first" />
+          <Spec label="Waits for" items={agent.depends_on.map(humanize)} empty="Nothing, starts first" />
           <Spec label="May read output of" items={agent.reads.map(humanize)} empty="Only the campaign and brand profile" />
           <Spec label="Tools" items={agent.allowed_tools} />
           <Spec label="Automated checks" items={agent.evaluation_checks.map(humanize)} />
@@ -130,7 +130,7 @@ export default function AgentDetailPage() {
               <ul className="deliverable-list">
                 {agent.allowed_integrations.map((i) => (
                   <li key={i.name}>
-                    {i.name} — <span className="muted">{humanize(i.status)}</span>
+                    {i.name}: <span className="muted">{humanize(i.status)}</span>
                   </li>
                 ))}
               </ul>
@@ -163,8 +163,8 @@ export default function AgentDetailPage() {
                   <td>
                     <span className={`status-pill ${e.status}`}>{statusLabel(e.status)}</span>
                   </td>
-                  <td className="muted small">{e.model || '—'}</td>
-                  <td className="muted small">{e.duration_ms != null ? `${(e.duration_ms / 1000).toFixed(1)}s` : '—'}</td>
+                  <td className="muted small">{e.model || '-'}</td>
+                  <td className="muted small">{e.duration_ms != null ? `${(e.duration_ms / 1000).toFixed(1)}s` : '-'}</td>
                   <td className="small">
                     {e.error_summary ? (
                       <span className="text-danger">{truncate(e.error_summary)}</span>
@@ -192,7 +192,7 @@ function Spec({ label, items, empty }: { label: string; items: string[]; empty?:
     <div className="deliverable-section">
       <div className="section-label">{label}</div>
       {items.length === 0 ? (
-        <p className="small muted">{empty || '—'}</p>
+        <p className="small muted">{empty || '-'}</p>
       ) : (
         <ul className="deliverable-list">
           {items.map((i) => (

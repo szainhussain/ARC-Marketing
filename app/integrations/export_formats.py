@@ -1,6 +1,6 @@
 """Per-platform formatting for manual copy-paste handoff.
 
-No platform here has a live API connector (see docs/DECISIONS.md D5/D9 —
+No platform here has a live API connector (see docs/DECISIONS.md D5/D9,
 none of Meta, Google Ads, or TikTok Ads have verified API access/app
 review in this build). This module only reformats already-generated,
 already-approved content_pack copy to match each platform's *composer*
@@ -10,7 +10,7 @@ API and never schedules or publishes anything itself.
 
 Every numeric limit below is either sourced from an official page (cited
 in the comment) or explicitly marked UNCONFIRMED. Never upgrade an
-UNCONFIRMED value to look authoritative without a real citation — that
+UNCONFIRMED value to look authoritative without a real citation, that
 would violate this project's own "never fabricate a source" rule
 (docs/SECURITY_AND_GOVERNANCE.md) just as much as AI-fabricated content
 would.
@@ -59,7 +59,7 @@ def format_for_meta_instagram(variant: dict) -> dict:
     """Source: Meta's own ad-creative specs (facebook.com/business/ads-guide),
     read 2026-11-03. These are the ad-composer limits Meta itself
     publishes; organic Instagram's caption limit is NOT published by Meta
-    anywhere findable in this session — left unconfirmed rather than
+    anywhere findable in this session, left unconfirmed rather than
     using the commonly-repeated-but-unofficial "2200 characters" figure.
     """
     headline = variant.get("headline", "") or ""
@@ -98,12 +98,12 @@ def format_for_meta_instagram(variant: dict) -> dict:
             "Image: 4:5 ratio, 1440×1800px recommended, JPG or PNG, max 30MB "
             "(source: Meta ads guide, Instagram feed image spec).",
             "Hashtags: Meta's ad-creative guidance lists a maximum of 30 per post.",
-            "This export does not generate or validate images/video — prepare those "
+            "This export does not generate or validate images/video, prepare those "
             "assets separately and attach them in Meta Business Suite.",
         ],
         "source_note": (
             "Character limits above marked as confirmed come from Meta's published ad "
-            "specs. Hard enforcement may still differ in the live composer — treat these "
+            "specs. Hard enforcement may still differ in the live composer, treat these "
             "as strong guidance, not a guarantee."
         ),
     }
@@ -115,7 +115,7 @@ def format_for_google_ads(variant: dict) -> dict:
     RSA requires 3-15 headlines (<=30 chars each) and 2-4 descriptions
     (<=90 chars each). This content_pack variant only has one headline
     and one body, so this produces ONE validated headline/description
-    pair plus a clear reminder of the minimum count — it does not
+    pair plus a clear reminder of the minimum count, it does not
     fabricate extra headline variants by chopping up unrelated sentences,
     since those wouldn't have been reviewed as real ad copy.
     """
@@ -145,16 +145,16 @@ def format_for_google_ads(variant: dict) -> dict:
         "cta": variant.get("cta", ""),
         "requirements": [
             "RSAs require a MINIMUM of 3 headlines (≤30 chars each) and 2 descriptions "
-            "(≤90 chars each) to serve — up to 15 headlines / 4 descriptions are allowed.",
+            "(≤90 chars each) to serve, up to 15 headlines / 4 descriptions are allowed.",
             "This export gives you one validated headline and description as a starting "
             "point. Write 2+ more headline variants and 1+ more description directly in "
-            "Google Ads Editor — don't just repeat this one.",
+            "Google Ads Editor, don't just repeat this one.",
             "Path fields (optional, shown after your domain) are limited to 15 characters "
             "each.",
         ],
         "asset_checklist": [
             "No image/video required for a standard RSA text ad.",
-            "Have your Final URL ready — this export does not generate or validate one.",
+            "Have your Final URL ready, this export does not generate or validate one.",
         ],
         "source_note": (
             "Character and count limits above are from Google's official RSA help page, "
@@ -169,7 +169,7 @@ def format_for_tiktok_ads(variant: dict) -> dict:
     2026-11-03, for video specs. TikTok's official ad-text character
     limit and CTA button list were NOT found on any page reachable in
     this session (TikTok's ad-creation help content did not surface them)
-    — left unconfirmed rather than guessed.
+   , left unconfirmed rather than guessed.
     """
     body = variant.get("body", "") or ""
     cta = variant.get("cta", "") or ""
@@ -177,7 +177,7 @@ def format_for_tiktok_ads(variant: dict) -> dict:
     fields = [
         FieldCheck(
             "Ad text", body, None, False,
-            "No official TikTok character limit was found in this session — paste into "
+            "No official TikTok character limit was found in this session, paste into "
             "TikTok Ads Manager and check the live counter there.",
         ),
     ]
@@ -190,21 +190,21 @@ def format_for_tiktok_ads(variant: dict) -> dict:
         "cta_note": (
             "TikTok Ads Manager uses a fixed CTA button dropdown (not free text in most "
             "placements). The exact option list wasn't confirmed from an official source "
-            "this session — pick the closest match to this suggested CTA "
+            "this session, pick the closest match to this suggested CTA "
             f"(“{cta}”) in Ads Manager."
             if cta
-            else "TikTok Ads Manager uses a CTA button dropdown — pick one in Ads Manager."
+            else "TikTok Ads Manager uses a CTA button dropdown, pick one in Ads Manager."
         ),
         "asset_checklist": [
             "Video: 9:16 vertical recommended, minimum 540×960px (1080×1920 "
             "recommended), up to 10 minutes, max 500MB, .mp4/.mov/.mpeg/.3gp/.avi "
             "(source: TikTok Auction In-Feed Ads spec page).",
             "Minimum recommended resolution 720p per TikTok's creative best-practices page.",
-            "This export does not generate or validate video — prepare it separately.",
+            "This export does not generate or validate video, prepare it separately.",
         ],
         "source_note": (
             "Video specs above are from TikTok's official ad-spec page. Ad text limit and "
-            "CTA list are flagged unconfirmed on purpose — verify directly in TikTok Ads "
+            "CTA list are flagged unconfirmed on purpose, verify directly in TikTok Ads "
             "Manager."
         ),
     }
@@ -220,7 +220,7 @@ PLATFORM_FORMATTERS = {
 def format_content_pack_for_platform(content: dict, platform: str) -> dict:
     """content is a content_pack deliverable's content dict
     (creative_brief, variants, calendar_notes). Returns one formatted
-    export per variant. Raises KeyError for an unknown platform — callers
+    export per variant. Raises KeyError for an unknown platform, callers
     should validate against PLATFORM_FORMATTERS.keys() first."""
 
     formatter = PLATFORM_FORMATTERS[platform]

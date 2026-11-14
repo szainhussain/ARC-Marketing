@@ -120,12 +120,12 @@ export function TeamPage() {
       <div className="card">
         <h2>What each role can do</h2>
         <ul className="deliverable-list small">
-          <li><strong>Workspace Owner</strong> — everything, including billing, ownership and deletion.</li>
-          <li><strong>Administrator</strong> — team, policies, budgets, integrations, kill switch.</li>
-          <li><strong>Marketing Manager</strong> — run, pause and retry agents; approve work.</li>
-          <li><strong>Approver</strong> — approve or reject deliverables and run starts.</li>
-          <li><strong>Contributor</strong> — start runs, edit knowledge and calendar.</li>
-          <li><strong>Analyst / Viewer</strong> — read-only.</li>
+          <li><strong>Workspace Owner</strong>, everything, including billing, ownership and deletion.</li>
+          <li><strong>Administrator</strong>, team, policies, budgets, integrations, kill switch.</li>
+          <li><strong>Marketing Manager</strong>, run, pause and retry agents; approve work.</li>
+          <li><strong>Approver</strong>, approve or reject deliverables and run starts.</li>
+          <li><strong>Contributor</strong>, start runs, edit knowledge and calendar.</li>
+          <li><strong>Analyst / Viewer</strong>, read-only.</li>
         </ul>
       </div>
       <Dialog open={inviting} onClose={() => setInviting(false)} title="Invite a teammate"
@@ -249,7 +249,7 @@ export function BillingPage() {
               columns={[
                 { key: 't', header: 'Event', render: (r) => <span className="mono small">{r.event_type}</span> },
                 { key: 'o', header: 'Outcome', render: (r) => humanize(r.outcome) },
-                { key: 'a', header: 'Amount', render: (r) => (r.amount_usd != null ? money(r.amount_usd) : '—') },
+                { key: 'a', header: 'Amount', render: (r) => (r.amount_usd != null ? money(r.amount_usd) : '-') },
                 { key: 'm', header: 'Mode', render: (r) => (r.is_test ? <span className="sample-tag">TEST</span> : 'Live') },
                 { key: 'w', header: 'When', render: (r) => <span className="muted small">{relativeTime(r.created_at)}</span> },
               ]} />
@@ -277,7 +277,7 @@ export function TestCheckoutPage() {
     <div className="page" style={{ maxWidth: 560 }}>
       <PageHeader title="Test checkout" />
       <div className="card">
-        <p><span className="sample-tag">TEST MODE — NO REAL PAYMENT</span></p>
+        <p><span className="sample-tag">TEST MODE: NO REAL PAYMENT</span></p>
         <p className="muted">This simulates the payment provider confirming a subscription to <strong>{humanize(plan)}</strong>. It sends a signed webhook through the same verification path real payments use.</p>
         {action.error && <div className="banner error">{action.error}</div>}
         <div className="head-actions">
@@ -445,7 +445,7 @@ export function SecuritySettingsPage() {
         <TwoFactorCard />
         <div className="card">
           <h2>Sessions & verification</h2>
-          <p className="small">Email: {user?.email} — {user?.email_verified ? <span className="text-success">verified</span> : <span className="text-warning">not verified</span>}</p>
+          <p className="small">Email: {user?.email}: {user?.email_verified ? <span className="text-success">verified</span> : <span className="text-warning">not verified</span>}</p>
           {!user?.email_verified && <button className="secondary small-btn" onClick={verifyEmail}>Send verification link</button>}
           <p className="muted small" style={{ marginTop: 14 }}>Signs out this and every other device.</p>
           <button className="secondary" onClick={signOutEverywhere}>Sign out everywhere</button>
@@ -518,11 +518,11 @@ export function AutomationSettingsPage() {
       {action.error && <ErrorState message={action.error} />}
       <div className="card controls-bar">
         <div className="control">
-          <div><div className="control-title">Pause all agents</div><div className="muted small">{w.automation_paused ? 'Paused — no new agent work starts.' : 'Running.'}</div></div>
+          <div><div className="control-title">Pause all agents</div><div className="muted small">{w.automation_paused ? 'Paused, no new agent work starts.' : 'Running.'}</div></div>
           <button disabled={!admin} className={w.automation_paused ? '' : 'secondary'} onClick={() => control('automation_paused', !w.automation_paused)}>{w.automation_paused ? 'Resume' : 'Pause all'}</button>
         </div>
         <div className="control">
-          <div><div className="control-title">Kill switch (external actions)</div><div className="muted small">{w.kill_switch_enabled ? 'On — exports blocked.' : 'Off.'}</div></div>
+          <div><div className="control-title">Kill switch (external actions)</div><div className="muted small">{w.kill_switch_enabled ? 'On, exports blocked.' : 'Off.'}</div></div>
           <button disabled={!admin} className={w.kill_switch_enabled ? '' : 'danger'} onClick={() => control('kill_switch_enabled', !w.kill_switch_enabled)}>{w.kill_switch_enabled ? 'Turn off' : 'Engage'}</button>
         </div>
       </div>
@@ -622,7 +622,7 @@ export function AuditLogPage() {
           columns={[
             { key: 'w', header: 'When', render: (r) => <span className="mono small">{new Date(r.created_at.endsWith('Z') || r.created_at.includes('+') ? r.created_at : `${r.created_at}Z`).toLocaleString()}</span> },
             { key: 'a', header: 'Action', render: (r) => <span className="mono small">{r.action}</span> },
-            { key: 't', header: 'Target', render: (r) => <span className="small">{r.target_type ? humanize(r.target_type) : '—'}</span> },
+            { key: 't', header: 'Target', render: (r) => <span className="small">{r.target_type ? humanize(r.target_type) : '-'}</span> },
             { key: 'u', header: 'Actor', render: (r) => <span className="small">{r.actor_user_id ? 'Person' : 'System / agent'}</span> },
             { key: 'o', header: 'Outcome', render: (r) => <StatusPill status={r.outcome === 'success' ? 'succeeded' : 'failed'} label={r.outcome} /> },
           ]} />

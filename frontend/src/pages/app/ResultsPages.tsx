@@ -37,10 +37,10 @@ const NUM_FIELDS: [keyof Metrics, string][] = [
   ['revenue', 'Revenue (USD)'],
 ]
 
-const usd = (v: number | null | undefined, digits = 0) => (v == null ? '—' : `$${v.toLocaleString(undefined, { maximumFractionDigits: digits, minimumFractionDigits: digits })}`)
-const num = (v: number | null | undefined) => (v == null ? '—' : v.toLocaleString(undefined, { maximumFractionDigits: 0 }))
-const pct = (v: number | null | undefined) => (v == null ? '—' : `${v.toFixed(2)}%`)
-const roas = (v: number | null | undefined) => (v == null ? '—' : `${v.toFixed(2)}x`)
+const usd = (v: number | null | undefined, digits = 0) => (v == null ? '-' : `$${v.toLocaleString(undefined, { maximumFractionDigits: digits, minimumFractionDigits: digits })}`)
+const num = (v: number | null | undefined) => (v == null ? '-' : v.toLocaleString(undefined, { maximumFractionDigits: 0 }))
+const pct = (v: number | null | undefined) => (v == null ? '-' : `${v.toFixed(2)}%`)
+const roas = (v: number | null | undefined) => (v == null ? '-' : `${v.toFixed(2)}x`)
 
 function iso(d: Date) {
   return d.toISOString().slice(0, 10)
@@ -71,7 +71,7 @@ function MetricTiles({ t }: { t: Metrics }) {
         <div key={k} className="kpi-tile">
           <div className="kpi-label">{k}</div>
           <div className="kpi-value">{v}</div>
-          <div className="muted small">{v === '—' ? 'Not recorded' : 'Entered manually'}</div>
+          <div className="muted small">{v === '-' ? 'Not recorded' : 'Entered manually'}</div>
         </div>
       ))}
     </div>
@@ -179,7 +179,7 @@ export function ResultsPage() {
       {data && data.results.length === 0 && campaignList.length > 0 && (
         <EmptyState
           title="No results recorded for this period"
-          body="Add spend, leads, sales and revenue from your ad platforms, CRM or shop. Until analytics connectors are live, these numbers come only from you — ARC never estimates them."
+          body="Add spend, leads, sales and revenue from your ad platforms, CRM or shop. Until analytics connectors are live, these numbers come only from you: ARC never estimates them."
           action={<button onClick={openNew}><Plus size={15} aria-hidden="true" /> Add results</button>}
         />
       )}

@@ -52,7 +52,7 @@ export const SOLUTIONS: Solution[] = [
       { agent: 'Social Media Manager', output: 'Launch-week posting calendar' },
       { agent: 'Performance Marketing', output: 'Paid campaign structure and budget recommendation' },
     ],
-    outcome: 'One brief in, a reviewed launch package out — with every piece version-locked for approval.',
+    outcome: 'One brief in, a reviewed launch package out, with every piece version-locked for approval.',
   },
   {
     slug: 'local-business',
@@ -87,7 +87,7 @@ export const SOLUTIONS: Solution[] = [
       { agent: 'Research Analyst', output: 'Customer segments and competitor offers' },
       { agent: 'SEO & Growth', output: 'Product-page and metadata drafts, conversion ideas' },
       { agent: 'Creative Studio', output: 'Promotion copy and creative briefs' },
-      { agent: 'Performance Marketing', output: 'Campaign structure and budget split — ARC never spends by itself' },
+      { agent: 'Performance Marketing', output: 'Campaign structure and budget split: ARC never spends by itself' },
       { agent: 'Marketing Ops', output: 'A quality check for brand rules and unsupported claims' },
     ],
     outcome: 'Promotions planned end to end, exported in each ad platform’s format, ready to launch.',
@@ -120,7 +120,7 @@ export const HOME_FAQS: Faq[] = [
   },
   {
     q: 'Will ARC post or spend money without asking?',
-    a: 'No. Every outbound action needs an explicit approval tied to one exact version. Agents cannot change ad spend, make payments or sign anything — those are locked platform rules.',
+    a: 'No. Every outbound action needs an explicit approval tied to one exact version. Agents cannot change ad spend, make payments or sign anything. Those are locked platform rules.',
   },
   {
     q: 'Can ARC publish to my channels?',
@@ -146,7 +146,7 @@ export const PRICING_FAQS: Faq[] = [
   { q: 'What counts as a campaign run?', a: 'One run takes one campaign brief from strategy to finished, checked work: the plan, the content for the channels you chose, a quality review and a record of what was decided.' },
   { q: 'What happens if I reach a limit?', a: 'The backend stops new runs once a monthly limit is reached and tells you why. Nothing is charged automatically; you can upgrade or wait for the next month.' },
   { q: 'Are prices final?', a: 'Prices are provisional while ARC is in early access. Any change is announced at least 30 days ahead and applies from your next billing period.' },
-  { q: 'Do you offer human help?', a: 'Yes — a strategist add-on for monthly planning calls and quarterly reviews. Book a demo to discuss it.' },
+  { q: 'Do you offer human help?', a: 'Yes, a strategist add-on for monthly planning calls and quarterly reviews. Book a demo to discuss it.' },
 ]
 
 export type ScoreQuestion = { id: string; q: string; options: { label: string; points: number }[]; area: string; tip: string }

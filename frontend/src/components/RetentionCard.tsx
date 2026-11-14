@@ -64,7 +64,7 @@ export default function RetentionCard({ orgId, workspaceName, planName }: { orgI
       <h2>Before you go</h2>
       {status === 'sent' ? (
         <div className="banner success">
-          Thanks — the ARC team has your request and will reply to {user?.email} within one business day. Your plan stays
+          Thanks, the ARC team has your request and will reply to {user?.email} within one business day. Your plan stays
           active until then.
         </div>
       ) : (
@@ -72,14 +72,14 @@ export default function RetentionCard({ orgId, workspaceName, planName }: { orgI
           <p className="muted small" style={{ marginTop: -6 }}>These often solve the problem without losing your work:</p>
           <ul className="retention-options">
             <li>
-              <strong>Pause all agents</strong> — nothing runs or uses your plan until you resume.{' '}
+              <strong>Pause all agents</strong>, nothing runs or uses your plan until you resume.{' '}
               <Link to="/app/settings/automation">Automation settings →</Link>
             </li>
             <li>
-              <strong>Move to a smaller plan</strong> — keep your workspace, history and brand profile. Choose a plan above.
+              <strong>Move to a smaller plan</strong>, keep your workspace, history and brand profile. Choose a plan above.
             </li>
             <li>
-              <strong>Get help from a strategist</strong> — a call to get better results from ARC. <Link to="/demo">Book a call →</Link>
+              <strong>Get help from a strategist</strong>, a call to get better results from ARC. <Link to="/demo">Book a call →</Link>
             </li>
             <li>
               <strong>Export your data</strong> any time from <Link to="/app/settings/security">Security settings</Link>.

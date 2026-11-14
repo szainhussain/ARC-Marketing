@@ -217,7 +217,7 @@ def set_policy(organization_id: str, action_type: str, mode: str, user_id: str) 
 # ---- Knowledge -----------------------------------------------------------
 
 def approved_knowledge_for_agents(organization_id: str, limit: int = 8) -> list[dict]:
-    """Small, recent, approved slice — never the whole library."""
+    """Small, recent, approved slice, never the whole library."""
 
     rows = (
         KnowledgeEntry.query.filter_by(organization_id=organization_id, status="approved")

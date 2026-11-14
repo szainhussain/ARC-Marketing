@@ -20,7 +20,7 @@ const NODES: DemoNode[] = [
   { id: 'social', n: '03', title: 'Social', deps: ['creative'], note: 'Post calendar' },
   { id: 'paid', n: '05', title: 'Paid Media', deps: ['creative'], note: 'Budget split (you decide)' },
   { id: 'ops', n: '11', title: 'Ops & QA', deps: ['social', 'paid', 'seo', 'pr', 'insights', 'accounts'], note: 'Quality gate' },
-  { id: 'approval', n: '—', title: 'Your approval', deps: ['ops'], note: 'Approve the content pack' },
+  { id: 'approval', n: '-', title: 'Your approval', deps: ['ops'], note: 'Approve the content pack' },
   { id: 'record', n: '12', title: 'Record Keeper', deps: ['approval'], note: 'Decisions & learnings' },
 ]
 
@@ -65,7 +65,7 @@ export default function WorkflowDemo() {
     <div className="card" style={{ padding: 20 }}>
       <div className="card-head">
         <div>
-          <strong>Campaign run — demonstration</strong>{' '}
+          <strong>Campaign run, demonstration</strong>{' '}
           <span className="sample-tag">LOCAL DEMO · NO REAL ACTIONS</span>
         </div>
         <div className="head-actions">

@@ -25,7 +25,7 @@ function task(id: string, agent: string, status: string, deps: string[] = [], se
 describe('KpiCard', () => {
   it('shows an explicit unavailable state instead of a number', () => {
     render(<KpiCard label="Revenue" value={1234} unavailable="Not connected" />)
-    expect(screen.getByText('—')).toBeTruthy()
+    expect(screen.getByText('-')).toBeTruthy()
     expect(screen.getByText('Not connected')).toBeTruthy()
     expect(screen.queryByText('1234')).toBeNull()
   })

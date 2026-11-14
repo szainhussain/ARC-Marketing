@@ -53,8 +53,8 @@ export function CampaignListPage() {
           columns={[
             { key: 'name', header: 'Campaign', render: (r) => <><Link to={`/app/campaigns/${r.id}`}><strong>{r.name}</strong></Link><div className="muted small">{r.objective}</div></> },
             { key: 'status', header: 'Status', render: (r) => <StatusPill status={r.status} /> },
-            { key: 'channels', header: 'Channels', render: (r) => <span className="small">{r.channels || '—'}</span> },
-            { key: 'dates', header: 'Dates', render: (r) => <span className="small mono">{r.start_date || '—'} → {r.end_date || '—'}</span> },
+            { key: 'channels', header: 'Channels', render: (r) => <span className="small">{r.channels || '-'}</span> },
+            { key: 'dates', header: 'Dates', render: (r) => <span className="small mono">{r.start_date || '-'} → {r.end_date || '-'}</span> },
             { key: 'updated', header: 'Updated', render: (r) => <span className="muted small">{relativeTime(r.updated_at)}</span> },
           ]}
         />

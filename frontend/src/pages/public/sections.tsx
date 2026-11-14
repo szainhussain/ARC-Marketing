@@ -30,7 +30,7 @@ export type Plan = {
 }
 
 
-const UNREACHABLE = "We couldn't reach the ARC service just now. It may be waking up — try again in a minute."
+const UNREACHABLE = "We couldn't reach the ARC service just now. It may be waking up, try again in a minute."
 
 export function AgentGrid({ limit }: { limit?: number }) {
   const { data, error, reload } = useResource<{ agents: PublicAgent[]; teams?: AgentTeam[] }>('/public/agents')

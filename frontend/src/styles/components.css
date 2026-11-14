@@ -558,3 +558,82 @@ kbd { font-family: var(--font-mono); font-size: 0.75rem; padding: 1px 6px; borde
 .swatch-dot { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-fg) 20%, transparent); }
 .swatch-dot.workspace { background: conic-gradient(var(--color-accent) 0 50%, var(--color-accent-2) 50%); }
 .swatch-dot.empty { background: repeating-linear-gradient(45deg, var(--color-border-strong) 0 3px, transparent 3px 6px) !important; }
+
+/* Display type in Plus Jakarta Sans: heavier and tighter than the old serif, a step smaller (D24). */
+.display, .section h2.display-h, .hero2 h1, .final-cta h2, .auth-card h1, .display-page { font-weight: 800; letter-spacing: -0.035em; }
+.hero2 h1 { font-size: clamp(2.4rem, 6vw, 4.6rem); line-height: 1.05; }
+.section h2.display-h { font-size: clamp(1.85rem, 3.7vw, 2.85rem); line-height: 1.12; }
+.final-cta h2, .display-page { font-size: clamp(1.95rem, 4.2vw, 3.2rem); line-height: 1.1; }
+.auth-card h1 { font-size: 2rem; }
+
+/* Animated monthly loop (components/motion/FlowLoop.tsx) */
+.flowloop { position: relative; margin: 0 0 32px; padding: 26px 22px 18px; border: 1px solid var(--color-border); border-radius: 18px; background: var(--color-bg-elevated); }
+.flowloop-track { position: absolute; left: calc(22px + 8.33%); right: calc(22px + 8.33%); top: 51px; height: 3px; border-radius: 3px; background: var(--color-border); overflow: hidden; }
+.flowloop-fill { height: 100%; background: var(--color-accent); transform-origin: left center; }
+.flowloop-steps { position: relative; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.flowloop-step button { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; background: none; border: none; box-shadow: none; padding: 0 2px; color: var(--color-muted-fg); cursor: pointer; }
+.flowloop-node { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--color-border-strong); background: var(--color-bg-elevated); color: var(--color-muted-fg); }
+.flowloop-step.done .flowloop-node { border-color: var(--color-accent); color: var(--color-accent); }
+.flowloop-step.active .flowloop-node { border-color: var(--color-accent); background: var(--color-accent); color: var(--color-on-accent); }
+.flowloop-step.gate.active .flowloop-node { border-color: var(--color-success); background: var(--color-success); }
+.flowloop-label { font-size: 0.86rem; font-weight: 700; text-align: center; }
+.flowloop-step.active .flowloop-label { color: var(--color-fg); }
+.flowloop-caption { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--color-border); min-height: 62px; }
+.flowloop-caption p { margin: 0; font-size: 1.02rem; }
+.flowloop-static { list-style: none; margin: 0 0 32px; padding: 0; display: grid; gap: 10px; }
+.flowloop-static li { display: flex; gap: 10px; align-items: flex-start; }
+@media (max-width: 640px) {
+  .flowloop { padding: 20px 10px 14px; }
+  .flowloop-track { left: calc(10px + 8.33%); right: calc(10px + 8.33%); top: 41px; }
+  .flowloop-node { width: 40px; height: 40px; }
+  .flowloop-label { font-size: 0.7rem; }
+}
+
+/* Animated How it works walkthrough (components/motion/HowItWorksStory.tsx) */
+.hiw { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+.hiw-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.hiw-steps li { position: relative; border: 1px solid transparent; border-radius: 14px; overflow: hidden; }
+.hiw-steps li.active { border-color: var(--color-border); background: var(--color-bg-elevated); }
+.hiw-steps button { width: 100%; display: flex; gap: 14px; align-items: flex-start; text-align: left; background: none; border: none; box-shadow: none; padding: 14px 16px; color: var(--color-muted-fg); cursor: pointer; font-weight: 400; }
+.hiw-num { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--color-border-strong); color: var(--color-muted-fg); }
+.hiw-steps li.active .hiw-num { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-on-accent); }
+.hiw-title { display: block; font-weight: 700; font-size: 1.02rem; padding-top: 5px; }
+.hiw-steps li.active .hiw-title { color: var(--color-fg); }
+.hiw-body { display: block; overflow: hidden; margin-top: 6px; color: var(--color-muted-fg); line-height: 1.55; }
+.hiw-progress { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--color-accent); transform-origin: left center; }
+.hiw-stage { position: sticky; top: 96px; min-height: 380px; border: 1px solid var(--color-border); border-radius: 20px; background: var(--color-bg-elevated); display: grid; place-items: center; padding: 28px; }
+.hiw-scene { width: 100%; max-width: 380px; }
+.hiw-pause { position: absolute; right: 12px; bottom: 12px; }
+.hiw-card { border: 1px solid var(--color-border-strong); border-radius: 16px; padding: 20px; background: var(--color-bg); display: grid; gap: 14px; position: relative; }
+.hiw-row { display: grid; grid-template-columns: 96px minmax(0, 1fr) 22px; align-items: center; gap: 12px; }
+.hiw-key { font-size: 0.8rem; font-weight: 600; color: var(--color-muted-fg); }
+.hiw-line { display: block; height: 9px; border-radius: 9px; background: color-mix(in srgb, var(--color-accent) 45%, var(--color-border)); transform-origin: left center; }
+.hiw-tick { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--color-success); color: #fff; }
+.hiw-doc-head { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--color-fg); }
+.hiw-version { font-family: var(--font-mono); font-size: 0.72rem; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--color-border-strong); color: var(--color-muted-fg); }
+.hiw-chip-btn { justify-self: start; display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 999px; font-weight: 700; font-size: 0.86rem; background: var(--color-accent); color: var(--color-on-accent); }
+.hiw-chain { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.hiw-chain li { display: flex; align-items: center; gap: 14px; font-weight: 600; color: var(--color-fg); padding: 9px 0; position: relative; }
+.hiw-chain li:not(:last-child)::after { content: ''; position: absolute; left: 6px; top: 30px; width: 2px; height: 16px; background: var(--color-border-strong); }
+.hiw-dot { width: 14px; height: 14px; border-radius: 50%; flex: none; }
+.hiw-center { position: relative; height: 120px; display: grid; place-items: center; }
+.hiw-badge { position: absolute; display: inline-flex; align-items: center; gap: 10px; padding: 14px 22px; border-radius: 16px; font-weight: 700; }
+.hiw-badge.warn { background: var(--color-warning-bg); color: var(--color-warning); }
+.hiw-badge.ok { background: var(--color-success-bg); color: var(--color-success); }
+.hiw-stamp { position: absolute; right: 16px; bottom: 14px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 10px; border: 2px solid var(--color-success); color: var(--color-success); background: var(--color-success-bg); font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.78rem; }
+.hiw-approve { padding-bottom: 54px; }
+.hiw-publish { display: grid; gap: 22px; justify-items: center; }
+.hiw-targets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; width: 100%; }
+.hiw-target { display: flex; align-items: center; gap: 8px; justify-content: center; padding: 12px; border-radius: 12px; border: 1px solid var(--color-border-strong); background: var(--color-bg); font-weight: 600; color: var(--color-fg); }
+.hiw-learn { display: grid; gap: 18px; justify-items: center; }
+.hiw-bars { display: flex; align-items: flex-end; gap: 12px; height: 150px; width: 100%; padding: 0 18px; border-bottom: 2px solid var(--color-border-strong); }
+.hiw-bars span { flex: 1; border-radius: 8px 8px 0 0; background: var(--color-accent); transform-origin: center bottom; }
+.hiw-bars span:last-child { background: var(--color-success); }
+.hiw-loopback { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; color: var(--color-accent); }
+@media (max-width: 860px) {
+  .hiw { grid-template-columns: minmax(0, 1fr); }
+  .hiw-stage { position: relative; top: 0; order: -1; min-height: 300px; padding: 20px; }
+}
+
+/* Step buttons inherit the page typeface */
+.hiw-steps button, .flowloop-step button { font-family: inherit; }

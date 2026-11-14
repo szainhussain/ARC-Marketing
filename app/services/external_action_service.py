@@ -86,7 +86,7 @@ def execute_manual_handoff(
     result = _connector.execute_action(action_payload, idempotency_key)
 
     # Platform formatting is a presentation/export concern layered on top
-    # of the already-approved content — it does not change what was
+    # of the already-approved content, it does not change what was
     # approved (the approval's payload hash covers deliverable content
     # only, not the target platform), and it never calls any external
     # platform API. See app/integrations/export_formats.py.
@@ -154,7 +154,7 @@ def get_external_action_or_404(organization_id: str, action_id: str) -> External
 
 def confirm_manual_publication(organization_id: str, action_id: str, user_id: str) -> ExternalAction:
     """The only way publication_status can become
-    'manually_confirmed_published' — never automatically, since the
+    'manually_confirmed_published', never automatically, since the
     manual-handoff connector has no way to verify a human actually posted
     the content."""
 

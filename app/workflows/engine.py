@@ -694,7 +694,7 @@ def _compact(data: dict) -> dict:
 
 
 def _upstream_outputs(run: WorkflowRun, reads: tuple[str, ...]) -> dict[str, dict]:
-    """Only agents in the allowlist — this is the enforcement point for
+    """Only agents in the allowlist, this is the enforcement point for
     each agent's `reads` permission."""
 
     outputs = {}

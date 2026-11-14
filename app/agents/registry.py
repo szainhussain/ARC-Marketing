@@ -13,7 +13,7 @@ def agents_in_department_order() -> list[AgentSpec]:
 
 
 def _validate_registry() -> None:
-    """Fail fast at import if the registry is internally inconsistent —
+    """Fail fast at import if the registry is internally inconsistent,
     a typo in depends_on would otherwise only show up as a workflow that
     silently never progresses."""
 

@@ -12,7 +12,7 @@ class StageContext:
     campaign: dict
     business_profile: dict
     # Only outputs of agents listed in the running agent's `reads`
-    # allowlist — the engine filters this before the agent sees it.
+    # allowlist, the engine filters this before the agent sees it.
     upstream_outputs: dict[str, dict]
     budget_usd: float
     timeout_seconds: int
@@ -31,7 +31,7 @@ class StageContext:
 class AgentSpec:
     """One of the 12 department agents. A spec is versioned: change
     `instructions`, `reads`, the schema, or the input builder and bump
-    `version` — every AgentExecution records the version that produced
+    `version`, every AgentExecution records the version that produced
     its output."""
 
     agent_id: str
