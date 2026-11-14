@@ -33,11 +33,11 @@ export default function HomePage() {
           <span className="dot" aria-hidden="true" /> Built for growing businesses in the UAE
         </motion.span>
         <motion.h1 {...enter(0.05)}>
-          A month of marketing, done. <em>Approved by you.</em>
+          Know which marketing drives growth. <em>We&rsquo;ll do the rest.</em>
         </motion.h1>
         <motion.p className="lede" {...enter(0.12)}>
-          ARC plans your month, writes the posts, ads, emails and articles, and tracks what each channel brings in,
-          for less than a part-time hire. Nothing goes out until you approve it.
+          ARC plans your month, writes every post, ad, email and article, and shows which channels grew your
+          business and which did not. Nothing goes out until you approve it.
         </motion.p>
         <motion.div {...enter(0.18)}>
           <CtaPair center />
