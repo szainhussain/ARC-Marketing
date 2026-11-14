@@ -98,7 +98,9 @@ try {
     await page.getByRole('button', { name: 'Save and continue' }).click()
     await page.getByLabel('Prohibited phrases').fill('guaranteed results')
     await page.getByRole('button', { name: 'Save and continue' }).click()
-    await page.getByLabel('Primary campaign goal').fill('Increase first purchases')
+    await page.getByLabel('Main goal').fill('Increase first purchases')
+    await page.getByRole('button', { name: 'Save and continue' }).click()
+    // "Your numbers" is optional; continue without filling it in.
     await page.getByRole('button', { name: 'Save and continue' }).click()
     await page.getByRole('button', { name: 'Save and continue' }).click()
     await shot(page, 'onboarding-review')

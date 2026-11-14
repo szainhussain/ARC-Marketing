@@ -287,7 +287,7 @@ export function ProfileForm({ mode }: { mode: 'wizard' | 'edit' }) {
     const current = String(profile[f.key] ?? '')
     const picked = current.split(',').map((x) => x.trim()).filter(Boolean)
     const chips = options && (
-      <span className="template-row" role="group" aria-label={`Suggested answers for ${f.label}`} style={{ marginTop: 6 }}>
+      <span className="template-row" role="group" aria-label="Quick picks" style={{ marginTop: 6 }}>
         {options.map((opt) => {
           const on = f.multi ? picked.includes(opt) : current === opt
           const next = f.multi ? (on ? picked.filter((x) => x !== opt) : [...picked, opt]).join(', ') : on ? '' : opt
