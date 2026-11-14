@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Any, Callable
 
 from app.ai.base import AIProvider, AIResult
+from app.agents.teams import team_for
 from app.ai.schemas import SCHEMAS_BY_TASK_TYPE
 
 
@@ -21,6 +22,9 @@ class StageContext:
     knowledge: list[dict] = field(default_factory=list)
     # Public pages fetched for the research agent (untrusted page text).
     web_sources: list[dict] = field(default_factory=list)
+    # What the business can afford and what recorded results show
+    # (results_service.performance_for_agents). Empty when nothing is recorded.
+    performance: dict = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -51,6 +55,8 @@ class AgentSpec:
     external_action_policy: str = "require_human_approval"
     evaluation_checks: tuple[str, ...] = ("schema_valid", "prohibited_phrases_absent")
     priority: int = 100
+    # "light" agents reshape upstream work and can run on AI_MODEL_LIGHT.
+    model_tier: str = "standard"
 
     @property
     def output_schema(self):
@@ -93,4 +99,6 @@ class AgentSpec:
             },
             "approval_policy": {"external_actions": self.external_action_policy},
             "evaluation_checks": list(self.evaluation_checks),
+            "model_tier": self.model_tier,
+            "team": team_for(self.agent_id),
         }

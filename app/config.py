@@ -59,6 +59,14 @@ class BaseConfig:
         "groq": "openai/gpt-oss-120b",
     }
     AI_MODEL = os.environ.get("AI_MODEL") or _AI_MODEL_DEFAULTS.get(AI_PROVIDER, "claude-sonnet-5")
+    # Optional cheaper model for routine agents (AgentSpec.model_tier == "light").
+    AI_MODEL_LIGHT = os.environ.get("AI_MODEL_LIGHT", "").strip()
+    # Your provider's real prices in USD per million tokens. Left unset, cost
+    # figures use a placeholder rate and are estimates only.
+    AI_PRICE_INPUT_PER_MTOK = float(os.environ.get("AI_PRICE_INPUT_PER_MTOK") or 3.0)
+    AI_PRICE_OUTPUT_PER_MTOK = float(os.environ.get("AI_PRICE_OUTPUT_PER_MTOK") or 15.0)
+    AI_PRICE_LIGHT_INPUT_PER_MTOK = float(os.environ.get("AI_PRICE_LIGHT_INPUT_PER_MTOK") or 0)
+    AI_PRICE_LIGHT_OUTPUT_PER_MTOK = float(os.environ.get("AI_PRICE_LIGHT_OUTPUT_PER_MTOK") or 0)
     AI_MAX_RETRIES = int(os.environ.get("AI_MAX_RETRIES", "2"))
     AI_TIMEOUT_SECONDS = int(os.environ.get("AI_TIMEOUT_SECONDS", "60"))
     AI_WORKFLOW_BUDGET_USD = float(os.environ.get("AI_WORKFLOW_BUDGET_USD", "1.00"))
@@ -83,6 +91,17 @@ class BaseConfig:
     TERMS_VERSION = "2026-11-05"
     # Emails allowed into the platform-owner inbox (demo requests, contact form).
     PLATFORM_ADMIN_EMAILS = {e.strip().lower() for e in os.environ.get("PLATFORM_ADMIN_EMAILS", "").split(",") if e.strip()}
+
+    # ARC's own emails to its users (password reset). "resend" or "brevo".
+    SYSTEM_EMAIL_PROVIDER = os.environ.get("SYSTEM_EMAIL_PROVIDER", "").strip().lower()
+    SYSTEM_EMAIL_API_KEY = os.environ.get("SYSTEM_EMAIL_API_KEY", "").strip()
+    SYSTEM_EMAIL_FROM = os.environ.get("SYSTEM_EMAIL_FROM", "").strip()
+    SYSTEM_EMAIL_FROM_NAME = os.environ.get("SYSTEM_EMAIL_FROM_NAME", "ARC").strip()
+    # Google PageSpeed Insights key for the Growth Audit's speed test. Without
+    # it the audit simply reports speed as not connected.
+    PAGESPEED_API_KEY = os.environ.get("PAGESPEED_API_KEY", "").strip()
+    # Error tracking; off when empty.
+    SENTRY_DSN = os.environ.get("SENTRY_DSN", "").strip()
 
     # Billing: "test" (local test mode, default), "stripe", or "none".
     BILLING_PROVIDER = os.environ.get("BILLING_PROVIDER", "test")

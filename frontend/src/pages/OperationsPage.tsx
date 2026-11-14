@@ -92,7 +92,7 @@ export default function OperationsPage() {
         <div>
           <h1>Marketing Operations Center</h1>
           <p className="muted">
-            Your 12 agents, their task queue, and the controls that stop them. Agents only produce drafts —
+            Your agents, their task queue, and the controls that stop them. Agents only produce drafts —
             nothing leaves this workspace without a person's approval.
           </p>
         </div>

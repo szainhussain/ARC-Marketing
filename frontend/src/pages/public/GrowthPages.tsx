@@ -176,7 +176,7 @@ export function DemoPage() {
           <ul className="check-list">
             {[
               'We run a real campaign brief for your business, live',
-              'You see all twelve agents, the approval inbox and the exports',
+              'You see the finished plan and content, the approval inbox and the exports',
               'We map ARC to your channels, team and budget',
               'Optional: how the strategist add-on works',
             ].map((t) => (
@@ -444,7 +444,7 @@ export function AgencyComparePage() {
           </thead>
           <tbody>
             {[
-              ['Strategy, plan and content in one place', 'Often', 'Rarely', 'Yes — twelve coordinated agents'],
+              ['Strategy, plan and content in one place', 'Often', 'Rarely', 'Yes — one brief, one workspace'],
               ['Start time', 'Weeks of onboarding', 'Days per freelancer', 'Same day'],
               ['You approve every piece before it goes out', 'Depends on the agency', 'Depends', 'Always — version-locked approvals'],
               ['Complete record of decisions and work', 'Reports', 'Rarely', 'Audit log and exportable data'],

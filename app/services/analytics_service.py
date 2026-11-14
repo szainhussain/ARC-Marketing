@@ -136,7 +136,7 @@ def dashboard(organization_id: str, days: int = 30, campaign_id: str | None = No
         _kpi("active_campaigns", "Active campaigns", sum(1 for x in campaigns if x.status != "archived"), None,
              "Campaigns not archived.", "/app/campaigns"),
         _kpi("runs_completed", "Campaign runs completed", runs_completed, prev_completed,
-             "All 12 agents delivered for these runs.", "/app/campaigns"),
+             "Runs where every agent delivered its draft.", "/app/campaigns"),
         _kpi("tasks_completed", "Agent tasks completed", tasks_done, tasks_done_prev,
              "Succeeded agent tasks in the period.", "/app/tasks?status=succeeded"),
         _kpi("approvals_pending", "Awaiting your approval", pending_approvals, None,

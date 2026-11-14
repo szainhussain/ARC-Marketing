@@ -1,9 +1,19 @@
 from marshmallow import Schema, ValidationError, fields, pre_load, validate, validates_schema
 
 
+class InitiativeSchema(Schema):
+    initiative = fields.String(required=True)
+    expected_impact = fields.String(required=True)  # high | medium | low
+    effort = fields.String(required=True)  # low | medium | high
+    evidence = fields.String(load_default="")
+
+
 class StrategySchema(Schema):
     strategic_direction = fields.String(required=True)
     key_objectives = fields.List(fields.String(), required=True)
+    prioritised_initiatives = fields.List(fields.Nested(InitiativeSchema), load_default=list)
+    risks = fields.List(fields.String(), load_default=list)
+    kpis = fields.List(fields.String(), load_default=list)
     assumptions = fields.List(fields.String(), load_default=list)
     sources = fields.List(fields.String(), load_default=list)
 

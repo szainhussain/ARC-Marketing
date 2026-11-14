@@ -886,7 +886,7 @@ export function AiPolicyPage() {
       heading: 'How ARC uses AI',
       body: (
         <p>
-          ARC runs twelve specialist agents — from the CMO to the Record Keeper — that each produce one kind of
+          ARC runs specialist agents — from the CMO to the Record Keeper — that each produce one kind of
           structured draft: a strategy, research notes, a plan, a content pack and so on. Every draft is checked against a
           schema and code-level quality checks before it is saved. Agents work in a fixed order and only see the outputs
           they depend on.

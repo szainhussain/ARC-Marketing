@@ -75,7 +75,7 @@ def start_run_route(organization_id, campaign_id):
             "Please correct the highlighted fields.",
             details=[{"field": "idempotency_key", "issue": "Required"}],
         )
-    # Only records the run and its 12 tasks; the worker process executes
+    # Only records the run and its tasks; the worker process executes
     # them, so 202 Accepted is literally true.
     run = enqueue_campaign_run(organization_id, campaign_id, current_user.id, idempotency_key)
     return jsonify({"workflow_run": run.to_dict()}), 202

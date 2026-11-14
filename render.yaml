@@ -57,6 +57,22 @@ services:
         generateValue: true  # any long random value; encrypts connected-site tokens at rest
       - key: PLATFORM_ADMIN_EMAILS
         sync: false          # your email(s), comma-separated: opens the in-app Admin inbox
+      - key: SYSTEM_EMAIL_PROVIDER
+        sync: false          # "resend" or "brevo": sends password-reset emails
+      - key: SYSTEM_EMAIL_API_KEY
+        sync: false          # API key for that provider (ARC's own account, not a client's)
+      - key: SYSTEM_EMAIL_FROM
+        sync: false          # a sender address on a domain you verified with the provider
+      - key: PAGESPEED_API_KEY
+        sync: false          # optional: free Google key that adds a speed test to the Growth Audit
+      - key: SENTRY_DSN
+        sync: false          # optional: error tracking from sentry.io
+      - key: AI_MODEL_LIGHT
+        sync: false          # optional: cheaper model for routine agents
+      - key: AI_PRICE_INPUT_PER_MTOK
+        sync: false          # your provider's real price per million input tokens (USD)
+      - key: AI_PRICE_OUTPUT_PER_MTOK
+        sync: false          # ...and per million output tokens
       - key: BILLING_PROVIDER
         value: test
       - key: AI_TIMEOUT_SECONDS

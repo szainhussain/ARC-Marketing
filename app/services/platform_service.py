@@ -30,7 +30,7 @@ DEFAULT_PLANS = [
         "entitlements": {"monthly_workflow_runs": 10, "seats": 2, "active_campaigns": 3,
                          "knowledge_entries": 100, "max_run_budget_usd": 1.0, "agents": 12,
                          "monthly_ai_budget_usd": 10.0, "monthly_agent_executions": 300, "monthly_exports": 50},
-        "features": ["All 12 agents", "Approval inbox", "Manual export to Meta, Google Ads, TikTok",
+        "features": ["Strategy, plan and content for your channels", "Approval inbox", "Manual export to Meta, Google Ads, TikTok",
                      "Operations Center"],
         "overage_note": "Additional runs are not sold yet; the workspace pauses new runs at the limit.",
     },

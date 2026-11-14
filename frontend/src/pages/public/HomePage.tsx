@@ -4,19 +4,19 @@ import { Repeat } from 'lucide-react'
 import ProductPreview from '../../components/marketing/ProductPreview'
 import WorkflowDemo from '../../components/marketing/WorkflowDemo'
 import Reveal from '../../components/motion/Reveal'
-import { AgentGrid, IntegrationList, PricingTable, SectionHead } from './sections'
+import { IntegrationList, PricingTable, SectionHead } from './sections'
 import { CtaPair, FaqList, LoopDiagram } from './GrowthPages'
-import { HOME_FAQS, SOLUTIONS } from '../../lib/growth'
+import { HOME_FAQS, MONTHLY_OUTCOMES, SOLUTIONS } from '../../lib/growth'
 import { usePageMeta } from '../../lib/seo'
 
 const PROBLEMS = [
-  'Too many disconnected tools',
-  'Strategy that never reaches execution',
-  'Content production bottlenecks',
-  'Inconsistent brand messaging',
-  'Campaigns that are hard to measure',
-  'Repetitive manual coordination',
-  'Reporting without actionable learning',
+  'No time to plan marketing between serving customers',
+  'Agency retainers that cost more than they return',
+  'Posting that stops whenever work gets busy',
+  'Ads launched without a plan or a budget split',
+  'A different message on every channel',
+  'No clear view of which channel brings enquiries',
+  'A full-time marketer you cannot yet justify',
 ]
 
 export default function HomePage() {
@@ -29,20 +29,23 @@ export default function HomePage() {
     <>
       <section className="hero2">
         <motion.span className="pill-tag" {...enter(0)}>
-          <span className="dot" aria-hidden="true" /> Your marketing department. Always moving.
+          <span className="dot" aria-hidden="true" /> Built for growing businesses in the UAE
         </motion.span>
         <motion.h1 {...enter(0.05)}>
-          Your whole marketing department. <em>Approved by you.</em>
+          A month of marketing, done. <em>Approved by you.</em>
         </motion.h1>
         <motion.p className="lede" {...enter(0.12)}>
-          Twelve specialist AI agents plan, create, publish and measure your marketing every month — and nothing goes
-          out until you approve it. The coordination of an agency, at a fraction of the cost.
+          ARC plans your month, writes the posts, ads, emails and articles, and tracks what each channel brings in —
+          for less than a part-time hire. Nothing goes out until you approve it.
         </motion.p>
         <motion.div {...enter(0.18)}>
           <CtaPair center />
         </motion.div>
         <motion.p className="hero-note" {...enter(0.24)}>
           14-day free trial · No card needed · Cancel any time
+        </motion.p>
+        <motion.p {...enter(0.27)} style={{ marginTop: 10 }}>
+          <Link to="/growth-audit">Or check your website first with a free Growth Audit →</Link>
         </motion.p>
         <motion.div id="workspace" {...enter(0.3)}>
           <ProductPreview />
@@ -51,8 +54,8 @@ export default function HomePage() {
 
       <section className="section">
         <SectionHead
-          title="Marketing shouldn't be a full-time job in coordination."
-          lede="Most teams don't lack ideas. They lose them between tools, handoffs and status meetings."
+          title="Marketing shouldn't depend on you finding the time."
+          lede="Most small businesses know what they should be doing. It stops when the owner gets busy."
         />
         <Reveal>
           <div className="problem-grid">
@@ -70,7 +73,7 @@ export default function HomePage() {
       <section className="section">
         <SectionHead
           title="Strategy to results, every month. You stay in control."
-          lede="Your CMO agent sets direction, the Marketing Manager plans it, ten specialists build it, Operations checks it — and nothing leaves the workspace until you approve it."
+          lede="One brief becomes a strategy, a dated plan and finished content, checked against your brand rules — and nothing leaves the workspace until you approve it."
         />
         <Reveal>
           <LoopDiagram />
@@ -92,16 +95,28 @@ export default function HomePage() {
           ))}
         </div>
         <p style={{ marginTop: 18 }}>
-          <Link to="/marketing-scorecard">Not sure where to start? Take the free 2-minute marketing scorecard →</Link>
+          <Link to="/growth-audit">Not sure where to start? Run a free Growth Audit of your website →</Link>
         </p>
       </section>
 
       <section className="section">
         <SectionHead
-          title="Meet the twelve agents."
-          lede="Each one has its own job, its own output format, its own permissions and its own quality checks. Open any card to see exactly what it can and can't do."
+          title="What you get every month."
+          lede="Finished work you can approve in minutes, not a blank page and a prompt box."
         />
-        <AgentGrid />
+        <Reveal>
+          <div className="cap-grid">
+            {MONTHLY_OUTCOMES.map((o) => (
+              <div key={o.title} className="cap">
+                <h3 style={{ marginTop: 0 }}>{o.title}</h3>
+                <p>{o.body}</p>
+              </div>
+            ))}
+          </div>
+        </Reveal>
+        <p style={{ marginTop: 18 }}>
+          <Link to="/agents">See the team behind the work →</Link>
+        </p>
       </section>
 
       <div className="rule" />
@@ -159,13 +174,13 @@ export default function HomePage() {
 
       <section className="final-cta">
         <Reveal>
-          <h2>Give your marketing goals a team that keeps moving.</h2>
+          <h2>Get next month's marketing off your desk.</h2>
           <p className="lede" style={{ margin: '0 auto 30px', color: 'var(--color-muted-fg)', maxWidth: 560 }}>
-            Bring your strategy, execution, and performance into one coordinated workspace.
+            Write one brief. Approve the plan and the content. See what each channel brings in.
           </p>
           <CtaPair center />
           <p className="hero-note">
-            <Repeat size={12} aria-hidden="true" /> Less coordination. More execution. Marketing that learns as it works.
+            <Repeat size={12} aria-hidden="true" /> Each month's results shape the next month's plan.
           </p>
         </Reveal>
       </section>

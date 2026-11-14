@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Check } from 'lucide-react'
 import { useResource } from '../../hooks/useResource'
-import { AGENT_META, agentVideo, type PublicAgent } from '../../lib/agentMeta'
+import { AGENT_META, agentVideo, type AgentTeam, type PublicAgent } from '../../lib/agentMeta'
 import AgentDetailDialog from '../../components/marketing/AgentDetailDialog'
 import Reveal from '../../components/motion/Reveal'
 import { ErrorState, Skeleton } from '../../components/ui'
@@ -33,15 +33,26 @@ export type Plan = {
 const UNREACHABLE = "We couldn't reach the ARC service just now. It may be waking up — try again in a minute."
 
 export function AgentGrid({ limit }: { limit?: number }) {
-  const { data, error, reload } = useResource<{ agents: PublicAgent[] }>('/public/agents')
+  const { data, error, reload } = useResource<{ agents: PublicAgent[]; teams?: AgentTeam[] }>('/public/agents')
   const [selected, setSelected] = useState<PublicAgent | null>(null)
   const agents = data?.agents || []
   if (error && !data) return <ErrorState message={UNREACHABLE} onRetry={reload} />
   if (!data) return <Skeleton height={140} count={2} />
   return (
     <>
+      {(limit || !data.teams ? [{ key: 'all', name: '', responsibility: '' }] : data.teams).map((team) => {
+        const members = team.key === 'all' ? agents.slice(0, limit) : agents.filter((a) => a.team?.key === team.key)
+        if (!members.length) return null
+        return (
+        <section key={team.key} style={{ marginBottom: 26 }}>
+          {team.name && (
+            <>
+              <h3 style={{ marginBottom: 4 }}>{team.name}</h3>
+              <p className="muted" style={{ marginTop: 0 }}>{team.responsibility}</p>
+            </>
+          )}
       <div className="agent-public-grid">
-        {agents.slice(0, limit).map((a) => {
+        {members.map((a) => {
           const meta = AGENT_META[a.agent_id]
           const Icon = meta?.icon
           return (
@@ -62,6 +73,9 @@ export function AgentGrid({ limit }: { limit?: number }) {
           )
         })}
       </div>
+        </section>
+        )
+      })}
       <AgentDetailDialog agent={selected} all={agents} onClose={() => setSelected(null)} />
     </>
   )
@@ -190,7 +204,7 @@ export function PlanComparison() {
         </thead>
         <tbody>
           <tr>
-            <th scope="row">All 12 agents</th>
+            <th scope="row">Strategy, plan and content for your channels</th>
             {plans.map((p) => (
               <td key={p.code}>
                 <Check size={15} aria-label="Included" />

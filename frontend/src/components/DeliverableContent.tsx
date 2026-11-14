@@ -51,6 +51,25 @@ function Strategy({ content }: { content: Json }) {
       <Section label="Key objectives">
         <BulletList items={asStringList(content.key_objectives)} />
       </Section>
+      {Array.isArray(content.prioritised_initiatives) && content.prioritised_initiatives.length > 0 && (
+        <Section label="Priorities, highest impact for least effort first">
+          <ol className="deliverable-list">
+            {(content.prioritised_initiatives as Json[]).map((it, i) => (
+              <li key={i}>
+                <strong>{String(it.initiative ?? '')}</strong>
+                <span className="muted"> · Impact: {String(it.expected_impact ?? '—')} · Effort: {String(it.effort ?? '—')}</span>
+                {it.evidence ? <div className="muted small">Based on: {String(it.evidence)}</div> : null}
+              </li>
+            ))}
+          </ol>
+        </Section>
+      )}
+      <Section label="KPIs">
+        <BulletList items={asStringList(content.kpis)} />
+      </Section>
+      <Section label="Risks">
+        <BulletList items={asStringList(content.risks)} />
+      </Section>
       <Section label="Assumptions">
         <BulletList items={asStringList(content.assumptions)} />
       </Section>

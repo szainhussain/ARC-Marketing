@@ -104,8 +104,9 @@ def _password_errors(password: str) -> list[dict]:
 @limiter.limit("5 per hour")
 def forgot_password():
     """Always returns the same response so it can't be used to discover
-    which emails have accounts. No email provider is configured yet, so the
-    reset link is written to the server log (see docs/OPERATIONS_RUNBOOK.md)."""
+    which emails have accounts. The link is emailed through the platform's
+    system email account (app/services/system_email.py); in dev/test it is
+    also written to the server log."""
 
     import logging
     import secrets
@@ -126,7 +127,16 @@ def forgot_password():
         ))
         db.session.commit()
         link = f"{current_app.config['FRONTEND_ORIGIN']}/reset-password?token={token}"
-        # Never log the token in production; dev-only until email is wired.
+        from app.services.system_email import send_system_email
+
+        minutes = current_app.config["PASSWORD_RESET_TTL_MINUTES"]
+        send_system_email(
+            user.email, "Reset your ARC password",
+            ["We received a request to reset the password for your ARC account.",
+             f"This link works once and expires in {minutes} minutes. If you did not ask for it, you can ignore this email."],
+            link=link, link_label="Choose a new password",
+        )
+        # Never log the token in production.
         if current_app.config.get("DEBUG") or current_app.config.get("TESTING"):
             logging.getLogger("app.auth").warning("Password reset link (dev only): %s", link)
             current_app.extensions.setdefault("last_reset_link", link)

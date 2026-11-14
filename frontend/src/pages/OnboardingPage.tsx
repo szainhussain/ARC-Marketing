@@ -5,6 +5,7 @@ import { apiRequest, ApiError } from '../api/client'
 import { ErrorState, Field, PageHeader, PageSkeleton, useToast } from '../components/ui'
 import { useWorkspace } from '../context/WorkspaceContext'
 import { useResource } from '../hooks/useResource'
+import { ALL_CHANNELS, BUDGET_BANDS, SEGMENTS, TONES, UAE_REGIONS, type Segment } from '../lib/segments'
 
 type Profile = Record<string, string | number | boolean | null | string[]>
 type ImportResult = {
@@ -117,7 +118,9 @@ ${text}` : text })
   )
 }
 
-type FieldDef = { key: string; label: string; type?: 'text' | 'textarea' | 'select' | 'url'; options?: [string, string][]; hint?: string; required?: boolean }
+// `suggest` adds one-tap answers under a field; `multi` lets several be picked.
+// Typing a different answer always stays possible.
+type FieldDef = { key: string; label: string; type?: 'text' | 'textarea' | 'select' | 'url' | 'number'; options?: [string, string][]; hint?: string; required?: boolean; suggest?: string[] | ((segment?: Segment) => string[]); multi?: boolean }
 
 const SECTIONS: { title: string; description: string; fields: FieldDef[] }[] = [
   {
@@ -126,10 +129,10 @@ const SECTIONS: { title: string; description: string; fields: FieldDef[] }[] = [
     fields: [
       { key: 'business_name', label: 'Business name', required: true },
       { key: 'business_description', label: 'What the business does', type: 'textarea' },
-      { key: 'industry', label: 'Industry', required: true },
+      { key: 'industry', label: 'Industry', required: true, suggest: SEGMENTS.map((x) => x.industry) },
       { key: 'website', label: 'Website', type: 'url', hint: 'Used as context. ARC only reads it when you click Import.' },
       { key: 'business_type', label: 'Business model', type: 'select', options: [['b2c', 'B2C'], ['b2b', 'B2B'], ['both', 'Both'], ['nonprofit', 'Nonprofit'], ['other', 'Other']] },
-      { key: 'regions_served', label: 'Countries and markets' },
+      { key: 'regions_served', label: 'Where your customers are', suggest: UAE_REGIONS, multi: true },
     ],
   },
   {
@@ -148,7 +151,7 @@ const SECTIONS: { title: string; description: string; fields: FieldDef[] }[] = [
     description: 'How you look and sound. Every agent, generated image and export follows this.',
     fields: [
       { key: 'brand_persona', label: 'Brand persona', type: 'textarea', hint: 'Who the brand sounds like, e.g. “a calm, expert trail guide who never oversells”.' },
-      { key: 'tone_of_voice', label: 'Tone of voice', type: 'textarea' },
+      { key: 'tone_of_voice', label: 'Tone of voice', suggest: TONES },
       { key: 'preferred_phrases', label: 'Preferred phrases / messaging guidelines', type: 'textarea' },
       { key: 'prohibited_phrases', label: 'Prohibited phrases', type: 'textarea', hint: 'Comma or line separated. Every agent output is checked against these in code.' },
       { key: 'constraints', label: 'Legal / compliance constraints', type: 'textarea' },
@@ -161,19 +164,30 @@ const SECTIONS: { title: string; description: string; fields: FieldDef[] }[] = [
     title: 'Goals & channels',
     description: 'What success looks like and where you market.',
     fields: [
-      { key: 'primary_goal', label: 'Primary campaign goal', required: true },
-      { key: 'channels', label: 'Channels you use', hint: 'e.g. Instagram, TikTok, Google Ads, email' },
-      { key: 'budget_range', label: 'Typical monthly marketing budget', type: 'select', options: [['', 'Prefer not to say'], ['<1k', 'Under $1k'], ['1k-5k', '$1k–5k'], ['5k-20k', '$5k–20k'], ['20k+', '$20k+']] },
+      { key: 'primary_goal', label: 'Main goal', required: true, suggest: (seg) => seg?.goals || ['More enquiries', 'More sales', 'More repeat customers'] },
+      { key: 'channels', label: 'Channels you use', suggest: ALL_CHANNELS, multi: true },
+      { key: 'budget_range', label: 'Typical monthly marketing budget', suggest: BUDGET_BANDS },
       { key: 'existing_systems', label: 'Existing marketing systems', type: 'textarea', hint: 'CRM, analytics, email tools…' },
       { key: 'reporting_expectations', label: 'Reporting expectations', type: 'textarea' },
+    ],
+  },
+  {
+    title: 'Your numbers',
+    description: 'Optional, and worth two minutes: with these ARC can tell you whether a campaign made or lost money, not just how many clicks it got. Rough figures are fine and you can change them any time.',
+    fields: [
+      { key: 'currency', label: 'Currency', type: 'select', options: [['', 'Choose'], ['AED', 'AED'], ['SAR', 'SAR'], ['QAR', 'QAR'], ['KWD', 'KWD'], ['BHD', 'BHD'], ['OMR', 'OMR'], ['USD', 'USD']] },
+      { key: 'gross_margin_pct', label: 'Gross margin (%)', type: 'number', suggest: ['20', '30', '40', '50', '60', '70'], hint: 'Out of every 100 you sell, what is left after the direct cost of the product or service.' },
+      { key: 'average_order_value', label: 'Average sale value', type: 'number', hint: 'What a typical customer pays per order, booking or job.' },
+      { key: 'orders_per_customer', label: 'Times a typical customer buys', type: 'number', suggest: ['1', '2', '3', '5', '10'], hint: 'Over the whole time they stay with you.' },
+      { key: 'monthly_marketing_budget', label: 'Monthly marketing budget', type: 'number', hint: 'In your currency. Plans and ad recommendations are sized to this.' },
     ],
   },
   {
     title: 'Operating preferences',
     description: 'Language, time zone and how much autonomy you want.',
     fields: [
-      { key: 'timezone', label: 'Time zone', hint: 'e.g. Europe/London' },
-      { key: 'language', label: 'Content language', hint: 'e.g. English (UK)' },
+      { key: 'timezone', label: 'Time zone', suggest: ['Asia/Dubai', 'Asia/Riyadh', 'Asia/Qatar', 'Asia/Kuwait'] },
+      { key: 'language', label: 'Content language', suggest: ['English', 'Arabic', 'English and Arabic'] },
     ],
   },
 ]
@@ -205,6 +219,26 @@ export function ProfileForm({ mode }: { mode: 'wizard' | 'edit' }) {
 
   if (error && !profile) return <ErrorState message={error} />
   if (!profile) return <PageSkeleton />
+
+  const segment = SEGMENTS.find((x) => x.industry === profile.industry)
+
+  // One tap fills the usual answers for that kind of business, into empty fields only.
+  function applySegment(seg: Segment) {
+    setProfile((p) => {
+      const cur = p as Profile
+      const blank = (k: string) => !String(cur[k] ?? '').trim()
+      return {
+        ...cur,
+        industry: seg.industry,
+        ...(blank('business_type') ? { business_type: seg.businessType } : {}),
+        ...(blank('channels') ? { channels: seg.channels.join(', ') } : {}),
+        ...(blank('regions_served') ? { regions_served: 'Dubai' } : {}),
+        ...(blank('timezone') ? { timezone: 'Asia/Dubai' } : {}),
+        ...(blank('language') ? { language: 'English' } : {}),
+        ...(blank('currency') ? { currency: 'AED' } : {}),
+      }
+    })
+  }
 
   const sections = mode === 'wizard' ? (step < SECTIONS.length ? [SECTIONS[step]] : []) : SECTIONS
 
@@ -249,6 +283,25 @@ export function ProfileForm({ mode }: { mode: 'wizard' | 'edit' }) {
       onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
         setProfile((p) => ({ ...(p as Profile), [f.key]: e.target.value })),
     }
+    const options = typeof f.suggest === 'function' ? f.suggest(segment) : f.suggest
+    const current = String(profile[f.key] ?? '')
+    const picked = current.split(',').map((x) => x.trim()).filter(Boolean)
+    const chips = options && (
+      <span className="template-row" role="group" aria-label={`Suggested answers for ${f.label}`} style={{ marginTop: 6 }}>
+        {options.map((opt) => {
+          const on = f.multi ? picked.includes(opt) : current === opt
+          const next = f.multi ? (on ? picked.filter((x) => x !== opt) : [...picked, opt]).join(', ') : on ? '' : opt
+          return (
+            <button key={opt} type="button" className={on ? 'chip active' : 'chip'} aria-pressed={on}
+              onClick={() => setProfile((p) => ({ ...(p as Profile), [f.key]: next }))}>
+              {opt}
+            </button>
+          )
+        })}
+      </span>
+    )
+    if (options) return (<><input type={f.type === 'number' ? 'number' : 'text'} min={f.type === 'number' ? 0 : undefined} step="any" {...common} />{chips}</>)
+    if (f.type === 'number') return <input type="number" min={0} step="any" {...common} />
     if (f.type === 'textarea') return <textarea rows={3} {...common} />
     if (f.key === 'brand_colors') {
       const swatches = String(profile[f.key] ?? '')
@@ -291,6 +344,21 @@ export function ProfileForm({ mode }: { mode: 'wizard' | 'edit' }) {
       {error && <ErrorState message={error} />}
       {orgId && (mode === 'edit' || step === 0) && (
         <WebsiteImport orgId={orgId} profile={profile} onApply={(patch) => setProfile((p) => ({ ...(p as Profile), ...patch }))} />
+      )}
+      {mode === 'wizard' && step === 0 && (
+        <div className="card">
+          <h2>What kind of business are you?</h2>
+          <p className="muted small" style={{ marginTop: -8 }}>
+            Pick the closest and ARC fills in the usual answers for you. You can change any of them.
+          </p>
+          <div className="template-row" role="group" aria-label="Kind of business">
+            {SEGMENTS.map((seg) => (
+              <button key={seg.key} type="button" className={segment?.key === seg.key ? 'chip active' : 'chip'} aria-pressed={segment?.key === seg.key} onClick={() => applySegment(seg)}>
+                {seg.label}
+              </button>
+            ))}
+          </div>
+        </div>
       )}
       {sections.map((s) => (
         <div key={s.title} className="card">

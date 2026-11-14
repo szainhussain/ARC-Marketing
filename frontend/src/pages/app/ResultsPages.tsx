@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { EconomicsPanel, type Economics } from '../../components/GrowthPanels'
 import { AXIS, CHART, TOOLTIP } from '../../lib/chartTheme'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
@@ -24,7 +25,7 @@ type Metrics = {
   roas: number | null
 }
 type ResultRow = Metrics & { id: string; campaign_id: string; campaign_name: string | null; channel: string; period_start: string; period_end: string; notes: string | null }
-type Summary = { totals: Metrics; by_channel: (Metrics & { channel: string })[]; by_campaign: (Metrics & { campaign_id: string; campaign_name: string | null })[]; results: ResultRow[] }
+type Summary = { economics?: Economics; currency?: string | null; totals: Metrics; by_channel: (Metrics & { channel: string })[]; by_campaign: (Metrics & { campaign_id: string; campaign_name: string | null })[]; results: ResultRow[] }
 
 const CHANNELS = ['Instagram', 'Facebook', 'LinkedIn', 'TikTok', 'Google Ads', 'Meta Ads', 'Email', 'SEO / organic', 'Google Business Profile', 'Events', 'Other']
 const NUM_FIELDS: [keyof Metrics, string][] = [
@@ -155,6 +156,7 @@ export function ResultsPage() {
         }
       />
       {error && <ErrorState message={error} onRetry={reload} />}
+      {data?.economics && <EconomicsPanel economics={data.economics} currency={data.currency} />}
       <div className="filter-row" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
         <label htmlFor="res-range" className="sr-only">Date range</label>
         <select id="res-range" className="select-inline" value={range} onChange={(e) => setRange(e.target.value)}>

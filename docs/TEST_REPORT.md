@@ -418,3 +418,41 @@ ad Active, Stop all -> Paused, 0 console errors. One unrelated flaky test
 seen once under a slow run (`test_mfa_enrolment_login_replay_recovery_and_disable`,
 a 30-second TOTP window edge); passes on re-run. **Not executed:** real Meta
 or Google Ads spend (no API access yet).
+
+## Market-fit pass: outcome positioning, agent selection, reset email (2026-11-14)
+
+`pytest`: 191 passed (9 new: `tests/integration/test_market_fit.py`). Covered: channel
+selection keeps the six core agents and adds only matching specialists; falls back to
+all twelve for empty or unrecognised channels; matches whole words only; a run for
+"Instagram, Facebook" queues 7 tasks and completes without waiting for unqueued
+specialists; the light tier swaps model and prices only when `AI_MODEL_LIGHT` is set;
+cost uses configured prices; the prompt's shared prefix is identical across agents;
+forgot-password emails the link through the provider (network call patched), sends
+nothing for an unknown address, and still answers 200 with email unconfigured.
+Frontend: `npm run build`, `npm run lint` (0 errors), `npm test` 44 passed. Browser
+check of the production build on a local preview with no backend: new hero and
+"What you get every month" section render, and failed API calls show the retry
+message instead of a blank page. **Not executed:** a real email send, a real Sentry
+event, the PostgreSQL CI step (runs on the next push), the E2E journey, and any
+measurement of token savings against a live provider.
+
+## Profit maths, Growth Score, Growth Audit, cost report, agent teams (2026-11-14)
+
+`pytest`: 14 new tests in `tests/integration/test_growth_features.py` and
+`tests/security/test_growth_isolation.py`. Covered: a 4x ROAS at a 20% margin reports a
+1,000 loss; missing inputs give None, never a guess; lifetime value and payback; the audit
+passes a well-built page, ranks gaps by impact on a bare one, ignores SVG icon titles,
+refuses private addresses, and stores a lead only when an email is given; the speed test
+reports "not connected" without a key and parses a patched Google response; the Growth
+Score scores only measured dimensions; impossible commercial numbers are rejected; agents
+receive margins and verified results; new endpoints deny other workspaces and signed-out
+callers; every agent belongs to a team.
+Browser check (local backend and Vite dev server, a new test account): the public audit
+run against a real site returned 10 of 15 checks with five ranked fixes; onboarding's
+business-type picker pre-filled industry, model and region; the Command Center showed a
+Growth Score of 52 from 4 of 6 dimensions; Results showed "Lost money" with AED -1,000;
+Usage showed the cost panel. That run found and fixed two bugs in the new code: swapped
+return values from the page fetch, and an icon's SVG title read as the page title.
+**Not executed:** a real PageSpeed call (no key), a real agent run with the new CMO and
+paid-media prompts against a live model, the E2E journey, and the PostgreSQL migration
+(CI applies it on the next push).

@@ -3,13 +3,24 @@
 import type { Faq } from './seo'
 
 export const LOOP = [
-  { k: 'Strategy', d: 'Your CMO agent sets objectives, positioning, KPIs and a budget envelope.' },
-  { k: 'Plan', d: 'The Marketing Manager turns it into a phased plan with owners and dates.' },
-  { k: 'Create', d: 'Ten specialists draft content, social, ads, SEO, PR and sales materials in parallel.' },
+  { k: 'Strategy', d: 'ARC sets objectives, positioning, KPIs and a budget split for the month.' },
+  { k: 'Plan', d: 'The strategy becomes a dated plan for each channel you use.' },
+  { k: 'Create', d: 'Posts, ads, emails, web pages and sales materials are drafted in parallel, in your brand voice.' },
   { k: 'You approve', d: 'Nothing leaves ARC until an approver signs off on the exact version.', highlight: true },
   { k: 'Publish', d: 'Approved work is exported in each platform’s format or sent to Zapier or Make.' },
   { k: 'Measure', d: 'Record results per channel and see cost per lead, ROAS and what worked.' },
   { k: 'Improve', d: 'Learnings you approve feed the next month’s strategy and plan.' },
+] as const
+
+// What a customer actually receives from a run. Each line maps to a real
+// deliverable type; keep it in step with app/agents/definitions.py.
+export const MONTHLY_OUTCOMES = [
+  { title: 'A clear plan for the month', body: 'Objectives, KPIs, a budget split and a dated plan for each channel you use.' },
+  { title: 'Posts ready to publish', body: 'A posting calendar with captions and timing, written in your brand voice.' },
+  { title: 'Ads ready to launch', body: 'Campaign structure and ad copy checked against Google, Meta and TikTok field limits, with a budget recommendation you approve.' },
+  { title: 'Pages that get found', body: 'Search themes for your market, page improvements and a blog article you can publish to WordPress.' },
+  { title: 'Emails and replies drafted', body: 'Outreach emails, answers to common customer objections and reply templates for reviews and messages.' },
+  { title: 'A report that shows profit', body: 'Record results per channel and see whether each one made or lost money at your margins, not just clicks and return on ad spend.' },
 ] as const
 
 export type Solution = {
@@ -105,7 +116,7 @@ export const SOLUTIONS: Solution[] = [
 export const HOME_FAQS: Faq[] = [
   {
     q: 'How is ARC different from ChatGPT or an AI writing tool?',
-    a: 'Writing tools answer one prompt at a time. ARC runs a coordinated department: twelve specialist agents work in a fixed order, each checks its inputs, Operations reviews the result, and nothing leaves the workspace until a person approves the exact version.',
+    a: 'Writing tools answer one prompt at a time. ARC does the whole job in order: it sets a strategy, turns it into a dated plan, writes the content for each channel, checks it against your brand rules, and tracks results. Nothing leaves the workspace until a person approves the exact version.',
   },
   {
     q: 'Will ARC post or spend money without asking?',
@@ -132,7 +143,7 @@ export const HOME_FAQS: Faq[] = [
 export const PRICING_FAQS: Faq[] = [
   { q: 'Is there a free trial?', a: 'Yes. Every new workspace starts with a 14-day trial of the Launch plan. No card is needed.' },
   { q: 'Can I cancel any time?', a: 'Yes. Cancel from the Billing page and your plan stays active until the end of the period you paid for.' },
-  { q: 'What counts as a campaign run?', a: 'One run is the full department working on one campaign brief: all twelve agents, from strategy to the final record.' },
+  { q: 'What counts as a campaign run?', a: 'One run takes one campaign brief from strategy to finished, checked work: the plan, the content for the channels you chose, a quality review and a record of what was decided.' },
   { q: 'What happens if I reach a limit?', a: 'The backend stops new runs once a monthly limit is reached and tells you why. Nothing is charged automatically; you can upgrade or wait for the next month.' },
   { q: 'Are prices final?', a: 'Prices are provisional while ARC is in early access. Any change is announced at least 30 days ahead and applies from your next billing period.' },
   { q: 'Do you offer human help?', a: 'Yes — a strategist add-on for monthly planning calls and quarterly reviews. Book a demo to discuss it.' },

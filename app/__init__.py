@@ -29,6 +29,16 @@ def create_app(config_name: str | None = None) -> Flask:
 
     configure_logging(app)
 
+    if app.config.get("SENTRY_DSN"):
+        try:
+            import sentry_sdk
+
+            # No request bodies or user details: they can hold client content.
+            sentry_sdk.init(dsn=app.config["SENTRY_DSN"], send_default_pii=False, traces_sample_rate=0.0,
+                            environment="production" if app.config.get("IS_PRODUCTION") else "development")
+        except ImportError:  # pragma: no cover
+            app.logger.warning("SENTRY_DSN is set but sentry-sdk is not installed.")
+
     from app.models.user import User
 
     @login_manager.user_loader

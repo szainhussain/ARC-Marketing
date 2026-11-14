@@ -11,7 +11,7 @@ const LINKS = [
   { to: '/product', label: 'Product' },
   { to: '/solutions', label: 'Solutions' },
   { to: '/how-it-works', label: 'How it works' },
-  { to: '/agents', label: 'Agents' },
+  { to: '/growth-audit', label: 'Free audit' },
   { to: '/pricing', label: 'Pricing' },
 ]
 
@@ -102,15 +102,15 @@ export default function PublicLayout() {
               <Logo size={24} /> ARC
             </Link>
             <p className="muted small" style={{ maxWidth: 300, marginTop: 12 }}>
-              Your marketing department. Always moving. Twelve specialist AI agents, one coordinated workspace, your
-              approval on what matters.
+              A month of marketing, planned, written and ready to approve. Built for growing businesses in the UAE, with
+              your sign-off on everything that goes out.
             </p>
           </div>
           <div>
             <h4>Product</h4>
             <Link to="/product">Overview</Link>
             <Link to="/solutions">Solutions</Link>
-            <Link to="/agents">The 12 agents</Link>
+            <Link to="/agents">The team behind the work</Link>
             <Link to="/how-it-works">How it works</Link>
             <Link to="/integrations">Integrations</Link>
             <Link to="/pricing">Pricing</Link>
@@ -126,6 +126,7 @@ export default function PublicLayout() {
           </div>
           <div>
             <h4>Resources</h4>
+            <Link to="/growth-audit">Free Growth Audit</Link>
             <Link to="/marketing-scorecard">Free marketing scorecard</Link>
             <Link to="/compare/agency">ARC vs an agency</Link>
             <Link to="/docs">Documentation</Link>
