@@ -47,7 +47,7 @@ Secondary claim: the coordination of an agency at a fraction of the cost (the si
 
 ## Brand Commitments
 
-- Name: ARC. Tagline: "Strategy. Plan. Execution." Hero line: "Your whole marketing department. Approved by you."
+- Name: ARC. Tagline: "Strategy. Plan. Execution." Hero line: "Stop guessing which marketing pays." Brand line: "Marketing that shows its results." Supporting line: "You run the business. We'll run the marketing."
 - Voice: plain, direct, honest. Short sentences, everyday words, no hype, no guaranteed results. Say what ARC does not do as clearly as what it does.
 - Fonts in use on the live site: Instrument Serif for display headings, Inter for body and UI text, JetBrains Mono for small notes and tags. Changing them is a rebrand decision for the owner.
 

@@ -18,7 +18,7 @@ export function ProductPage() {
     <>
       <section className="section">
         <SectionHead
-          title="Your marketing gets done every month, not just written."
+          title="Marketing that shows its results."
           lede="ARC turns one brief into a strategy, a dated plan and finished content for each channel, checks it against your brand rules, and tracks the results. You approve what goes out."
         />
         <div className="grid-3">
@@ -187,7 +187,7 @@ export function PricingPage() {
     <>
       <section className="section">
         <SectionHead
-          title="A marketing department for less than one hire."
+          title="Know which marketing pays, for less than one hire."
           lede="Every plan includes strategy, planning, content for your channels, approvals and exports. Start with a 14-day free trial, no card needed, and cancel any time."
         />
         <PricingTable />

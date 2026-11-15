@@ -1,4 +1,4 @@
-# ARC — Your marketing department. Always moving.
+# ARC — Stop guessing which marketing pays.
 
 **ARC** is a multi-tenant SaaS "Marketing Department as a Service": 12
 specialist AI agents (CMO, Marketing Manager, Social, PR & Partnerships,
