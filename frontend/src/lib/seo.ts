@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 
 const SITE = 'ARC'
 const DEFAULT_DESCRIPTION =
-  'ARC plans your month of marketing, writes the posts, ads, emails and articles, and tracks what each channel brings in. Built for growing businesses in the UAE. Nothing goes out until you approve it.'
+  'ARC plans your month, writes every post, ad and email, and shows which channels brought customers and which lost money. Nothing goes out until you approve it. Built for growing businesses in the UAE.'
 
 function setMeta(name: string, content: string, attr: 'name' | 'property' = 'name') {
   let el = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${name}"]`)

@@ -64,7 +64,7 @@ try {
       await page.locator('main h1, main h2').first().waitFor()
     }
     await page.goto(FRONTEND + '/', { waitUntil: 'networkidle' })
-    await page.getByRole('heading', { name: /Know which marketing drives growth/ }).waitFor()
+    await page.getByRole('heading', { name: /Stop guessing which marketing/ }).waitFor()
     await shot(page, 'home')
     await page.getByRole('button', { name: 'Agent Operations Center' }).click()
     await page.getByRole('button', { name: 'Start' }).click()

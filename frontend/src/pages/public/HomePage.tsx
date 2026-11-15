@@ -33,11 +33,11 @@ export default function HomePage() {
           <span className="dot" aria-hidden="true" /> Built for growing businesses in the UAE
         </motion.span>
         <motion.h1 {...enter(0.05)}>
-          Know which marketing drives growth. <em>We&rsquo;ll do the rest.</em>
+          Stop guessing which marketing <em>pays.</em>
         </motion.h1>
         <motion.p className="lede" {...enter(0.12)}>
-          ARC plans your month, writes every post, ad, email and article, and shows which channels grew your
-          business and which did not. Nothing goes out until you approve it.
+          ARC plans your month, writes every post, ad and email, and shows which channels brought customers and
+          which lost money. Nothing goes out until you approve it.
         </motion.p>
         <motion.div {...enter(0.18)}>
           <CtaPair center />
@@ -46,7 +46,7 @@ export default function HomePage() {
           14-day free trial · No card needed · Cancel any time
         </motion.p>
         <motion.p {...enter(0.27)} style={{ marginTop: 10 }}>
-          <Link to="/growth-audit">Or check your website first with a free Growth Audit →</Link>
+          <Link to="/growth-audit">Find your website&rsquo;s leaks in a minute, free →</Link>
         </motion.p>
         <motion.div id="workspace" {...enter(0.3)}>
           <ProductPreview />
@@ -55,7 +55,7 @@ export default function HomePage() {
 
       <section className="section">
         <SectionHead
-          title="Marketing shouldn't depend on you finding the time."
+          title="You run the business. We&rsquo;ll run the marketing."
           lede="Most small businesses know what they should be doing. It stops when the owner gets busy."
         />
         <Reveal>

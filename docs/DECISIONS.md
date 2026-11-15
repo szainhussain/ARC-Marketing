@@ -583,3 +583,19 @@ the serif was. `FlowLoop` pauses on hover and focus, has a pause button, and und
 `prefers-reduced-motion` renders a static list instead. The model prompt in
 `provider_adapter.py` was deliberately left untouched, so no agent version changes. The
 text-based `LoopDiagram` remains on the How it works page.
+
+## D25 — Positioning: "Stop guessing which marketing pays."
+
+**Decision (2026-11-15, chosen by the user):** the headline is "Stop guessing which
+marketing pays.", the brand line is "Marketing that shows its results.", and "You run the
+business. We'll run the marketing." is the supporting line. This replaces "Know which
+marketing drives growth." everywhere a customer sees it: site, link previews, videos, ads.
+
+**Why:** a read of eight competitor home pages the same day found "AI" in six of the eight
+hero lines, Blaze using "You make the calls. Blaze does the work." and HubSpot using "a team
+of AI agents". None spoke to a small owner about whether marketing paid. That position was
+empty, and the profit view and the free audit already prove it on the page.
+
+**How to apply:** lead with proof of results, not with AI, agents or a department. Never
+promise more customers, sales or a return figure. In-app labels such as "Run the marketing
+department" are working labels, not positioning, and were left as they are.

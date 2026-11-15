@@ -102,8 +102,8 @@ export default function PublicLayout() {
               <Logo size={24} /> ARC
             </Link>
             <p className="muted small" style={{ maxWidth: 300, marginTop: 12 }}>
-              A month of marketing, planned, written and ready to approve. Built for growing businesses in the UAE, with
-              your sign-off on everything that goes out.
+              Marketing that shows its results. Planned and written for growing businesses in the UAE, with your
+              sign-off on everything that goes out.
             </p>
           </div>
           <div>
