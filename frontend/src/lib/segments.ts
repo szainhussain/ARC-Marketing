@@ -92,7 +92,7 @@ export const SEGMENTS: Segment[] = [
 
 export const OTHER_SEGMENT = 'other'
 
-export const BUDGET_BANDS = ['Under AED 2,000 / month', 'AED 2,000–5,000 / month', 'AED 5,000–15,000 / month', 'AED 15,000–50,000 / month', 'Over AED 50,000 / month', 'Not decided yet']
+export const BUDGET_BANDS = ['Under $500 / month', '$500 to $1,500 / month', '$1,500 to $5,000 / month', '$5,000 to $15,000 / month', 'Over $15,000 / month', 'Not decided yet']
 
 export const UAE_REGIONS = ['Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman', 'Ras Al Khaimah', 'Fujairah', 'Umm Al Quwain', 'All UAE', 'GCC']
 

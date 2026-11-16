@@ -61,7 +61,7 @@ def _limit() -> float:
 def guardrail(org_id: str) -> AdGuardrail:
     g = AdGuardrail.query.filter_by(organization_id=org_id).first()
     if g is None:
-        g = AdGuardrail(organization_id=org_id, max_daily_budget=0.0, currency="GBP")
+        g = AdGuardrail(organization_id=org_id, max_daily_budget=0.0, currency="USD")
         db.session.add(g)
         db.session.flush()
     return g
@@ -91,9 +91,9 @@ def set_guardrail(m: Membership, data: dict) -> dict:
         raise _bad("max_daily_budget", "Enter an amount") from None
     if not 0 <= cap <= _limit():
         raise _bad("max_daily_budget", f"Between 0 and {_limit():.0f} a day")
-    currency = (data.get("currency") or "GBP").upper()[:3]
-    if currency not in ("GBP", "USD", "EUR", "AED", "PKR", "INR", "CAD", "AUD"):
-        raise _bad("currency", "Unsupported currency")
+    currency = "USD"  # ARC works in US dollars everywhere
+    if (data.get("currency") or "USD").upper() != "USD":
+        raise _bad("currency", "ARC works in US dollars (USD)")
     g = guardrail(m.organization_id)
     if cap < committed_budget(m.organization_id):
         raise _bad("max_daily_budget", "Lower than the daily budgets already approved or running. Pause or stop some ads first.")

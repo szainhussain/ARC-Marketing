@@ -173,13 +173,12 @@ const SECTIONS: { title: string; description: string; fields: FieldDef[] }[] = [
   },
   {
     title: 'Your numbers',
-    description: 'Optional, and worth two minutes: with these ARC can tell you whether a campaign made or lost money, not just how many clicks it got. Rough figures are fine and you can change them any time.',
+    description: 'Optional, and worth two minutes: with these ARC can tell you whether a campaign made or lost money, not just how many clicks it got. Enter amounts in US dollars. Rough figures are fine and you can change them any time.',
     fields: [
-      { key: 'currency', label: 'Currency', type: 'select', options: [['', 'Choose'], ['AED', 'AED'], ['SAR', 'SAR'], ['QAR', 'QAR'], ['KWD', 'KWD'], ['BHD', 'BHD'], ['OMR', 'OMR'], ['USD', 'USD']] },
       { key: 'gross_margin_pct', label: 'Gross margin (%)', type: 'number', suggest: ['20', '30', '40', '50', '60', '70'], hint: 'Out of every 100 you sell, what is left after the direct cost of the product or service.' },
-      { key: 'average_order_value', label: 'Average sale value', type: 'number', hint: 'What a typical customer pays per order, booking or job.' },
+      { key: 'average_order_value', label: 'Average sale value', type: 'number', hint: 'In US dollars: what a typical customer pays per order, booking or job.' },
       { key: 'orders_per_customer', label: 'Times a typical customer buys', type: 'number', suggest: ['1', '2', '3', '5', '10'], hint: 'Over the whole time they stay with you.' },
-      { key: 'monthly_marketing_budget', label: 'Monthly marketing budget', type: 'number', hint: 'In your currency. Plans and ad recommendations are sized to this.' },
+      { key: 'monthly_marketing_budget', label: 'Monthly marketing budget', type: 'number', hint: 'In US dollars. Plans and ad recommendations are sized to this.' },
     ],
   },
   {
@@ -235,7 +234,6 @@ export function ProfileForm({ mode }: { mode: 'wizard' | 'edit' }) {
         ...(blank('regions_served') ? { regions_served: 'Dubai' } : {}),
         ...(blank('timezone') ? { timezone: 'Asia/Dubai' } : {}),
         ...(blank('language') ? { language: 'English' } : {}),
-        ...(blank('currency') ? { currency: 'AED' } : {}),
       }
     })
   }

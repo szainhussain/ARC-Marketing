@@ -32,7 +32,9 @@ const VERDICT: Record<Economics['verdict'], { label: string; cls: string }> = {
 function num(v: number | null, opts: { currency?: string | null; suffix?: string; digits?: number } = {}) {
   if (v == null) return '-'
   const text = v.toLocaleString(undefined, { maximumFractionDigits: opts.digits ?? 2 })
-  return `${opts.currency ? `${opts.currency} ` : ''}${text}${opts.suffix || ''}`
+  // ARC works in US dollars, so amounts read like every other figure on the page.
+  const prefix = !opts.currency ? '' : opts.currency === 'USD' ? '$' : `${opts.currency} `
+  return `${prefix}${text}${opts.suffix || ''}`
 }
 
 /** Whether recorded spend made or lost money at the customer's own margin. */

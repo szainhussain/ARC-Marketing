@@ -113,7 +113,7 @@ def test_growth_score_only_scores_what_is_measured(client):
     assert measured == {"brand_readiness"} and empty["total_dimensions"] == 6
     assert all(d["score"] is None and d["next_step"] for d in empty["dimensions"] if not d["measured"])
 
-    assert client.patch(f"{base}/business-profile", json={"gross_margin_pct": 20, "currency": "aed"}).status_code == 200
+    assert client.patch(f"{base}/business-profile", json={"gross_margin_pct": 20, "currency": "usd"}).status_code == 200
     campaign = create_campaign(client, org["id"])
     _result(client, org["id"], campaign["id"], spend=5000, revenue=20000, clicks=1000, leads=200, conversions=40)
 
@@ -126,7 +126,7 @@ def test_growth_score_only_scores_what_is_measured(client):
     assert score["measured_dimensions"] == 4 and "4 of 6" in score["note"]
 
     summary = client.get(f"{base}/results").get_json()
-    assert summary["currency"] == "AED" and summary["economics"]["verdict"] == "losing"
+    assert summary["currency"] == "USD" and summary["economics"]["verdict"] == "losing"
     assert summary["by_channel"][0]["economics"]["contribution_profit"] == -1000.0
 
 
@@ -137,6 +137,7 @@ def test_profile_rejects_impossible_commercial_numbers(client):
     assert client.patch(url, json={"gross_margin_pct": 140}).status_code == 400
     assert client.patch(url, json={"average_order_value": "lots"}).status_code == 400
     assert client.patch(url, json={"currency": "dirhams"}).status_code == 400
+    assert client.patch(url, json={"currency": "AED"}).status_code == 400  # USD only
     assert client.patch(url, json={"gross_margin_pct": ""}).status_code == 200  # clearing is allowed
 
 
