@@ -1,6 +1,8 @@
 """Record campaign results and derive the metrics clients care about.
 Ratios are only computed when both sides exist, and never invented."""
 
+from app.models.business_profile import BASE_CURRENCY
+
 from datetime import date, datetime
 
 from app.extensions import db
@@ -151,7 +153,7 @@ def summarize(organization_id: str, start: date | None = None, end: date | None 
         row["economics"] = economics(row, margin, repeat)
     return {
         "source": "manual",
-        "currency": (profile.currency if profile else None),
+        "currency": BASE_CURRENCY,
         "economics": economics(_sum(rows), margin, repeat),
         "totals": derive(_sum(rows)),
         "by_channel": by_channel,
@@ -240,7 +242,7 @@ def performance_for_agents(organization_id: str, days: int = 90) -> dict:
         if profile.monthly_marketing_budget:
             afford["monthly_marketing_budget"] = profile.monthly_marketing_budget
         if afford:
-            out["unit_economics"] = {**afford, "currency": profile.currency,
+            out["unit_economics"] = {**afford, "currency": BASE_CURRENCY,
                                      "source": "entered by the business in its profile"}
     summary = summarize(organization_id, start=date.today() - timedelta(days=days))
     channels = []

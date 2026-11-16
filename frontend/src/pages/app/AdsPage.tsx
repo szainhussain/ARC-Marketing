@@ -51,7 +51,7 @@ export default function AdsPage() {
   if (!orgId) return null
   if (loading && !data) return <PageSkeleton />
   const g = data?.guardrail
-  const cur = g?.currency || 'GBP'
+  const cur = g?.currency || 'USD'
 
   return (
     <div className="page page-wide">
@@ -120,11 +120,10 @@ export default function AdsPage() {
 
 function CapDialog({ orgId, g, onClose, onDone }: { orgId: string; g: Overview['guardrail']; onClose: () => void; onDone: () => void }) {
   const [cap, setCap] = useState(String(g.max_daily_budget || ''))
-  const [currency, setCurrency] = useState(g.currency)
   const [err, setErr] = useState<string | null>(null)
   async function save() {
     try {
-      await apiRequest(`/organizations/${orgId}/ads/guardrail`, { method: 'POST', body: { max_daily_budget: Number(cap), currency } })
+      await apiRequest(`/organizations/${orgId}/ads/guardrail`, { method: 'POST', body: { max_daily_budget: Number(cap), currency: 'USD' } })
       onDone()
     } catch (e) {
       setErr(e instanceof ApiError ? e.details?.[0]?.issue || e.message : 'Could not save')
@@ -133,13 +132,8 @@ function CapDialog({ orgId, g, onClose, onDone }: { orgId: string; g: Overview['
   return (
     <Dialog open onClose={onClose} title="Daily ad spend cap" footer={<><button className="secondary" onClick={onClose}>Cancel</button><button onClick={save}>Save cap</button></>}>
       <p className="small muted" style={{ marginTop: 0 }}>The most this workspace can spend per day across every ad. ARC refuses launches above it and pauses all ads if spend goes over it. Set 0 to turn launching off.</p>
-      <Field id="cap-amount" label="Cap per day" error={err || undefined} hint={`Up to ${g.limit} a day.`}>
+      <Field id="cap-amount" label="Cap per day (USD)" error={err || undefined} hint={`Up to ${g.limit} a day.`}>
         <input id="cap-amount" type="number" min={0} step="1" value={cap} onChange={(e) => setCap(e.target.value)} />
-      </Field>
-      <Field id="cap-currency" label="Currency">
-        <select id="cap-currency" value={currency} onChange={(e) => setCurrency(e.target.value)}>
-          {['GBP', 'USD', 'EUR', 'AED', 'PKR', 'INR', 'CAD', 'AUD'].map((c) => <option key={c}>{c}</option>)}
-        </select>
       </Field>
     </Dialog>
   )

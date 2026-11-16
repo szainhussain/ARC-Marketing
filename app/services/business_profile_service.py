@@ -1,3 +1,4 @@
+from app.models.business_profile import BASE_CURRENCY
 import re
 
 from app.extensions import db
@@ -79,10 +80,10 @@ def update_profile(organization_id: str, user_id: str, payload: dict) -> Busines
             setattr(profile, field, _numeric(field, payload[field]))
     if "currency" in payload:
         code = (payload["currency"] or "").strip().upper()
-        if code and not (len(code) == 3 and code.isalpha()):
+        if code and code != BASE_CURRENCY:
             raise ValidationError("Please correct the highlighted fields.", details=[
-                {"field": "currency", "issue": "Use a 3-letter currency code such as AED"}])
-        profile.currency = code or None
+                {"field": "currency", "issue": "ARC works in US dollars (USD). Enter amounts in USD."}])
+    profile.currency = BASE_CURRENCY
     if "brand_colors" in payload:
         profile.brand_colors = normalise_brand_colors(payload["brand_colors"])
     if "logo_document_id" in payload:

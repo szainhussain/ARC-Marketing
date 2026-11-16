@@ -31,7 +31,7 @@ def _setup(app, client, cap=50):
     register_and_login(client)
     org = create_org(client)
     base = f"/api/v1/organizations/{org['id']}/ads"
-    client.post(f"{base}/guardrail", json={"max_daily_budget": cap, "currency": "GBP"})
+    client.post(f"{base}/guardrail", json={"max_daily_budget": cap, "currency": "USD"})
     return org["id"], base, _plan(app, client, org["id"])
 
 

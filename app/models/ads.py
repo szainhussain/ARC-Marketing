@@ -22,7 +22,7 @@ class AdGuardrail(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
     __tablename__ = "ad_guardrails"
     organization_id = db.Column(db.String(36), db.ForeignKey("organizations.id", name="fk_ad_guardrails_org"), nullable=False, unique=True)
     max_daily_budget = db.Column(db.Float, nullable=False, default=0.0)  # 0 = launching off
-    currency = db.Column(db.String(3), nullable=False, default="GBP")
+    currency = db.Column(db.String(3), nullable=False, default="USD")
     updated_by_user_id = db.Column(db.String(36), db.ForeignKey("users.id", name="fk_ad_guardrails_updated_by"))
 
 

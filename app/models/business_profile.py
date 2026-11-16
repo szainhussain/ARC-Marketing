@@ -2,6 +2,10 @@ from app.extensions import db
 from app.models.base import TimestampMixin, UUIDPrimaryKeyMixin
 
 
+# ARC works in one currency so spend, revenue and margins always add up.
+BASE_CURRENCY = "USD"
+
+
 class BusinessProfile(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
     """One structured business/brand profile per organization.
 
