@@ -82,9 +82,9 @@ def _explain(verdict, roas, break_even, contribution, margin_pct) -> str:
         return "Record both ad spend and revenue to see whether this spend made or lost money."
     head = f"ROAS is {roas:.2f}x. At a {margin_pct:g}% margin you need {break_even:.2f}x to break even"
     if verdict == "profitable":
-        return f"{head}, so this made about {contribution:,.0f} after ad spend."
+        return f"{head}, so this made about ${contribution:,.0f} after ad spend."
     if verdict == "losing":
-        return f"{head}, so this lost about {abs(contribution):,.0f} after ad spend."
+        return f"{head}, so this lost about ${abs(contribution):,.0f} after ad spend."
     return f"{head}, so this roughly broke even."
 
 
