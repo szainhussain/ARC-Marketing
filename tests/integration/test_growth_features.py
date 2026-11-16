@@ -22,7 +22,7 @@ def test_four_times_roas_on_a_thin_margin_loses_money():
     assert e["roas"] == 4.0 and e["break_even_roas"] == 5.0
     assert e["contribution_profit"] == -1000.0 and e["verdict"] == "losing"
     assert e["customer_acquisition_cost"] == 125.0 and e["lead_to_customer_pct"] == 20.0
-    assert "lost about 1,000" in e["explanation"]
+    assert "lost about $1,000" in e["explanation"]
 
 
 def test_economics_never_guesses_missing_inputs():
